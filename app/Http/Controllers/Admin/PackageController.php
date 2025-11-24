@@ -57,6 +57,7 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
@@ -107,7 +108,7 @@ class PackageController extends Controller
             'weekendPrice' => 'required|numeric|min:0',
             'selected_weekday' => 'nullable|string|in:sunday,monday,tuesday,wednesday,thursday',
             'selected_weekend' => 'nullable|string|in:friday,saturday',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,webp,bmp,svg|max:5120',
         ], [
             'packageName.required' => 'Package name is required.',
             'packageType.required' => 'Package type is required.',
