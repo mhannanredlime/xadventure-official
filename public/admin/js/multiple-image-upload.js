@@ -31,7 +31,6 @@ class MultipleImageUpload {
         this.urls = {
             images: this.container.dataset.imagesUrl,
             primary: this.container.dataset.primaryUrl,
-            reorder: this.container.dataset.reorderUrl,
             altText: this.container.dataset.altTextUrl,
             delete: this.container.dataset.deleteUrl
         };
@@ -195,9 +194,6 @@ class MultipleImageUpload {
                                     <button type="button" class="btn btn-outline-primary btn-sm gallery-images-btn">
                                         <i class="bi bi-images me-1"></i>Choose from Gallery
                                     </button>
-                                    <button type="button" class="btn btn-outline-info btn-sm reorder-images-btn">
-                                        <i class="bi bi-sort-down me-1"></i>Reorder Images
-                                    </button>
                                 </div>
                             </div>
 
@@ -284,14 +280,6 @@ class MultipleImageUpload {
             e.preventDefault();
             e.stopPropagation();
             this.openGalleryModal();
-        });
-
-        // Reorder images button
-        const reorderBtn = this.container.querySelector('.reorder-images-btn');
-        reorderBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.reorderImages();
         });
 
         // Add more card click
@@ -882,11 +870,6 @@ class MultipleImageUpload {
 
             this.addGalleryImage(mockFile);
         });
-    }
-
-    reorderImages() {
-        // Implement reorder functionality
-        this.showSuccess('Reorder functionality would be implemented here');
     }
 }
 
