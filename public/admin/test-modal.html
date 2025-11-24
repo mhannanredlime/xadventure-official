@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal System Test</title>
+    <script src="js/modal-system.js"></script>
+</head>
+<body>
+    <h1>Modal System Test</h1>
+    
+    <button onclick="testConfirm()">Test Confirm Modal</button>
+    <button onclick="testAlert()">Test Alert Modal</button>
+    <button onclick="testWarning()">Test Warning Modal</button>
+    <button onclick="testError()">Test Error Modal</button>
+    <button onclick="testSuccess()">Test Success Modal</button>
+    
+    <script>
+        function testConfirm() {
+            modalSystem.confirm('Are you sure you want to delete this image?', function() {
+                console.log('Confirmed!');
+                alert('Confirmed!');
+            }, function() {
+                console.log('Cancelled!');
+                alert('Cancelled!');
+            });
+        }
+        
+        function testAlert() {
+            modalSystem.alert('This is an information message.', function() {
+                console.log('Alert closed!');
+            });
+        }
+        
+        function testWarning() {
+            modalSystem.warning('This is a warning message.', function() {
+                console.log('Warning acknowledged!');
+            });
+        }
+        
+        function testError() {
+            modalSystem.error('This is an error message.', function() {
+                console.log('Error acknowledged!');
+            });
+        }
+        
+        function testSuccess() {
+            modalSystem.success('This is a success message.', function() {
+                console.log('Success acknowledged!');
+            });
+        }
+    </script>
+</body>
+</html>

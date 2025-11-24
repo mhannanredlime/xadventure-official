@@ -1,0 +1,84 @@
+/* Checkout Page Styles */
+.checkout-form {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.order-summary {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.price-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-right: 8px;
+}
+
+.price-tag.premium {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+.price-tag.discounted {
+    background-color: #10b981;
+    color: white;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-right: 8px;
+}
+
+.btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+    color: white;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .checkout-form {
+        padding: 20px;
+    }
+    
+    .order-summary {
+        padding: 20px;
+        margin-top: 20px;
+    }
+}

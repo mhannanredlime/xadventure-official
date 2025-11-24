@@ -1,0 +1,369 @@
+
+    :root {
+      --primary-color: #F27A44;
+      --secondary-color: #FFF5F1;
+      --text-color: #333;
+      --light-gray: #F8F9FA;
+      --border-color: #EAEAEA;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #FFFFFF;
+      color: var(--text-color);
+    }
+
+    /* Navigation Bar Styles */
+    .navbar {
+      padding: 1rem 0;
+      background-color: #fff;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .navbar-brand img {
+      height: 50px;
+    }
+
+    .nav-link {
+      color: var(--text-color) !important;
+      font-weight: 500;
+      margin: 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+
+ 
+
+    .nav-icons .nav-icon {
+      font-size: 1.2rem;
+      margin-left: 1.5rem;
+      cursor: pointer;
+    }
+
+    .btn-book-now {
+      background-color: var(--primary-color);
+      color: white !important;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-book-now:hover {
+      background-color: #d9632a;
+    }
+
+    /* Main Content Styles */
+    .main-section {
+      padding: 4rem 0;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    .main-heading {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    .card-container {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+    }
+
+    .light-card {
+      background-color: var(--light-gray);
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+    }
+
+    /* Package Selection Card */
+    .package-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #FFFFFF;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .package-details {
+      display: flex;
+      align-items: center;
+    }
+
+    .package-details img {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-right: 1.5rem;
+    }
+
+    .package-info h5 {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .package-info p {
+      margin: 0;
+      color: #555;
+    }
+
+    .package-info .price {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .package-counter {
+      display: flex;
+      align-items: center;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 10px;
+      padding: 0.5rem;
+    }
+
+    .package-counter button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 700;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      cursor: pointer;
+    }
+
+    .package-counter .count {
+      padding: 0 1.5rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .total-section {
+      background-color: var(--secondary-color);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      margin-left: -15px;
+      /* Overlap effect */
+      position: relative;
+    }
+
+    .total-section .total-label {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0;
+    }
+
+    .total-section .total-price {
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .total-section .close-btn {
+      position: absolute;
+      top: 50%;
+      right: -15px;
+      transform: translateY(-50%);
+      background-color: #000;
+      color: #fff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Calendar Styles */
+    .calendar-container {
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .calendar-header h5 {
+      font-weight: 600;
+      margin: 0 1rem;
+    }
+
+    .calendar-nav {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .calendar-grid div {
+      padding: 0.5rem;
+      font-weight: 500;
+    }
+
+    .day-name {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .day-number {
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      padding: 0;
+      margin: auto;
+      transition: all 0.3s ease;
+    }
+
+    .day-number:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .day-number.active {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 1%;
+    }
+
+    .day-number.empty {
+      cursor: default;
+      padding: 1%;
+    }
+
+    .day-number.empty:hover {
+      background-color: transparent;
+      padding: 1%;
+    }
+
+    /* Slot Selection */
+    .slot-button {
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 500;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .slot-button.active,
+    .slot-button:hover {
+      background-color: rgb(155, 155, 155);
+      color: white;
+      border-color: rgb(112, 112, 112);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+      .package-card {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .package-counter {
+        margin: 1rem 0;
+      }
+
+      .total-section {
+        margin-left: 0;
+        border-radius: 19px;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      .total-section .close-btn {
+        top: 10px;
+        right: 10px;
+        transform: none;
+      }
+
+      .calendar-months {
+        flex-direction: column;
+      }
+
+      .calendar-months .col-md-6 {
+        margin-bottom: 2rem;
+      }
+    }
+
+    .total-section-container {
+      display: flex;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+
+
+    .total-section {
+      flex-grow: 1;
+      background-color: #F8F4F2;
+      /* হালকা গোলাপী ব্যাকগ্রাউন্ড কালার */
+
+    }
+
+    .total-section .total-label,
+    .total-section .total-price {
+      margin: 0;
+      font-weight: bold;
+      color: #000;
+    }
+
+    .total-section .total-label {
+      font-size: 1em;
+    }
+
+    .total-section .total-price {
+      font-size: 1.2em;
+    }
+
+    .close-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #EEDDD8;
+      /* বোতামের জন্য আলাদা ব্যাকগ্রাউন্ড কালার */
+      padding: 0 15px;
+    }
+
+    .close-btn {
+      background-color: transparent;
+      border: none;
+      font-size: 2em;
+      color: #000;
+      cursor: pointer;
+    }
