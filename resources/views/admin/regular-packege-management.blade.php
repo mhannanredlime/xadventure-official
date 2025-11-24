@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
     <style>
         #weekendPills .nav-item .nav-link {
-            color: #CF1313FF;
+            color: #F76B19FF;
         }
 
         #weekdayPills .nav-link {
