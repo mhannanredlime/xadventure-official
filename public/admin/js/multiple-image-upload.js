@@ -1,7 +1,7 @@
 /**
  * Multiple Image Upload Handler
  * Provides drag & drop, preview, and management functionality for multiple image uploads
- * Enhanced UI with professional main image section
+ * Enhanced UI with professional main image section using Bootstrap Icons
  */
 class MultipleImageUpload {
     constructor(containerId, options = {}) {
@@ -127,7 +127,7 @@ class MultipleImageUpload {
                     <div class="col-12">
                         <div class="main-image-section">
                             <h5 class="section-title mb-3">
-                                <i class="fas fa-star text-warning me-2"></i>
+                                <i class="bi bi-star-fill text-warning me-2"></i>
                                 Main Image
                                 <span class="badge jatio-bg-color ms-2">Primary Display</span>
                             </h5>
@@ -136,7 +136,7 @@ class MultipleImageUpload {
                                     <div class="card border-primary">
                                         <div class="card-header bg-light py-2">
                                             <small class="text-muted">
-                                                <i class="fas fa-info-circle me-1"></i>
+                                                <i class="bi bi-info-circle me-1"></i>
                                                 This image will be featured as the main display
                                             </small>
                                         </div>
@@ -146,7 +146,7 @@ class MultipleImageUpload {
                                                  style="min-height: 280px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); cursor: pointer;">
                                                 <div class="empty-state text-center p-4">
                                                     <div class="empty-icon mb-3">
-                                                        <i class="fas fa-camera fa-4x text-muted"></i>
+                                                        <i class="bi bi-camera fa-4x text-muted"></i>
                                                     </div>
                                                     <h6 class="text-muted mb-2">No Main Image Selected</h6>
                                                     <p class="text-muted small mb-3">This will be your primary display image</p>
@@ -159,15 +159,15 @@ class MultipleImageUpload {
                                         <div class="card-footer bg-light">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <small class="text-muted">
-                                                    <i class="fas fa-shield-alt me-1"></i>
+                                                    <i class="bi bi-shield-check me-1"></i>
                                                     Recommended: 1200×800px
                                                 </small>
                                                 <div class="image-actions">
                                                     <button type="button" class="btn btn-outline-secondary btn-sm me-2 change-main-image">
-                                                        <i class="fas fa-sync-alt me-1"></i>Change
+                                                        <i class="bi bi-arrow-repeat me-1"></i>Change
                                                     </button>
                                                     <button type="button" class="btn btn-outline-danger btn-sm remove-main-image">
-                                                        <i class="fas fa-times me-1"></i>Remove
+                                                        <i class="bi bi-x me-1"></i>Remove
                                                     </button>
                                                 </div>
                                             </div>
@@ -182,21 +182,21 @@ class MultipleImageUpload {
                     <div class="col-12">
                         <div class="additional-images-section">
                             <h5 class="section-title mb-3">
-                                <i class="bi bi-layer-group text-info me-2"></i>
+                                <i class="bi bi-layers text-info me-2"></i>
                                 Additional Images
                                 <span class="badge bg-secondary ms-2">Optional</span>
                             </h5>
                             
                             <div class="upload-actions mb-3">
                                 <div class="d-flex flex-wrap gap-2">
-                                    <button type="button" class="btn btn-outline-primary btn-sm upload-images-btn">
+                                    <button type="button" class="btn jatio-bg-color btn-sm upload-images-btn">
                                         <i class="bi bi-upload me-1"></i>Upload Images
                                     </button>
-                                    <button type="button" class="btn btn-outline-success btn-sm gallery-images-btn">
+                                    <button type="button" class="btn btn-outline-primary btn-sm gallery-images-btn">
                                         <i class="bi bi-images me-1"></i>Choose from Gallery
                                     </button>
                                     <button type="button" class="btn btn-outline-info btn-sm reorder-images-btn">
-                                        <i class="bi bi-sort me-1"></i>Reorder Images
+                                        <i class="bi bi-sort-down me-1"></i>Reorder Images
                                     </button>
                                 </div>
                             </div>
@@ -208,9 +208,9 @@ class MultipleImageUpload {
                                         <div class="card h-100 border-dashed">
                                             <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
                                                 <div class="add-icon mb-2">
-                                                    <i class="bi bi-plus-circle fa-3x text-primary"></i>
+                                                    <i class="bi bi-plus-circle fa-3x jatio-text-color"></i>
                                                 </div>
-                                                <h6 class="text-primary mb-1">Add Images</h6>
+                                                <h6 class="jatio-text-color mb-1">Add Images</h6>
                                                 <p class="text-muted small mb-0">Click to upload or select from gallery</p>
                                             </div>
                                         </div>
@@ -220,7 +220,7 @@ class MultipleImageUpload {
 
                             <div class="image-upload-info mt-3">
                                 <div class="alert alert-light border d-flex align-items-center">
-                                    <i class="bi bi-info-circle text-info me-2 fa-lg"></i>
+                                    <i class="bi bi-info-circle jatio-text-color me-2 fa-lg"></i>
                                     <div>
                                         <small class="text-muted">
                                             <strong>Supported formats:</strong> JPG, PNG, WebP • 
@@ -376,7 +376,7 @@ class MultipleImageUpload {
                         <img src="${e.target.result}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
                         <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
                             <button type="button" class="btn btn-sm btn-danger remove-image" data-file="${file.name}" style="border-radius: 50%; width: 30px; height: 30px; padding: 0;">
-                                <i class="bi bi-times"></i>
+                                <i class="bi bi-x"></i>
                             </button>
                         </div>
                     </div>
@@ -416,7 +416,7 @@ class MultipleImageUpload {
                         <div class="btn-group btn-group-sm">
                             <span class="badge bg-info" style="font-size: 12px; padding: 4px 8px;">From Gallery</span>
                             <button type="button" class="btn btn-sm btn-danger remove-image" data-file="${galleryImage.name}" data-gallery-id="${galleryImage.galleryId || ''}" style="font-size: 12px; padding: 4px 8px;">
-                                <i class="fas fa-times"></i>
+                                <i class="bi bi-x"></i>
                             </button>
                         </div>
                     </div>
@@ -484,7 +484,7 @@ class MultipleImageUpload {
                      style="width: 100%; height: 280px; object-fit: cover; border-radius: 4px;">
                 <div class="main-image-overlay">
                     <div class="overlay-content">
-                        <span class="badge bg-success mb-2">
+                        <span class="badge jatio-bg-color mb-2">
                             <i class="bi bi-check me-1"></i>Main Image
                         </span>
                         <div class="btn-group btn-group-sm">
@@ -521,12 +521,12 @@ class MultipleImageUpload {
         this.mainPreview.innerHTML = `
             <div class="empty-state text-center p-4">
                 <div class="empty-icon mb-3">
-                    <i class="fas fa-camera fa-4x text-muted"></i>
+                    <i class="bi bi-camera fa-4x text-muted"></i>
                 </div>
                 <h6 class="text-muted mb-2">No Main Image Selected</h6>
                 <p class="text-muted small mb-3">This will be your primary display image</p>
-                <button type="button" class="btn btn-primary btn-sm">
-                    <i class="fas fa-upload me-1"></i>Select Main Image
+                <button type="button" class="btn jatio-bg-color btn-sm">
+                    <i class="bi bi-upload me-1"></i>Select Main Image
                 </button>
             </div>
         `;
@@ -575,14 +575,6 @@ class MultipleImageUpload {
         }
     }
 
-    // ... REST OF THE METHODS REMAIN EXACTLY THE SAME ...
-    // The following methods are identical to your original code:
-    // updateAllPreviews(), addExistingImage(), updateMainPreviewWithExistingImage(), 
-    // setPrimaryImage(), deleteImage(), performDeleteImage(), updateMainPreviewAfterDeletion(),
-    // updateAltText(), getFiles(), getSelectedFiles(), showSuccess(), showError(),
-    // testMainPreviewUpdate(), forceUpdateMainPreview(), openGalleryModal(), handleGallerySelection()
-
-    // Include all the remaining methods from your original code here without changes
     updateAllPreviews() {
         const additionalItems = this.additionalImagesGrid.querySelectorAll('.additional-image-item');
         additionalItems.forEach(item => item.remove());
@@ -603,10 +595,10 @@ class MultipleImageUpload {
                     <img src="${image.url}" alt="${image.alt_text || 'Image'}" style="width: 100%; height: 100%; object-fit: cover;">
                     <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
                         <div class="btn-group btn-group-sm">
-                            ${image.is_primary ? '<span class="badge bg-primary" style="font-size: 12px; padding: 4px 8px;">Primary</span>' :
-                '<button type="button" class="btn btn-sm btn-outline-primary set-primary" data-image-id="' + image.id + '" style="font-size: 12px; padding: 4px 8px;">Set Primary</button>'}
+                            ${image.is_primary ? '<span class="badge jatio-bg-color" style="font-size: 12px; padding: 4px 8px;">Primary</span>' :
+                '<button type="button" class="btn btn-sm jatio-bg-color set-primary" data-image-id="' + image.id + '" style="font-size: 12px; padding: 4px 8px;">Set Primary</button>'}
                             <button type="button" class="btn btn-sm btn-outline-danger delete-image" data-image-id="${image.id}" style="font-size: 12px; padding: 4px 8px;">
-                                <i class="fas fa-trash"></i>
+                                <i class="bi bi-trash"></i>
                             </button>
                         </div>
                     </div>
@@ -667,7 +659,7 @@ class MultipleImageUpload {
             img.onerror = () => {
                 this.mainPreview.innerHTML = `
                     <div style="text-align: center; color: #6c757d; font-size: 16px; padding: 20px;">
-                        <i class="fa fa-image fa-4x mb-3"></i>
+                        <i class="bi bi-image fa-4x mb-3"></i>
                         <p>Image failed to load</p>
                         <small>URL: ${image.url}</small>
                     </div>
@@ -743,7 +735,7 @@ class MultipleImageUpload {
                     this.showSuccess('Image deleted successfully.');
                     const imageElement = document.querySelector(`#existing-${imageId}`);
                     if (imageElement) {
-                        const isPrimary = imageElement.querySelector('.badge.bg-primary');
+                        const isPrimary = imageElement.querySelector('.badge.jatio-bg-color');
                         imageElement.remove();
                         if (isPrimary) {
                             this.updateMainPreviewAfterDeletion();
@@ -839,7 +831,7 @@ class MultipleImageUpload {
     }
 
     forceUpdateMainPreview() {
-        const primaryImageElement = document.querySelector('.additional-image-item .badge.bg-primary');
+        const primaryImageElement = document.querySelector('.additional-image-item .badge.jatio-bg-color');
         if (primaryImageElement) {
             const imageContainer = primaryImageElement.closest('.additional-image-item');
             const img = imageContainer.querySelector('img');
