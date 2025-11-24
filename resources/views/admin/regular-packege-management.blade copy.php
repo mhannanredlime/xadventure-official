@@ -5,19 +5,10 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('admin/css/multiple-image-upload.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
-    <style>
-        #weekendPills .nav-item .nav-link {
-            color: #CF1313FF;
-        }
-
-        #weekdayPills .nav-link {
-            color: #2b2929;
-        }
-    </style>
 @endpush
 
 @section('content')
-    <main class="mt-4">
+    <main class="main-content-packege-manage">
         <header class="d-flex justify-content-between align-items-center page-header">
             <div>
                 <h1>{{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}</h1>
@@ -290,6 +281,7 @@
             const container = document.getElementById('multiple-image-upload');
             if (!container) return;
 
+            // instantiate your class (assumes the class is provided by admin/js/multiple-image-upload.js)
             const uploader = new MultipleImageUpload(container.id, {
                 maxFiles: parseInt(container.dataset.maxFiles || container.dataset.maxFiles) || 12,
                 maxFileSize: parseInt(container.dataset.maxFileSize || (5 * 1024 * 1024)) || (5 * 1024 *
@@ -454,6 +446,9 @@
 
                 return true;
             }
+
+            // When gallery modal selects images it should call MultipleImageUpload.handleGallerySelection
+            // and the uploader will add gallery images to its internal files array as objects with isGalleryImage = true
         });
     </script>
 @endpush
