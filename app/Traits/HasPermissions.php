@@ -36,7 +36,7 @@ trait HasPermissions
         if ($this->roles->isEmpty()) {
             return false;
         }
-        
+
         // Check if any of the user's roles have this permission
         return $this->roles->contains(function ($role) use ($permission) {
             return $role->permissions->contains('slug', $permission);

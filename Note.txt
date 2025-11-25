@@ -1,4 +1,5 @@
-1. Update multiple image attach input design break and add a clean ui for image attach input
-2. Update additional image input design break and add a clean ui for additional information input
-3. Explore the xadventurebandarban project and participate a meeting with monir bhai 
-4. Fix an error when doctor set schedule with a patient 
+November 25, 2025
+
+1. Update login page ui break and add a clean ui for login page
+2. Save contact message in database and validate and saitize the contact form data , remove newsletter, blog and search options from frontend
+3. Handle error and success message for contact form and update contact model to sanitize the data

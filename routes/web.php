@@ -1,32 +1,33 @@
 <?php
 
-use App\Http\Controllers\Admin\AvailabilityController;
-use App\Http\Controllers\Admin\CalendarController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\ImageController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\PromoCodeController;
 use App\Http\Controllers\Admin\ReportsController;
-use App\Http\Controllers\Admin\ReservationController;
-use App\Http\Controllers\Admin\VehicleAvailabilityController;
-use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\VehicleController;
-use App\Http\Controllers\Admin\VehicleTypeController;
-use App\Http\Controllers\Admin\SlotPresetController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\CustomerAuthController;
-use App\Http\Controllers\Customer\DashboardController;
-use App\Http\Controllers\Frontend\BookingController;
 use App\Http\Controllers\Frontend\CartController;
-use App\Http\Controllers\Frontend\CheckoutReceiptController;
+use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Admin\CalendarController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\PromoCodeController;
+use App\Http\Controllers\Admin\SlotPresetController;
+use App\Http\Controllers\Frontend\BookingController;
 use App\Http\Controllers\Frontend\ContactController;
+use App\Http\Controllers\Admin\CustomerContactManage;
+use App\Http\Controllers\Admin\ReservationController;
+use App\Http\Controllers\Admin\VehicleTypeController;
+use App\Http\Controllers\Auth\CustomerAuthController;
+use App\Http\Controllers\Admin\AvailabilityController;
+use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Frontend\CustomPackageController;
+use App\Http\Controllers\Frontend\BookingReceiptController;
+use App\Http\Controllers\Frontend\CheckoutReceiptController;
+use App\Http\Controllers\Admin\VehicleAvailabilityController;
 use App\Http\Controllers\Frontend\RegularPackageBookingController;
 use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
-use App\Http\Controllers\Frontend\HomeController;
-use App\Http\Controllers\Frontend\BookingReceiptController;
-use App\Http\Controllers\PaymentController;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -251,6 +252,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('reservations/export/pending', [ReservationController::class, 'exportPending'])->name('reservations.export.pending');
         Route::get('reservations/export/history', [ReservationController::class, 'exportHistory'])->name('reservations.export.history');
     });
+
+    Route::middleware(['permission:contacts.view'])->group(function () {
+        Route::get('customer/contacts', [CustomerContactManage::class, 'contacts'])->name('customer.contacts');
+    });
+
 
     // Vehicle Availability
     Route::middleware(['permission:vehicles.view'])->group(function () {

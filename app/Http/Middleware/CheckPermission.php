@@ -20,6 +20,7 @@ class CheckPermission
         }
 
         if (!$request->user()->hasPermission($permission)) {
+            // dd($permission);
             abort(403, 'Insufficient permissions');
         }
 

@@ -6,31 +6,65 @@
     <link rel="stylesheet" href="{{ asset('admin/css/multiple-image-upload.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
     <style>
-        #weekendPills .nav-item .nav-link {
-            color: #F76B19FF;
+        /* Pills styling */
+        .pricing-pills .nav-link {
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            color: #2b2929;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
         }
 
-        #weekdayPills .nav-link {
-            color: #2b2929;
+        .pricing-pills .nav-link.active {
+            background-color: #F76B19FF;
+            color: #fff;
+            border-color: #F76B19FF;
+        }
+
+        .pricing-pills .nav-link:hover {
+            background-color: #F76B19FF;
+            color: #fff;
+        }
+
+        /* Card spacing */
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+        }
+
+        .ms-3 {
+            margin-left: 1rem !important;
+        }
+
+        .btn-save {
+            min-width: 150px;
+        }
+
+        /* Badge for main image in uploader */
+        .badge.jatio-bg-color {
+            background-color: #F76B19FF;
+            color: #fff;
+            font-weight: 500;
         }
     </style>
 @endpush
 
 @section('content')
     <main class="mt-4">
-        <header class="d-flex justify-content-between align-items-center page-header">
+        <header class="d-flex justify-content-between align-items-center page-header mb-4">
             <div>
                 <h1>{{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}</h1>
                 <p class="breadcrumb-custom">Package Management >
                     {{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}</p>
             </div>
-            <div>
-                <button id="submitBtn" class="btn btn-save jatio-bg-color">
-                    {{ isset($package) ? 'Update Package' : 'Save Package' }}
-                </button>
-            </div>
         </header>
 
+        {{-- Alerts --}}
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle"></i> {{ session('success') }}
@@ -71,7 +105,7 @@
 
                     <div class="row g-4">
                         <!-- Multiple Image Uploader -->
-                        <div class="col-lg-12 package-multiple-image-upload-form">
+                        <div class="col-lg-12 package-multiple-image-upload-form ms-3">
                             <label for="multiple-image-upload" class="form-label">Upload Images</label>
 
                             <div id="multiple-image-upload" data-model-type="App\Models\Package"
@@ -85,13 +119,10 @@
                                 data-delete-url="{{ url('admin/images') }}/:id"
                                 data-existing-images="{{ isset($package) ? $package->images->toJson() : '[]' }}"
                                 data-max-files="12" data-max-file-size="{{ 5 * 1024 * 1024 }}">
-                                <!-- JS will render the uploader UI here -->
                             </div>
 
-                            <!-- Real file input that will be populated before submit -->
                             <input type="file" id="package_images_input" name="images[]" multiple accept="image/*"
                                 style="display:none;">
-                            <!-- Gallery images (IDs) from server gallery selection -->
                             <input type="hidden" id="gallery_images_input" name="gallery_images" value="">
                         </div>
 
@@ -195,20 +226,18 @@
                         <div class="card-body p-4">
                             <h5 class="card-title">Pricing Details</h5>
 
+                            <!-- Weekdays -->
                             <div class="mb-4">
                                 <label class="form-label">Weekdays Prices</label>
                                 <ul class="nav nav-pills pricing-pills mb-3" id="weekdayPills">
-                                    <li class="nav-item"><a href="#" class="nav-link" data-day="sunday"
-                                            data-price="{{ old('sundayPrice', '1000') }}">Sunday</a></li>
-                                    <li class="nav-item"><a href="#" class="nav-link" data-day="monday"
-                                            data-price="{{ old('mondayPrice', optional($package?->variants->first()?->prices->where('price_type', 'weekday')->first())->amount ?? '1000') }}">Monday</a>
-                                    </li>
-                                    <li class="nav-item"><a href="#" class="nav-link" data-day="tuesday"
-                                            data-price="{{ old('tuesdayPrice', '1000') }}">Tuesday</a></li>
-                                    <li class="nav-item"><a href="#" class="nav-link" data-day="wednesday"
-                                            data-price="{{ old('wednesdayPrice', '1000') }}">Wednesday</a></li>
-                                    <li class="nav-item"><a href="#" class="nav-link" data-day="thursday"
-                                            data-price="{{ old('thursdayPrice', '1000') }}">Thursday</a></li>
+                                    @foreach (['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'] as $day)
+                                        <li class="nav-item">
+                                            <a href="#" class="nav-link {{ $day == 'monday' ? 'active' : '' }}"
+                                                data-day="{{ $day }}">
+                                                {{ ucfirst($day) }}
+                                            </a>
+                                        </li>
+                                    @endforeach
                                 </ul>
 
                                 <div class="d-flex align-items-center mb-2">
@@ -216,32 +245,28 @@
                                     <span id="selectedWeekday">Monday</span>
                                 </div>
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <label for="weekdayPrice" class="form-label">Price</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">৳</span>
-                                            <input type="number" step="0.01"
-                                                class="form-control @error('weekdayPrice') is-invalid @enderror"
-                                                id="weekdayPrice" name="weekdayPrice"
-                                                value="{{ old('weekdayPrice', optional($package?->variants->first()?->prices->where('price_type', 'weekday')->first())->amount ?? 1000) }}"
-                                                required>
-                                        </div>
-                                        @error('weekdayPrice')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                <div class="col-md-4 mb-3">
+                                    <label for="weekdayPrice" class="form-label">Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">৳</span>
+                                        <input type="number" step="0.01" class="form-control" id="weekdayPrice"
+                                            name="weekdayPrice" value="1000">
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Weekends -->
                             <div>
                                 <label class="form-label">Weekend Prices</label>
                                 <ul class="nav nav-pills pricing-pills mb-3" id="weekendPills">
-                                    <li class="nav-item"><a href="#" class="nav-link" data-day="friday"
-                                            data-price="{{ old('fridayPrice', optional($package?->variants->first()?->prices->where('price_type', 'weekend')->first())->amount ?? 1500) }}">Friday</a>
-                                    </li>
-                                    <li class="nav-item"><a href="#" class="nav-link" data-day="saturday"
-                                            data-price="{{ old('saturdayPrice', '1500') }}">Saturday</a></li>
+                                    @foreach (['friday', 'saturday'] as $day)
+                                        <li class="nav-item">
+                                            <a href="#" class="nav-link {{ $day == 'friday' ? 'active' : '' }}"
+                                                data-day="{{ $day }}">
+                                                {{ ucfirst($day) }}
+                                            </a>
+                                        </li>
+                                    @endforeach
                                 </ul>
 
                                 <div class="d-flex align-items-center mb-2">
@@ -249,36 +274,34 @@
                                     <span id="selectedWeekend">Friday</span>
                                 </div>
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <label for="weekendPrice" class="form-label">Price</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">৳</span>
-                                            <input type="number" step="0.01"
-                                                class="form-control @error('weekendPrice') is-invalid @enderror"
-                                                id="weekendPrice" name="weekendPrice"
-                                                value="{{ old('weekendPrice', optional($package?->variants->first()?->prices->where('price_type', 'weekend')->first())->amount ?? 1500) }}"
-                                                required>
-                                        </div>
-                                        @error('weekendPrice')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                <div class="col-md-4 mb-3">
+                                    <label for="weekendPrice" class="form-label">Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">৳</span>
+                                        <input type="number" step="0.01" class="form-control" id="weekendPrice"
+                                            name="weekendPrice" value="1500">
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
-                    <!-- hidden fields kept minimal -->
+                    <!-- Hidden fields -->
                     <input type="hidden" id="selected_weekday" name="selected_weekday" value="monday">
                     <input type="hidden" id="selected_weekend" name="selected_weekend" value="friday">
 
+                    <div class="mt-3">
+                        <button id="submitBtn" class="btn btn-save jatio-bg-color">
+                            <i class="fas fa-save me-2"></i> {{ isset($package) ? 'Update Package' : 'Save Package' }}
+                        </button>
+
+                    </div>
                 </form>
             </div>
         </div>
     </main>
 @endsection
+
 
 @push('scripts')
     <script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>

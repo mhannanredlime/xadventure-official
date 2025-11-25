@@ -104,6 +104,14 @@ class PermissionSeeder extends Seeder
                 'module' => 'Pricing Management',
             ],
 
+            // Contacts
+            [
+                'name' => 'View Contacts Messages',
+                'slug' => 'contacts.view',
+                'description' => 'View contacts list',
+                'module' => 'Contact Management',
+            ],
+
             // Reservation Management Module
             [
                 'name' => 'View Reservations',
