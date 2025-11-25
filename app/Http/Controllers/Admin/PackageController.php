@@ -96,17 +96,16 @@ class PackageController extends Controller
 
     public function storeRegular(Request $request)
     {
-        dd($request->all());
         $validated = $request->validate([
             'packageName' => 'required|string|max:255',
             'subTitle' => 'nullable|string|max:255',
             'packageType' => 'required|in:Single,Bundle,Group',
             'details' => 'nullable|string',
-            'displayStartingPrice' => 'nullable|numeric|min:0',
+            'displayStartingPrice' => 'nullable|numeric|min:50',
             'minParticipant' => 'required|integer|min:1',
             'maxParticipant' => 'required|integer|min:1|gte:minParticipant',
-            'weekdayPrice' => 'required|numeric|min:0',
-            'weekendPrice' => 'required|numeric|min:0',
+            'weekdayPrice' => 'required|numeric|min:50',
+            'weekendPrice' => 'required|numeric|min:50',
             'selected_weekday' => 'nullable|string|in:sunday,monday,tuesday,wednesday,thursday',
             'selected_weekend' => 'nullable|string|in:friday,saturday',
             'images.*' => 'required|image|mimes:jpeg,png,jpg,webp,bmp,svg|max:5120',
@@ -144,7 +143,7 @@ class PackageController extends Controller
         if ($request->hasFile('images')) {
             // Validate image formats
             $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
             ]);
 
             $imageService = new ImageService();

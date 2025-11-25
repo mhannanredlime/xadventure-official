@@ -80,32 +80,70 @@ class MultipleImageUpload {
 
     createUploadArea() {
         this.container.innerHTML = `
-            <div class="multiple-image-upload-area">
-                <div class="mb-3">
-                    <button type="button" class="btn jatio-bg-color btn-sm upload-images-btn">
-                        <i class="bi bi-upload me-1"></i>Upload Images
-                    </button>
-                    <button type="button" class="btn btn-outline-primary btn-sm gallery-images-btn">
-                        <i class="bi bi-images me-1"></i>Choose from Gallery
-                    </button>
-                </div>
-                <div class="d-flex flex-wrap gap-2 additional-images-grid" id="additional-images-${this.container.id}">
-                    <div class="image-card add-more-card d-none" style="width: 300px; height: 300px;">
-                        <div class="card h-100 border-dashed d-flex align-items-center justify-content-center">
-                            <i class="bi bi-image fa-3x text-secondary"></i>
-                        </div>
+        <div class="multiple-image-upload-area">
+            <div class="mb-3">
+                <button type="button" class="btn jatio-bg-color btn-sm upload-images-btn">
+                    <i class="bi bi-upload me-1"></i>Upload Images
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm gallery-images-btn">
+                    <i class="bi bi-images me-1"></i>Choose from Gallery
+                </button>
+            </div>
+            <div class="d-flex flex-wrap gap-2 additional-images-grid" id="additional-images-${this.container.id}">
+                <div class="image-card add-more-card d-none" style="width: 300px; height: 300px;">
+                    <div class="card h-100 border-dashed d-flex align-items-center justify-content-center">
+                        <i class="bi bi-image fa-3x text-secondary"></i>
                     </div>
                 </div>
-                <input type="file" id="file-input-${this.container.id}" multiple accept="image/*" style="display: none;">
             </div>
-        `;
+            <input type="file" id="file-input-${this.container.id}" multiple accept="image/*" style="display: none;">
+        </div>
+    `;
 
         this.fileInput = document.getElementById(`file-input-${this.container.id}`);
         this.additionalImagesGrid = document.getElementById(`additional-images-${this.container.id}`);
 
-        this.container.querySelector('.upload-images-btn').addEventListener('click', e => { e.preventDefault(); this.fileInput.click(); });
-        this.container.querySelector('.gallery-images-btn').addEventListener('click', e => { e.preventDefault(); this.openGalleryModal(); });
-        this.fileInput.addEventListener('change', e => this.handleFiles(e.target.files));
+        // Upload button
+        this.container.querySelector('.upload-images-btn').addEventListener('click', e => {
+            console.log('Upload button clicked');
+            e.preventDefault();
+            this.fileInput.click();
+        });
+
+        // Gallery button with debugging
+        const galleryBtn = this.container.querySelector('.gallery-images-btn');
+        galleryBtn.addEventListener('click', e => {
+            console.log('Gallery button clicked');
+            console.log('this.openGalleryModal exists:', typeof this.openGalleryModal);
+            console.log('global openGalleryModal exists:', typeof openGalleryModal);
+            e.preventDefault();
+            this.openGalleryModal();
+        });
+
+        this.fileInput.addEventListener('change', e => {
+            console.log('File input changed, files:', e.target.files.length);
+            this.handleFiles(e.target.files);
+        });
+    }
+
+    // Make sure openGalleryModal method exists in your class
+    openGalleryModal() {
+        console.log('openGalleryModal method called');
+
+        if (typeof openGalleryModal === 'function') {
+            console.log('Calling global openGalleryModal function');
+            openGalleryModal({
+                multiple: true,
+                onSelect: (selectedImages) => {
+                    console.log('Gallery selection:', selectedImages);
+                    this.handleGallerySelection(selectedImages);
+                }
+            });
+        } else {
+            console.error('Global openGalleryModal function not found!');
+            // Fallback: show file input instead
+            this.fileInput.click();
+        }
     }
 
     handleFiles(fileList) {
@@ -245,6 +283,10 @@ class MultipleImageUpload {
 
     showSuccess(msg) { console.log('Success:', msg); }
     showError(msg) { console.error('Error:', msg); }
+
+    getSelectedFiles() {
+        return this.files;
+    }
 }
 
 // Initialize

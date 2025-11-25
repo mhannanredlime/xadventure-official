@@ -102,7 +102,7 @@
                                     <label for="packageName" class="form-label">Package Name</label>
                                     <input type="text" class="form-control @error('packageName') is-invalid @enderror"
                                         id="packageName" name="packageName"
-                                        value="{{ old('packageName', $package->name ?? 'Kids Fun') }}" required>
+                                        value="{{ old('packageName', $package->name ?? '') }}" required>
                                     @error('packageName')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -112,7 +112,7 @@
                                     <label for="subTitle" class="form-label">Sub Title</label>
                                     <input type="text" class="form-control @error('subTitle') is-invalid @enderror"
                                         id="subTitle" name="subTitle"
-                                        value="{{ old('subTitle', $package->subtitle ?? 'Kids Friendly Fun Zone') }}">
+                                        value="{{ old('subTitle', $package->subtitle ?? '') }}">
                                     @error('subTitle')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -407,29 +407,49 @@
                     selectedFiles = window.multipleImageUploadInstance.getSelectedFiles() || [];
                 }
 
+                console.log('Selected files:', selectedFiles);
+
                 // Separate real File objects and gallery images
-                const realFiles = selectedFiles.filter(f => f instanceof File);
+                const realFiles = selectedFiles.filter(f => f instanceof File && !f.isGalleryImage);
                 const galleryImages = selectedFiles.filter(f => f.isGalleryImage);
+
+                console.log('Real files to upload:', realFiles);
+                console.log('Gallery images:', galleryImages);
 
                 // Attach real files to the hidden file input using DataTransfer
                 if (realFiles.length > 0) {
                     const dt = new DataTransfer();
-                    realFiles.forEach(f => dt.items.add(f));
+                    realFiles.forEach(f => {
+                        console.log('Adding file to DataTransfer:', f.name, f.type, f.size);
+                        dt.items.add(f);
+                    });
                     realFileInput.files = dt.files;
+                    console.log('File input now has files:', realFileInput.files.length);
                 } else {
-                    // clear file input
-                    realFileInput.value = '';
+                    // Don't clear the input value, just set empty files
+                    realFileInput.files = new DataTransfer().files;
+                    console.log('No real files to upload');
                 }
 
-                // Attach gallery image IDs as JSON string (if your backend supports)
+                // Attach gallery image IDs as JSON string
                 if (galleryImages.length > 0) {
                     const ids = galleryImages.map(g => g.galleryId || g.id).filter(Boolean);
                     galleryInput.value = JSON.stringify(ids);
+                    console.log('Gallery image IDs:', galleryInput.value);
                 } else {
                     galleryInput.value = '';
                 }
 
+                // Create a FormData object to see what's being sent
+                const formData = new FormData(form);
+                console.log('FormData contents:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(key + ': ' + (value instanceof File ? value.name + ' (' + value.type +
+                        ', ' + value.size + ' bytes)' : value));
+                }
+
                 // Finally submit the form
+                console.log('Submitting form...');
                 form.submit();
             });
 
