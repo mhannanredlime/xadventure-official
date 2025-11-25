@@ -142,10 +142,7 @@
 
 <body>
 
-    <div id="searchOverlay">
-        <span class="close-btn" onclick="toggleSearch()">✖</span>
-        <input type="text" class="form-control" placeholder="Search here...">
-    </div>
+
 
     <!-- Package Selection Modal -->
     <div class="modal fade" id="packageSelectionModal" tabindex="-1" aria-labelledby="packageSelectionModalLabel"
@@ -218,7 +215,6 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('contact') }}">Contact</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-1 gap-md-3">
-                    <i class=" fa-solid fa-magnifying-glass" onclick="toggleSearch()" style="color: white;"></i>
                     <a href="{{ url('/shopping-cart') }}"
                         style="color: white; text-decoration: none; position: relative;">
                         <i class="fa-solid fa-cart-arrow-down"></i>

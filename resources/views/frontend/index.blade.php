@@ -25,40 +25,34 @@
 
                 <div class="mt-4 d-flex align-items-center">
                     <a href="{{ route('contact') }}" class="btn btn-orange jatio-bg-color">Contact Us →</a>
-                    <a href="#" id="playVideoBtn" class="play-btn" data-bs-toggle="modal" data-bs-target="#videoModal"><i class="bi bi-play-fill"></i></a>
+                    <a href="#" id="playVideoBtn" class="play-btn" data-bs-toggle="modal"
+                        data-bs-target="#videoModal"><i class="bi bi-play-fill"></i></a>
                     <span class="ms-2">Play Video</span>
-                   
+
 
                 </div>
                 <!-- Video Modal -->
-                    <!-- Video Modal -->
-<div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content bg-transparent border-0">
-      <div class="modal-body p-0 position-relative">
-        <button type="button"
-                id="closeVideoBtn"
-                class="btn-close btn-close-white position-absolute top-0 end-0 m-3"
-                aria-label="Close">
-        </button>
+                <!-- Video Modal -->
+                <div class="modal fade" id="videoModal" tabindex="-1" aria-labelledby="videoModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content bg-transparent border-0">
+                            <div class="modal-body p-0 position-relative">
+                                <button type="button" id="closeVideoBtn"
+                                    class="btn-close btn-close-white position-absolute top-0 end-0 m-3" aria-label="Close">
+                                </button>
 
-        <div class="ratio ratio-16x9">
-          <iframe id="youtubeVideo"
-                  class="rounded-3"
-                  src=""
-                  title="Adventure Park Video"
-                  frameborder="0"
-                  allow="autoplay; encrypted-media"
-                  allowfullscreen>
-          </iframe>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                                <div class="ratio ratio-16x9">
+                                    <iframe id="youtubeVideo" class="rounded-3" src="" title="Adventure Park Video"
+                                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                                    </iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 
-                   <!-- end video maodal -->
+                <!-- end video maodal -->
             </div>
         </section>
         <img src="images/atv1.jpg" class="active" alt="1">
@@ -144,39 +138,44 @@
     <section class="py-5 animation-img" style="min-height: 100vh; position: relative; z-index: 1; overflow: hidden;">
         <div class="container">
             <div class="container-fluid h-100">
-            <div class="row align-items-center h-100 flex-column flex-md-row">
-                <div class="col-md-5 d-flex justify-content-center align-items-center mb-4 mb-md-0">
-                    <img src="images/multi.png" alt="Left Image" class="img-fluid"
-                        style="max-width: 95%;min-width: 95%; max-height: 95%; height: auto;">
-                </div>
-                <div
-                    class="col-md-7 d-flex flex-column justify-content-center align-items-start px-4 text-dark text-center text-md-start">
-                    <h1 class=" mb-3 " style="color: #FC692A; font-size: 16px !important;">Welcome To Xtreme Adventure
-                        Bandarban</h1>
-                    <h2 class="display-7 fontFamily mb-3">Your Ultimate Outdoor Destination in Bandarban</h2>
-                    <p class="fw-semibold text-secondary mt-3">
-                        Bangladesh’s Most Complete Outdoor Adventure Park <br>
-                        <span class="fst-italic text-muted">
-                            ATV Trails • UTV Rides • Challenge Courses • Team Games & More
-                        </span>
-                    </p>
-                    <ul class="list-unstyled mt-4">
-                        <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Guided UTV & UTV Trail Rides</li>
-                        <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Ground & Tree Challenge Courses</li>
-                        <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Kids Fun zone (2 to 10 Years old)
-                        </li>
-                        <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Archery and Target Games</li>
-                        <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Human Foosball & Volleyball Court
-                        </li>
-                        <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Corporate & School Team-Building
-                            Activities</li>
-                    </ul>
-                    <a href="#" class="btn btn-orange mt-4">
-                        About Us <i class="bi bi-arrow-right ms-2"></i>
-                    </a>
+                <div class="row align-items-center h-100 flex-column flex-md-row">
+                    <div class="col-md-5 d-flex justify-content-center align-items-center mb-4 mb-md-0">
+                        <img src="images/multi.png" alt="Left Image" class="img-fluid"
+                            style="max-width: 95%;min-width: 95%; max-height: 95%; height: auto;">
+                    </div>
+                    <div
+                        class="col-md-7 d-flex flex-column justify-content-center align-items-start px-4 text-dark text-center text-md-start">
+                        <h1 class=" mb-3 " style="color: #FC692A; font-size: 16px !important;">Welcome To Xtreme Adventure
+                            Bandarban</h1>
+                        <h2 class="display-7 fontFamily mb-3">Your Ultimate Outdoor Destination in Bandarban</h2>
+                        <p class="fw-semibold text-secondary mt-3">
+                            Bangladesh’s Most Complete Outdoor Adventure Park <br>
+                            <span class="fst-italic text-muted">
+                                ATV Trails • UTV Rides • Challenge Courses • Team Games & More
+                            </span>
+                        </p>
+                        <ul class="list-unstyled mt-4">
+                            <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Guided UTV & UTV Trail Rides
+                            </li>
+                            <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Ground & Tree Challenge Courses
+                            </li>
+                            <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Kids Fun zone (2 to 10 Years
+                                old)
+                            </li>
+                            <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Archery and Target Games</li>
+                            <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Human Foosball & Volleyball
+                                Court
+                            </li>
+                            <li class="mb-2"><i class="bi bi-check-lg orange-check"></i> Corporate & School
+                                Team-Building
+                                Activities</li>
+                        </ul>
+                        <a href="#" class="btn btn-orange mt-4">
+                            About Us <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
     </section>
 
@@ -344,44 +343,4 @@
             </div>
         </div>
     </section>
-
-    <!-- Blog -->
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h6 class="section-title">Our Blog</h6>
-                <h1 class="fw-bold">Latest Blog & Articles</h1>
-                <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget
-                    dolor. Aenean massa. Cum sociis natoque penatibus et magnis.</p>
-            </div>
-            <a href="#" class="btn-orange" style="width: 35%;">More Blog →</a>
-        </div>
-        <div class="row">
-            <div class="col-md-6 col-lg-5">
-                <div class="card blog-card shadow-sm p-3">
-                    <img src="images/atv3.jpg" class="card-img-top rounded" alt="Blog Image">
-                    <div class="card-body px-0">
-                        <div class="blog-category">Uncategorized</div>
-                        <h5 class="blog-title">Hello world!</h5>
-                        <div class="blog-date mb-2">
-                            <i class="bi bi-clock"></i> July 1, 2025
-                        </div>
-                        <p class="card-text text-muted">Welcome to WordPress. This is your first post. Edit or delete it,
-                            then start writing!</p>
-                        <a href="#" class="read-more">Read More →</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Newsletter -->
-    <center>
-        <h1 style="font-weight: 700;">Join Our Newsletter</h1>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat iste dicta reprehenderit aliquam fugiat quod</p>
-        <div class="input-group mb-3" style="width: 40%;">
-            <input type="text" class="form-control" placeholder="Enter Your Email Address">
-            <span class="input-group-text jatio-bg-color" id="basic-addon2">Sign Up</span>
-        </div>
-    </center>
 @endsection

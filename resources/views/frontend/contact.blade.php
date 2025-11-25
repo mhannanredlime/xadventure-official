@@ -77,43 +77,46 @@
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="name" class="form-label">Full Name *</label>
+                                        <label for="name" class="form-label">Full Name <span
+                                                class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                            id="name" name="name" value="{{ old('name') }}" required>
+                                            id="name" name="name" value="{{ old('name') }}">
                                         @error('name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label">Email Address *</label>
+                                        <label for="email" class="form-label">Email Address <span
+                                                class="text-danger">*</span></label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                            id="email" name="email" value="{{ old('email') }}" required>
+                                            id="email" name="email" value="{{ old('email') }}">
                                         @error('email')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="subject" class="form-label">Subject *</label>
+                                    <label for="subject" class="form-label">Subject <span
+                                            class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('subject') is-invalid @enderror"
-                                        id="subject" name="subject" value="{{ old('subject') }}" required>
+                                        id="subject" name="subject" value="{{ old('subject') }}">
                                     @error('subject')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="mb-4">
-                                    <label for="message" class="form-label">Message *</label>
-                                    <textarea class="form-control @error('message') is-invalid @enderror" id="message" name="message" rows="5"
-                                        required>{{ old('message') }}</textarea>
+                                    <label for="message" class="form-label">Message <span
+                                            class="text-danger">*</span></label>
+                                    <textarea class="form-control @error('message') is-invalid @enderror" id="message" name="message" rows="5">{{ old('message') }}</textarea>
                                     @error('message')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="text-center">
-                                    <button type="submit" class="btn btn-orange jatio-bg-color btn-lg px-5">
-                                        Send Message
-                                    </button>
-                                </div>
+
+                                <button type="submit" class="btn btn-orange jatio-bg-color btn-lg px-5">
+                                    Send Message
+                                </button>
+
                             </form>
                         </div>
                     </div>
