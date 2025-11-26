@@ -10,7 +10,7 @@
             <div class="hero-overlay"></div>
 
             <div class="social-icons" style="padding-right: 3%;">
-                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="https://www.facebook.com/xadventure" target="_blank"><i class="bi bi-facebook"></i></a>
                 <a href="#"><i class="bi bi-twitter"></i></a>
                 <a href="#"><i class="bi bi-instagram"></i></a>
                 <a href="#"><i class="bi bi-linkedin"></i></a>
