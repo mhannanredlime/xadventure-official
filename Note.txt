@@ -1,5 +1,17 @@
-November 25, 2025
+ssh root@31.97.236.32
 
-1. Update login page ui break and add a clean ui for login page
-2. Save contact message in database and validate and saitize the contact form data , remove newsletter, blog and search options from frontend
-3. Handle error and success message for contact form and update contact model to sanitize the data
++1Nm19g7df7lvJbOPiN0
+
+cd /home/xadventurebandarban/htdocs/xadventurebandarban.com
+
+
+
+
+
+November 25, 2025 – Task Summary
+
+1. Xadventure – Updated the login page UI by fixing layout issues and implementing a cleaner, modern design.
+2. Xadventure – Added functionality to store contact form messages in the database, including proper validation and sanitization. Removed newsletter, blog, and search features from the frontend.
+3. Xadventure – Implemented error and success message handling for the contact form and updated the Contact model to ensure all input data is sanitized.
+4. Fixed the unique email validation issue in the pharmacy-related user entity.
+5. Completed several enhancements for the pharmacy module, including search improvements, PDF content updates, and other related fixes.
