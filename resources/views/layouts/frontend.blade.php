@@ -204,7 +204,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url('/about') }}">About</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url('/adventure') }}">Adventure</a></li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="/#" id="packagesDropdown" role="button"
+                        <a class="nav-link " href="/#" id="packagesDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">Package</a>
                         <ul class="dropdown-menu" aria-labelledby="packagesDropdown">
                             <li><a class="dropdown-item" href="{{ route('custom-packages') }}">Regular Package</a></li>

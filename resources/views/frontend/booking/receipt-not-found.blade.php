@@ -11,7 +11,7 @@
     <div class="container mx-auto px-4 py-8 max-w-2xl">
         <div class="bg-white rounded-lg shadow-lg p-8 text-center">
             <div class="text-6xl text-red-500 mb-4">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="bi  bi-exclamation-triangle"></i>
             </div>
             <h1 class="text-3xl font-bold text-gray-800 mb-4">Booking Not Found</h1>
             <p class="text-gray-600 mb-6">
@@ -27,11 +27,11 @@
             </div>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ route('home') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
-                    <i class="fas fa-home mr-2"></i>
+                    <i class="bi  bi-home mr-2"></i>
                     Back to Home
                 </a>
                 <a href="tel:+8801712345678" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">
-                    <i class="fas fa-phone mr-2"></i>
+                    <i class="bi  bi-phone mr-2"></i>
                     Contact Support
                 </a>
             </div>

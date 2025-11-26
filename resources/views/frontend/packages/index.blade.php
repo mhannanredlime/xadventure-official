@@ -597,7 +597,7 @@
             <div class="modal-content" style="background-color: #ffffff;">
                 <div class="modal-header" style="background-color: #2c5aa0; color: white;">
                     <h5 class="modal-title" id="acknowledgmentModalLabel">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi  bi-exclamation-triangle me-2"></i>
                         Booking Acknowledgment - ATV/UTV Trail Rides
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -647,18 +647,18 @@
 
                     <!-- Signature Section -->
                     <div class="signature-section">
-                        <h6 class="mb-3"><i class="fas fa-signature me-2"></i>Digital Signature Required</h6>
-                        
+                        <h6 class="mb-3"><i class="bi  bi-signature me-2"></i>Digital Signature Required</h6>
+
                         <!-- Signature Tabs -->
                         <ul class="nav nav-tabs mb-3" id="signatureTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="draw-tab" data-bs-toggle="tab" data-bs-target="#draw-pane" type="button" role="tab">
-                                    <i class="fas fa-pen me-1"></i> Draw Signature
+                                    <i class="bi  bi-pen me-1"></i> Draw Signature
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-pane" type="button" role="tab">
-                                    <i class="fas fa-upload me-1"></i> Upload Signature
+                                    <i class="bi  bi-upload me-1"></i> Upload Signature
                                 </button>
                             </li>
                         </ul>
@@ -688,7 +688,7 @@
                         <!-- Signature Actions -->
                         <div class="text-center mt-3">
                             <button type="button" class="btn btn-outline-secondary me-2" onclick="clearSignature()">
-                                <i class="fas fa-eraser me-1"></i> Clear Signature
+                                <i class="bi  bi-eraser me-1"></i> Clear Signature
                             </button>
                             <div id="signatureStatus" class="mt-2">
                                 <small class="text-muted">No signature provided</small>
@@ -706,7 +706,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-success" id="submitAcknowledgmentBtn" onclick="submitAcknowledgment()" disabled>
-                        <i class="fas fa-check me-1"></i> Confirm & Add to Cart
+                        <i class="bi  bi-check me-1"></i> Confirm & Add to Cart
                     </button>
                 </div>
             </div>
@@ -797,7 +797,7 @@
 
         // Date Picker Toggle Functions
         function formatDateForDisplay(date) {
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
                           'July', 'August', 'September', 'October', 'November', 'December'];
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const day = days[date.getDay()];
@@ -822,10 +822,10 @@
         function toggleCalendar() {
             const calendarContainer = document.getElementById('calendarContainer');
             const toggleButton = document.getElementById('datePickerToggle');
-            
+
             if (calendarContainer && toggleButton) {
                 const isVisible = calendarContainer.style.display !== 'none';
-                
+
                 if (isVisible) {
                     calendarContainer.style.display = 'none';
                     toggleButton.classList.remove('active');
@@ -846,7 +846,7 @@
                     toggleCalendar();
                 });
             }
-            
+
             // Update button text on initial load
             updateDatePickerButton(selectedDate);
         }
@@ -2132,12 +2132,12 @@
 
             // Store cart data temporarily and show acknowledgment modal
             pendingCartData = cartData;
-            
+
             // Reset acknowledgment form
             document.getElementById('acknowledgment1').checked = false;
             document.getElementById('acknowledgment2').checked = false;
             clearSignature();
-            
+
             // Show acknowledgment modal
             const modal = new bootstrap.Modal(document.getElementById('acknowledgmentModal'));
             modal.show();
@@ -2235,7 +2235,7 @@
         }
 
         // ===== ACKNOWLEDGMENT MODAL FUNCTIONALITY =====
-        
+
         // Global variables for acknowledgment
         let pendingCartData = [];
         let signatureCanvas = null;
@@ -2252,13 +2252,13 @@
                 signatureCtx.lineWidth = 2;
                 signatureCtx.lineCap = 'round';
                 signatureCtx.lineJoin = 'round';
-                
+
                 // Mouse events
                 signatureCanvas.addEventListener('mousedown', startDrawing);
                 signatureCanvas.addEventListener('mousemove', draw);
                 signatureCanvas.addEventListener('mouseup', stopDrawing);
                 signatureCanvas.addEventListener('mouseout', stopDrawing);
-                
+
                 // Touch events for mobile
                 signatureCanvas.addEventListener('touchstart', handleTouch);
                 signatureCanvas.addEventListener('touchmove', handleTouch);
@@ -2270,7 +2270,7 @@
         function handleTouch(e) {
             e.preventDefault();
             const touch = e.touches[0];
-            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' :
                                             e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
                 clientX: touch.clientX,
                 clientY: touch.clientY
@@ -2314,7 +2314,7 @@
         function handleSignatureUpload() {
             const fileInput = document.getElementById('signatureUpload');
             const file = fileInput.files[0];
-            
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -2345,7 +2345,7 @@
         function updateSignatureStatus(hasSignature) {
             const statusElement = document.getElementById('signatureStatus');
             if (hasSignature) {
-                statusElement.innerHTML = '<small class="text-success"><i class="fas fa-check me-1"></i>Signature provided</small>';
+                statusElement.innerHTML = '<small class="text-success"><i class="bi  bi-check me-1"></i>Signature provided</small>';
             } else {
                 statusElement.innerHTML = '<small class="text-muted">No signature provided</small>';
             }
@@ -2357,7 +2357,7 @@
             const checkbox1 = document.getElementById('acknowledgment1').checked;
             const checkbox2 = document.getElementById('acknowledgment2').checked;
             const hasSignature = signatureData !== null;
-            
+
             const submitBtn = document.getElementById('submitAcknowledgmentBtn');
             if (checkbox1 && checkbox2 && hasSignature) {
                 submitBtn.disabled = false;
@@ -2397,11 +2397,11 @@
                     if (typeof updateCartCount === 'function') {
                         updateCartCount();
                     }
-                    
+
                     // Close acknowledgment modal
                     const acknowledgmentModal = bootstrap.Modal.getInstance(document.getElementById('acknowledgmentModal'));
                     acknowledgmentModal.hide();
-                    
+
                     // Show success modal
                     const successModal = new bootstrap.Modal(document.getElementById('successModal'));
                     successModal.show();

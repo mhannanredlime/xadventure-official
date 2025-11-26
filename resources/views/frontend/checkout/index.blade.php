@@ -164,21 +164,21 @@
 
         @if (session('error'))
             <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="bi  bi-exclamation-triangle"></i>
                 {{ session('error') }}
             </div>
         @endif
 
         @if (session('success'))
             <div class="success-message">
-                <i class="fas fa-check-circle"></i>
+                <i class="bi  bi-check-circle"></i>
                 {{ session('success') }}
             </div>
         @endif
 
         @if ($errors->any())
             <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="bi  bi-exclamation-triangle"></i>
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -331,7 +331,7 @@
                             <input type="hidden" name="password_confirmation" id="hidden_password_confirmation_amarpay">
 
                             <div class="alert alert-info">
-                                <h5><i class="fas fa-shield-alt"></i> Secure Payment with Amar Pay</h5>
+                                <h5><i class="bi  bi-shield-alt"></i> Secure Payment with Amar Pay</h5>
                                 <p class="mb-0">You will be redirected to Amar Pay's secure payment gateway to complete
                                     your transaction. Your payment information is encrypted and secure.</p>
                             </div>
@@ -343,7 +343,7 @@
                             </div>
                             <div class="text-center mt-4">
                                 <button type="submit" class="btn btn-warning btn-lg px-5">
-                                    <i class="fas fa-credit-card me-2"></i>Continue to Payment
+                                    <i class="bi  bi-credit-card me-2"></i>Continue to Payment
                                 </button>
                             </div>
                         </form>
@@ -368,7 +368,7 @@
                             // Use the price and subtotal already calculated by the controller
                             $unitPrice = $packageData['price'];
                             $itemTotal = $packageData['subtotal'];
-                            
+
                             // Only calculate additional pricing info for display
                             $priceService = app(\App\Services\PriceCalculationService::class);
                             $defaultPrice = $priceService->getDefaultPriceForDate($variant, $date);
@@ -399,7 +399,7 @@
                     @php
                         // Use the subtotal calculated by the controller instead of recalculating
                         $subtotal = $total; // This is the subtotal from controller
-                        
+
                         // Get applied promo code discount from session
                         $promoDiscount = session()->get('promo_discount', 0);
                         $appliedPromoCode = session()->get('applied_promo_code');
