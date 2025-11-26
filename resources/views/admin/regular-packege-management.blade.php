@@ -68,7 +68,7 @@
                 {{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}
             </p>
         </div>
-        <a href="#" class="btn btn-outline-secondary">
+        <a href="{{ url('admin/add-packege-management') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Back to Packages
         </a>
     </header>
