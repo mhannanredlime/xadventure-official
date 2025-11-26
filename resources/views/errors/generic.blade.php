@@ -154,20 +154,20 @@
     .error-number {
       font-size: 6rem;
     }
-    
+
     .error-title {
       font-size: 2rem;
     }
-    
+
     .error-message {
       font-size: 1rem;
     }
-    
+
     .error-actions {
       flex-direction: column;
       align-items: center;
     }
-    
+
     .btn-home, .btn-back {
       width: 200px;
     }
@@ -185,10 +185,10 @@
       </p>
       <div class="error-actions">
         <a href="{{ url('/') }}" class="btn-home">
-          <i class="fas fa-home me-2"></i>Go Home
+          <i class="bi  bi-home me-2"></i>Go Home
         </a>
         <a href="javascript:history.back()" class="btn-back">
-          <i class="fas fa-arrow-left me-2"></i>Go Back
+          <i class="bi  bi-arrow-left me-2"></i>Go Back
         </a>
       </div>
     </div>
@@ -202,12 +202,12 @@
           <p class="lead text-muted">Here are some options to help you get back on track</p>
         </div>
       </div>
-      
+
       <div class="row g-4">
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-search"></i>
+              <i class="bi  bi-search"></i>
             </div>
             <h3 class="feature-title">Search Our Site</h3>
             <p class="feature-text">
@@ -215,11 +215,11 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-sitemap"></i>
+              <i class="bi  bi-sitemap"></i>
             </div>
             <h3 class="feature-title">Browse Categories</h3>
             <p class="feature-text">
@@ -227,11 +227,11 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-headset"></i>
+              <i class="bi  bi-headset"></i>
             </div>
             <h3 class="feature-title">Contact Support</h3>
             <p class="feature-text">
@@ -240,11 +240,11 @@
           </div>
         </div>
       </div>
-      
+
       <div class="row mt-5 text-center">
         <div class="col-12">
           <a href="{{ url('/adventure') }}" class="btn btn-lg jatio-bg-color text-white px-5 py-3">
-            <i class="fas fa-compass me-2"></i>Explore Adventures
+            <i class="bi  bi-compass me-2"></i>Explore Adventures
           </a>
         </div>
       </div>

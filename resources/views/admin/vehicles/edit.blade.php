@@ -82,7 +82,7 @@
                         <label for="vehicle-type-images" class="form-label">Vehicle Type Images</label>
                         <div id="vehicle-type-images" class="vehicle-type-images-container">
                             <div class="text-center text-muted py-4">
-                                <i class="fas fa-image fa-3x mb-3"></i>
+                                <i class="bi  bi-image fa-3x mb-3"></i>
                                 <p>Select a vehicle type to see its images</p>
                             </div>
                         </div>
@@ -236,7 +236,7 @@
             if (!selectedOption || !selectedOption.value) {
                 imageContainer.innerHTML = `
             <div class="text-center text-muted py-4">
-                <i class="fas fa-image fa-3x mb-3"></i>
+                <i class="bi  bi-image fa-3x mb-3"></i>
                 <p>Select a vehicle type to see its images</p>
             </div>
         `;
@@ -250,7 +250,7 @@
                 if (images.length === 0 && !displayImage) {
                     imageContainer.innerHTML = `
                 <div class="text-center text-muted py-4">
-                    <i class="fas fa-image fa-3x mb-3"></i>
+                    <i class="bi  bi-image fa-3x mb-3"></i>
                     <p>No images available for ${selectedOption.text}</p>
                 </div>
             `;
@@ -264,7 +264,7 @@
                         const isPrimary = image.is_primary ? 'border-primary' : 'border-secondary';
                         imageHtml += `
                     <div class="vehicle-type-image-item ${isPrimary}">
-                        <img src="${image.url}" alt="${image.alt_text || selectedOption.text}" 
+                        <img src="${image.url}" alt="${image.alt_text || selectedOption.text}"
                              class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;">
                         ${image.is_primary ? '<span class="badge bg-primary position-absolute top-0 end-0 m-1">Primary</span>' : ''}
                     </div>
@@ -273,7 +273,7 @@
                 } else if (displayImage) {
                     imageHtml += `
                 <div class="vehicle-type-image-item border-primary">
-                    <img src="${displayImage}" alt="${selectedOption.text}" 
+                    <img src="${displayImage}" alt="${selectedOption.text}"
                          class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;">
                 </div>
             `;
@@ -286,7 +286,7 @@
                 // Error parsing vehicle type images
                 imageContainer.innerHTML = `
             <div class="text-center text-muted py-4">
-                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                <i class="bi  bi-exclamation-triangle fa-3x mb-3"></i>
                 <p>Error loading images for ${selectedOption.text}</p>
             </div>
         `;

@@ -16,7 +16,7 @@
                 <p class="text-muted mb-0">Comprehensive insights into your business performance</p>
             </div>
             <a href="{{ route('admin.reports.export', request()->query()) }}" class="export-btn">
-                <i class="fas fa-download"></i>
+                <i class="bi  bi-download"></i>
                 Export Data
             </a>
         </div>
@@ -27,12 +27,12 @@
         <form method="GET" action="{{ route('admin.reports.index') }}" class="row g-3">
             <div class="col-md-3">
                 <label for="date_from" class="form-label">From Date</label>
-                <input type="date" name="date_from" id="date_from" class="form-control" 
+                <input type="date" name="date_from" id="date_from" class="form-control"
                        value="{{ $dateFrom->format('Y-m-d') }}">
             </div>
             <div class="col-md-3">
                 <label for="date_to" class="form-label">To Date</label>
-                <input type="date" name="date_to" id="date_to" class="form-control" 
+                <input type="date" name="date_to" id="date_to" class="form-control"
                        value="{{ $dateTo->format('Y-m-d') }}">
             </div>
             <div class="col-md-3 d-flex align-items-end">
@@ -47,12 +47,12 @@
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="stats-card">
                 <div class="card-icon" style="background: linear-gradient(135deg, #ff6600, #ff8533);">
-                    <i class="fas fa-calendar-check"></i>
+                    <i class="bi  bi-calendar-check"></i>
                 </div>
                 <div class="stat-number">{{ $reservationSummary['total'] }}</div>
                 <div class="stat-label">Total Reservations</div>
                 <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> {{ $reservationSummary['confirmed'] }} Confirmed
+                    <i class="bi  bi-arrow-up"></i> {{ $reservationSummary['confirmed'] }} Confirmed
                 </div>
             </div>
         </div>
@@ -60,12 +60,12 @@
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="stats-card">
                 <div class="card-icon" style="background: linear-gradient(135deg, #28a745, #20c997);">
-                    <i class="fas fa-coins"></i>
+                    <i class="bi  bi-coins"></i>
                 </div>
                 <div class="stat-number">৳{{ number_format($financialSummary['total_revenue'], 2) }}</div>
                 <div class="stat-label">Total Revenue</div>
                 <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> ৳{{ number_format($financialSummary['paid_reservations'], 2) }} Paid
+                    <i class="bi  bi-arrow-up"></i> ৳{{ number_format($financialSummary['paid_reservations'], 2) }} Paid
                 </div>
             </div>
         </div>
@@ -73,12 +73,12 @@
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="stats-card">
                 <div class="card-icon" style="background: linear-gradient(135deg, #007bff, #6610f2);">
-                    <i class="fas fa-users"></i>
+                    <i class="bi  bi-users"></i>
                 </div>
                 <div class="stat-number">{{ $customerAnalytics['total_customers'] }}</div>
                 <div class="stat-label">Total Customers</div>
                 <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> {{ $customerAnalytics['new_customers'] }} New
+                    <i class="bi  bi-arrow-up"></i> {{ $customerAnalytics['new_customers'] }} New
                 </div>
             </div>
         </div>
@@ -86,12 +86,12 @@
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="stats-card">
                 <div class="card-icon" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
-                    <i class="fas fa-user-friends"></i>
+                    <i class="bi  bi-user-friends"></i>
                 </div>
                 <div class="stat-number">{{ $reservationSummary['total_guests'] }}</div>
                 <div class="stat-label">Total Guests</div>
                 <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> {{ number_format($reservationSummary['avg_party_size'], 1) }} Avg Party
+                    <i class="bi  bi-arrow-up"></i> {{ number_format($reservationSummary['avg_party_size'], 1) }} Avg Party
                 </div>
             </div>
         </div>
@@ -101,7 +101,7 @@
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="report-section">
-                <h3><i class="fas fa-chart-pie me-2"></i>Financial Summary</h3>
+                <h3><i class="bi  bi-chart-pie me-2"></i>Financial Summary</h3>
                 <div class="row">
                     <div class="col-6 mb-3">
                         <div class="d-flex justify-content-between">
@@ -128,7 +128,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mt-3">
                     <h6 class="mb-3">Payment Status Breakdown</h6>
                     <div class="mb-2">
@@ -164,7 +164,7 @@
 
         <div class="col-lg-6 mb-4">
             <div class="report-section">
-                <h3><i class="fas fa-chart-line me-2"></i>Reservation Status</h3>
+                <h3><i class="bi  bi-chart-line me-2"></i>Reservation Status</h3>
                 <div class="row">
                     <div class="col-6 mb-3">
                         <div class="d-flex justify-content-between">
@@ -191,10 +191,10 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mt-3">
                     <h6 class="mb-3">Status Distribution</h6>
-                    
+
                     <div class="mb-2">
                         <div class="d-flex justify-content-between mb-1">
                             <span>Confirmed</span>
@@ -238,7 +238,7 @@
 
     <!-- Customer Analytics Details -->
     <div class="report-section">
-        <h3><i class="fas fa-user-chart me-2"></i>Customer Analytics</h3>
+        <h3><i class="bi  bi-user-chart me-2"></i>Customer Analytics</h3>
         <div class="row">
             <div class="col-md-3 mb-3">
                 <div class="text-center p-3 bg-light rounded">
@@ -269,7 +269,7 @@
 
     <!-- Package Performance -->
     <div class="report-section">
-        <h3><i class="fas fa-box me-2"></i>Top Performing Packages</h3>
+        <h3><i class="bi  bi-box me-2"></i>Top Performing Packages</h3>
         @if($packagePerformance->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover responsive-stacked">
@@ -314,7 +314,7 @@
             </div>
         @else
             <div class="empty-state">
-                <i class="fas fa-box-open"></i>
+                <i class="bi  bi-box-open"></i>
                 <p>No package performance data available for the selected period.</p>
             </div>
         @endif
@@ -322,7 +322,7 @@
 
     <!-- Promo Code Performance -->
     <div class="report-section">
-        <h3><i class="fas fa-tag me-2"></i>Promo Code Performance</h3>
+        <h3><i class="bi  bi-tag me-2"></i>Promo Code Performance</h3>
         @if($promoCodePerformance->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover responsive-stacked">
@@ -356,7 +356,7 @@
             </div>
         @else
             <div class="empty-state">
-                <i class="fas fa-tag"></i>
+                <i class="bi  bi-tag"></i>
                 <p>No promo code performance data available for the selected period.</p>
             </div>
         @endif
@@ -364,7 +364,7 @@
 
     <!-- Monthly Trends -->
     <div class="report-section">
-        <h3><i class="fas fa-chart-line me-2"></i>Monthly Trends (Last 12 Months)</h3>
+        <h3><i class="bi  bi-chart-line me-2"></i>Monthly Trends (Last 12 Months)</h3>
         @if($monthlyTrends->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover responsive-stacked">
@@ -393,7 +393,7 @@
             </div>
         @else
             <div class="empty-state">
-                <i class="fas fa-chart-line"></i>
+                <i class="bi  bi-chart-line"></i>
                 <p>No monthly trends data available.</p>
             </div>
         @endif
@@ -401,7 +401,7 @@
 
     <!-- Top Customers -->
     <div class="report-section">
-        <h3><i class="fas fa-crown me-2"></i>Top Customers</h3>
+        <h3><i class="bi  bi-crown me-2"></i>Top Customers</h3>
         @if($topCustomers->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover responsive-stacked">
@@ -431,7 +431,7 @@
             </div>
         @else
             <div class="empty-state">
-                <i class="fas fa-users"></i>
+                <i class="bi  bi-users"></i>
                 <p>No customer data available for the selected period.</p>
             </div>
         @endif
@@ -439,7 +439,7 @@
 
     <!-- Recent Activity -->
     <div class="report-section">
-        <h3><i class="fas fa-clock me-2"></i>Recent Activity</h3>
+        <h3><i class="bi  bi-clock me-2"></i>Recent Activity</h3>
         @if($recentActivity->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover responsive-stacked">
@@ -473,7 +473,7 @@
             </div>
         @else
             <div class="empty-state">
-                <i class="fas fa-clock"></i>
+                <i class="bi  bi-clock"></i>
                 <p>No recent activity available.</p>
             </div>
         @endif

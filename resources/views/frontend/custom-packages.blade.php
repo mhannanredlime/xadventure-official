@@ -299,19 +299,19 @@ document.addEventListener('DOMContentLoaded', function() {
     notification.className = 'success-notification';
     notification.innerHTML = `
       <div class="success-content">
-        <i class="fas fa-check"></i>
+        <i class="bi  bi-check"></i>
         <span>${message}</span>
       </div>
     `;
-    
+
     // Add to page
     document.body.appendChild(notification);
-    
+
     // Show notification
     setTimeout(() => {
       notification.classList.add('show');
     }, 100);
-    
+
     // Remove after 3 seconds
     setTimeout(() => {
       notification.classList.remove('show');
@@ -346,22 +346,22 @@ document.addEventListener('DOMContentLoaded', function() {
   function bindAddToCart(btn) {
     if (!btn || btn.getAttribute('data-bound') === '1') return;
     btn.setAttribute('data-bound', '1');
-    
+
     // Get the container and quantity controls
     const container = btn.closest('.add-to-cart-container');
     const quantityControls = container.querySelector('.quantity-controls');
     const quantityDisplay = container.querySelector('.quantity-text');
     const minusBtn = container.querySelector('.quantity-btn-minus');
     const plusBtn = container.querySelector('.quantity-btn-plus');
-    
+
     // Get min and max participants from the package card
     const packageCard = btn.closest('.custom-card');
     const minParticipants = parseInt(packageCard.getAttribute('data-min-participants')) || 1;
     const maxParticipants = parseInt(packageCard.getAttribute('data-max-participants')) || 10;
-    
+
     let currentQuantity = minParticipants; // Start with minimum participants
     let cartKey = null;
-    
+
     // Function to add/update item in cart
     function addToCart(quantity) {
       const variantId = btn.getAttribute('data-variant-id');
@@ -369,14 +369,14 @@ document.addEventListener('DOMContentLoaded', function() {
         toastNotifications.warning('This package is not available right now.');
         return Promise.reject(new Error('No variant ID'));
       }
-      
+
       setBtnLoading(btn, true, 'Adding...');
-      
+
       const tryAddForDate = (offsetDays = 0) => {
         const date = new Date();
         date.setDate(date.getDate() + offsetDays);
         const dateStr = date.toISOString().split('T')[0];
-        
+
         return fetchJson(`/api/schedule-slots/availability?variant_id=${variantId}&date=${dateStr}`)
           .then(slots => {
             const open = Array.isArray(slots) ? slots.find(s => s.is_open && s.available_total > 0) : null;
@@ -392,10 +392,10 @@ document.addEventListener('DOMContentLoaded', function() {
               })
               .then(async res => {
                 let body = null;
-                try { 
+                try {
                   const contentType = res.headers.get('content-type');
                   if (contentType && contentType.includes('application/json')) {
-                    body = await res.json(); 
+                    body = await res.json();
                   } else {
                     const text = await res.text();
                     throw new Error('Server returned invalid response format');
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   }
                   throw new Error('Invalid JSON response');
                 }
-                
+
                 if (!res.ok) {
                   let message = 'Unable to add to cart.';
                   if (body) {
@@ -429,16 +429,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           });
       };
-      
+
       return tryAddForDate(0);
     }
-    
+
     // Handle quantity increment/decrement with automatic cart update
     minusBtn.addEventListener('click', function() {
       if (currentQuantity > minParticipants) {
         currentQuantity--;
         quantityDisplay.textContent = `${currentQuantity} Package${currentQuantity > 1 ? 's' : ''}`;
-        
+
         // Update cart with new quantity
         addToCart(currentQuantity)
           .then(data => {
@@ -458,19 +458,19 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       }
     });
-    
+
     plusBtn.addEventListener('click', function() {
       if (currentQuantity < maxParticipants) {
         currentQuantity++;
         quantityDisplay.textContent = `${currentQuantity} Package${currentQuantity > 1 ? 's' : ''}`;
-        
+
         // Update cart with new quantity
         addToCart(currentQuantity)
           .then(data => {
             if (data && data.success) {
               updateCartCount();
               // Removed success message modal
-              
+
               // Update cart count again after a short delay to ensure it's current
               setTimeout(() => {
                 updateCartCount();
@@ -491,27 +491,27 @@ document.addEventListener('DOMContentLoaded', function() {
         toastNotifications.warning(`Maximum ${maxParticipants} participants allowed for this package.`);
       }
     });
-    
+
     // Handle "Add to Cart" button click - immediately add 1 item and show quantity controls
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       if (btn.classList.contains('disabled')) return;
-      
+
       // Add minimum participants to cart immediately
       addToCart(minParticipants)
         .then(data => {
           if (data && data.success) {
             // Update cart count immediately
             updateCartCount();
-            
+
             // Removed success message modal
-            
+
             // Show quantity controls for further adjustments
             btn.style.display = 'none';
             quantityControls.style.display = 'block';
             currentQuantity = minParticipants;
             quantityDisplay.textContent = `${currentQuantity} Package${currentQuantity > 1 ? 's' : ''}`;
-            
+
             // Update cart count again after a short delay to ensure it's current
             setTimeout(() => {
               updateCartCount();
@@ -533,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-price-for-variant]').forEach(function(span){
     const variantId = span.getAttribute('data-price-for-variant');
     const displayPrice = span.getAttribute('data-display-price');
-    
+
     // If display price is set, use it; otherwise fetch from API
     if (displayPrice && displayPrice !== '') {
       span.textContent = 'Starting from TK ' + Number(displayPrice).toLocaleString();
@@ -564,13 +564,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to update cart count
   function updateCartCount() {
     console.log('Updating cart count...');
-    
+
     // Add loading state to cart icon
     const cartIcon = document.getElementById('floatingCartIcon');
     if (cartIcon) {
       cartIcon.style.opacity = '0.7';
     }
-    
+
     fetch('{{ route("frontend.cart.count") }}')
       .then(response => {
         if (!response.ok) {
@@ -588,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           console.error('Cart count element not found');
         }
-        
+
         // Remove loading state
         if (cartIcon) {
           cartIcon.style.opacity = '1';
@@ -596,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(error => {
         console.error('Error updating cart count:', error);
-        
+
         // Remove loading state on error
         if (cartIcon) {
           cartIcon.style.opacity = '1';

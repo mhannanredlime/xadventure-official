@@ -31,13 +31,13 @@
 
 @section('content')
   <div class="container mt-4" style="margin-top: 20% !important;">
-    
+
     @if(session('success'))
       <div class="success-message">
-        <i class="fas fa-check-circle"></i>
+        <i class="bi  bi-check-circle"></i>
         {{ session('success') }}
       </div>
-      
+
       <!-- Order Summary Section -->
       @if(isset($payment) && $payment)
         <div class="row">
@@ -59,14 +59,14 @@
                   <p><strong>Booking Code:</strong> {{ $payment->reservation->booking_code }}</p>
                   <p><strong>Transaction ID:</strong> {{ $payment->transaction_id }}</p>
                   <p><strong>Date:</strong> {{ date('F j, Y', strtotime($payment->reservation->date)) }}</p>
-                  <p><strong>Status:</strong> 
+                  <p><strong>Status:</strong>
                     <span class="badge {{ $payment->status === 'completed' ? 'bg-success' : 'bg-warning' }}">
                       {{ ucfirst($payment->status) }}
                     </span>
                   </p>
                 </div>
               </div>
-              
+
               <div class="mt-4">
                 <h5>Package Details</h5>
                 <div class="card">
@@ -78,7 +78,7 @@
                   </div>
                 </div>
               </div>
-              
+
               @if($payment->payment_method === 'check_payment')
                 <div class="mt-4 alert alert-info">
                   <h5>Check Payment Instructions</h5>
@@ -93,18 +93,18 @@
               @endif
             </div>
           </div>
-          
+
           <div class="col-lg-4">
             <div class="payment-form">
               <h4>Quick Actions</h4>
               <a href="{{ route('frontend.packages.index') }}" class="btn btn-primary w-100 mb-2">
-                <i class="fas fa-plus"></i> Book Another Adventure
+                <i class="bi  bi-plus"></i> Book Another Adventure
               </a>
               <a href="{{ route('frontend.cart.index') }}" class="btn btn-outline-secondary w-100 mb-2">
-                <i class="fas fa-shopping-cart"></i> View Cart
+                <i class="bi  bi-shopping-cart"></i> View Cart
               </a>
               <a href="{{ url('/') }}" class="btn btn-outline-primary w-100">
-                <i class="fas fa-home"></i> Back to Home
+                <i class="bi  bi-home"></i> Back to Home
               </a>
             </div>
           </div>
@@ -113,15 +113,15 @@
         <!-- Show simple success message for check payments -->
         <div class="payment-form">
           <div class="text-center">
-            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+            <i class="bi  bi-check-circle text-success" style="font-size: 4rem;"></i>
             <h2 class="mt-3">Booking Confirmed!</h2>
             <p class="lead">Your booking has been successfully processed.</p>
             <div class="mt-4">
               <a href="{{ route('frontend.packages.index') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Book Another Adventure
+                <i class="bi  bi-plus"></i> Book Another Adventure
               </a>
               <a href="{{ url('/') }}" class="btn btn-outline-primary">
-                <i class="fas fa-home"></i> Back to Home
+                <i class="bi  bi-home"></i> Back to Home
               </a>
             </div>
           </div>
@@ -129,13 +129,13 @@
       @endif
     @elseif(session('error'))
       <div class="error-message">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="bi  bi-exclamation-triangle"></i>
         {{ session('error') }}
       </div>
-      
+
       <div class="text-center mt-4">
         <a href="{{ route('frontend.cart.index') }}" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Back to Cart
+          <i class="bi  bi-arrow-left"></i> Back to Cart
         </a>
       </div>
     @else
@@ -143,7 +143,7 @@
 
       @if($errors->any())
         <div class="error-message">
-          <i class="fas fa-exclamation-triangle"></i>
+          <i class="bi  bi-exclamation-triangle"></i>
           <ul class="mb-0">
             @foreach($errors->all() as $error)
               <li>{{ $error }}</li>
@@ -151,7 +151,7 @@
           </ul>
         </div>
       @endif
-      
+
       <form action="{{ route('frontend.checkout.process') }}" method="POST" id="payment-form">
         @csrf
         <div class="payment-form">
@@ -159,7 +159,7 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="customer_name" class="form-label">Full Name *</label>
-              <input type="text" class="form-control @error('customer_name') is-invalid @enderror" 
+              <input type="text" class="form-control @error('customer_name') is-invalid @enderror"
                      id="customer_name" name="customer_name" value="{{ old('customer_name') }}" required>
               @error('customer_name')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -167,7 +167,7 @@
             </div>
             <div class="col-md-6">
               <label for="customer_email" class="form-label">Email *</label>
-              <input type="email" class="form-control @error('customer_email') is-invalid @enderror" 
+              <input type="email" class="form-control @error('customer_email') is-invalid @enderror"
                      id="customer_email" name="customer_email" value="{{ old('customer_email') }}" required>
               @error('customer_email')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -182,11 +182,11 @@
                   <i class="bi bi-telephone text-muted"></i>
                   <span class="ms-1 text-muted fw-bold">+880</span>
                 </span>
-                <input type="tel" 
-                       class="form-control border-start-0 @error('customer_phone') is-invalid @enderror" 
-                       id="customer_phone" 
-                       name="customer_phone" 
-                       value="{{ old('customer_phone') }}" 
+                <input type="tel"
+                       class="form-control border-start-0 @error('customer_phone') is-invalid @enderror"
+                       id="customer_phone"
+                       name="customer_phone"
+                       value="{{ old('customer_phone') }}"
                        placeholder="1X XXX XXXX"
                        maxlength="15"
                        required>
@@ -200,7 +200,7 @@
             </div>
             <div class="col-md-6">
               <label for="customer_address" class="form-label">Address</label>
-              <textarea class="form-control @error('customer_address') is-invalid @enderror" 
+              <textarea class="form-control @error('customer_address') is-invalid @enderror"
                         id="customer_address" name="customer_address" rows="2">{{ old('customer_address') }}</textarea>
               @error('customer_address')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -284,14 +284,14 @@
     // Phone validation (with +880 prefix support)
     const phone = $('#customer_phone').val().replace(/\s/g, '');
     let phoneValid = false;
-    
+
     if (phone.startsWith('880')) {
       const phoneWithoutPrefix = phone.substring(3);
       phoneValid = /^\d{10,11}$/.test(phoneWithoutPrefix);
     } else {
       phoneValid = /^\d{10,11}$/.test(phone);
     }
-    
+
     if (phone && !phoneValid) {
       $('#customer_phone').addClass('is-invalid');
       isValid = false;
@@ -307,12 +307,12 @@
   // Phone number formatting (simplified)
   $('#customer_phone').on('input', function() {
     let value = $(this).val().replace(/\D/g, '');
-    
+
     // Limit to 11 digits
     if (value.length > 11) {
       value = value.substring(0, 11);
     }
-    
+
     // Simple formatting - just add spaces for readability
     if (value.length >= 8) {
       value = value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5, 8) + ' ' + value.substring(8);
@@ -321,7 +321,7 @@
     } else if (value.length >= 2) {
       value = value.substring(0, 2) + ' ' + value.substring(2);
     }
-    
+
     $(this).val(value);
   });
 

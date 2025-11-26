@@ -23,7 +23,7 @@
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="mb-3">
-                                <i class="fas fa-map-marker-alt fa-2x text-orange"></i>
+                                <i class="bi  bi-map-marker-alt fa-2x text-orange"></i>
                             </div>
                             <h5 class="card-title">Our Location</h5>
                             <p class="card-text text-muted">Xtreme Adventure Bandarban<br>Babunagarpara, Ward No.
@@ -35,7 +35,7 @@
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="mb-3">
-                                <i class="fas fa-envelope fa-2x text-orange"></i>
+                                <i class="bi  bi-envelope fa-2x text-orange"></i>
                             </div>
                             <h5 class="card-title">Email Us</h5>
                             <p class="card-text text-muted">info@xadventurebandarban.com</p>
@@ -46,7 +46,7 @@
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="mb-3">
-                                <i class="fas fa-phone-alt fa-2x text-orange"></i>
+                                <i class="bi  bi-phone-alt fa-2x text-orange"></i>
                             </div>
                             <h5 class="card-title">Call Us</h5>
                             <p class="card-text text-muted">01893583010<br>01893585377</p>

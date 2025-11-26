@@ -14,14 +14,14 @@
 
     @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <i class="bi  bi-check-circle"></i> {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
 
     @if(session('error'))
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+        <i class="bi  bi-exclamation-triangle"></i> {{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
@@ -138,7 +138,7 @@
               @empty
                 <tr>
                   <td colspan="9" class="text-center py-4">
-                    <i class="fas fa-tag fa-3x text-muted mb-3 d-block"></i>
+                    <i class="bi  bi-tag fa-3x text-muted mb-3 d-block"></i>
                     <h5>No Promo Codes Found</h5>
                     <p class="text-muted">Create your first promo code to get started.</p>
                   </td>
@@ -170,7 +170,7 @@
           @csrf
           <input type="hidden" name="_method" id="formMethod" value="POST">
           <input type="hidden" name="promo_id" id="promoId">
-          
+
           <div class="mb-3">
             <label for="appliesTo" class="form-label">Applies To</label>
             <select class="form-select form-control-custom" id="appliesTo" name="applies_to" required>

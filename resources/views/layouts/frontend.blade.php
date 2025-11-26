@@ -231,15 +231,15 @@
                         <div class="dropdown">
                             <button class="btn btn-outline-light dropdown-toggle" type="button" id="accountDropdown"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i> Account
+                                <i class="bi  bi-user"></i> Account
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="accountDropdown">
                                 <li><a class="dropdown-item" href="{{ route('customer.dashboard') }}"><i
-                                            class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                            class="bi  bi-tachometer-alt"></i> Dashboard</a></li>
                                 <li><a class="dropdown-item" href="{{ route('customer.profile') }}"><i
-                                            class="fas fa-user-edit"></i> Profile</a></li>
+                                            class="bi  bi-user-edit"></i> Profile</a></li>
                                 <li><a class="dropdown-item" href="{{ route('customer.reservations') }}"><i
-                                            class="fas fa-calendar-check"></i> Reservations</a></li>
+                                            class="bi  bi-calendar-check"></i> Reservations</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -247,7 +247,7 @@
                                     <form method="POST" action="{{ route('customer.logout') }}"
                                         style="display: inline;">
                                         @csrf
-                                        <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i>
+                                        <button type="submit" class="dropdown-item"><i class="bi  bi-sign-out-alt"></i>
                                             Logout</button>
                                     </form>
                                 </li>
@@ -257,22 +257,22 @@
                         <div class="dropdown">
                             <button class="btn btn-outline-light dropdown-toggle" type="button" id="accountDropdown"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-shield"></i> {{ Auth::user()->name }}
+                                <i class="bi  bi-user-shield"></i> {{ Auth::user()->name }}
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="accountDropdown">
                                 <li><a class="dropdown-item" href="{{ route('admin.reservation-dashboard') }}"><i
-                                            class="fas fa-clipboard-check"></i> Admin Dashboard</a></li>
+                                            class="bi  bi-clipboard-check"></i> Admin Dashboard</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.profile.index') }}"><i
-                                            class="fas fa-user-edit"></i> Profile</a></li>
+                                            class="bi  bi-user-edit"></i> Profile</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.settings.index') }}"><i
-                                            class="fas fa-cog"></i> Settings</a></li>
+                                            class="bi  bi-cog"></i> Settings</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                                         @csrf
-                                        <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i>
+                                        <button type="submit" class="dropdown-item"><i class="bi  bi-sign-out-alt"></i>
                                             Logout</button>
                                     </form>
                                 </li>
@@ -282,13 +282,13 @@
                         <div class="dropdown">
                             <button class="btn btn-outline-light dropdown-toggle" type="button" id="accountDropdown"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i> Account
+                                <i class="bi  bi-user"></i> Account
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="accountDropdown">
                                 <li><a class="dropdown-item" href="{{ route('customer.login') }}"><i
-                                            class="fas fa-sign-in-alt"></i> Login</a></li>
+                                            class="bi  bi-sign-in-alt"></i> Login</a></li>
                                 <li><a class="dropdown-item" href="{{ route('customer.register') }}"><i
-                                            class="fas fa-user-plus"></i> Register</a></li>
+                                            class="bi  bi-user-plus"></i> Register</a></li>
                             </ul>
                         </div>
                     @endauth
@@ -309,9 +309,9 @@
                             style="color: orange;">TURE</span></h2>
                     <p>Xtreme Adventure Bandarban</p>
                     <div class="contact-info mt-3">
-                        <p><i class="fas fa-map-marker-alt"></i>Babunagarpara, Ward No. 3,<br>Tongkaboti, Bandarban</p>
-                        <p><i class="fas fa-envelope"></i>info@xadventurebandarban.com</p>
-                        <p><i class="fas fa-phone-alt"></i>01893583010, 01893585377</p>
+                        <p><i class="bi  bi-map-marker-alt"></i>Babunagarpara, Ward No. 3,<br>Tongkaboti, Bandarban</p>
+                        <p><i class="bi  bi-envelope"></i>info@xadventurebandarban.com</p>
+                        <p><i class="bi  bi-phone-alt"></i>01893583010, 01893585377</p>
                     </div>
                 </div>
                 <div class="col-md-2 mb-4">
@@ -335,7 +335,7 @@
                 </div>
                 <div class="col-md-3 mb-4">
                     <h5>Work Hours</h5>
-                    <p><i class="fas fa-clock text-warning"></i> 9 AM - 10 PM, Monday - Saturday</p>
+                    <p><i class="bi  bi-clock text-warning"></i> 9 AM - 10 PM, Monday - Saturday</p>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor</p>
                     <div class="social-icons-footer mt-3">
                         <a href="https://www.facebook.com/xadventure" target="_blank"><i class="fab fa-facebook-f"></i></a>

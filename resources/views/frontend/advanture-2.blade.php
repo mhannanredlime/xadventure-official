@@ -288,7 +288,7 @@
       notification.className = 'success-notification';
       notification.innerHTML = `
       <div class="success-content">
-        <i class="fas fa-check"></i>
+        <i class="bi  bi-check"></i>
         <span>${message}</span>
       </div>
     `;

@@ -97,7 +97,7 @@
     .col-lg-8, .col-lg-4 {
         margin-bottom: 2rem;
     }
-    
+
     .sticky-top {
         position: static !important;
     }
@@ -144,7 +144,7 @@
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
+            <i class="bi  bi-check-circle"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -225,7 +225,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 @if($data['vehicles']->count() > 0)
                                 <div class="mt-3">
                                     <h6 class="fw-bold">Individual Vehicles:</h6>
@@ -293,7 +293,7 @@
                                 </span>
                             </div>
                         </div>
-                        
+
                         @if($data['vehicle_types'])
                         <div class="mt-2">
                             <small class="opacity-75">Vehicle Types:</small>

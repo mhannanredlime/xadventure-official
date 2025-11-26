@@ -45,21 +45,21 @@
 
     @if(session('error'))
       <div class="error-message">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="bi  bi-exclamation-triangle"></i>
         {{ session('error') }}
       </div>
     @endif
 
     @if(session('success'))
       <div class="success-message">
-        <i class="fas fa-check-circle"></i>
+        <i class="bi  bi-check-circle"></i>
         {{ session('success') }}
       </div>
     @endif
 
     @if($errors->any())
       <div class="error-message">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="bi  bi-exclamation-triangle"></i>
         <ul class="mb-0">
           @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
@@ -70,7 +70,7 @@
 
     @if(isset($packages) && $packages->isEmpty())
       <div class="text-center py-5">
-        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+        <i class="bi  bi-info-circle fa-3x text-muted mb-3"></i>
         <h3>No packages available</h3>
         <p class="text-muted">Please check back later for available adventure packages.</p>
       </div>
@@ -83,13 +83,13 @@
                 <img src="{{ $package->display_image_url }}" alt="{{ $package->name }}" class="img-fluid mb-3" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
               @else
                 <div class="bg-light d-flex align-items-center justify-content-center mb-3" style="width: 100%; height: 200px; border-radius: 8px;">
-                  <i class="fas fa-mountain fa-3x text-muted"></i>
+                  <i class="bi  bi-mountain fa-3x text-muted"></i>
                 </div>
               @endif
-              
+
               <h3 class="h5 mb-2">{{ $package->name }}</h3>
               <p class="text-muted mb-3">{{ Str::limit($package->description, 100) }}</p>
-              
+
               <div class="mb-3">
                 <strong>Available for:</strong>
                 @foreach($package->vehicleTypes as $vehicleType)

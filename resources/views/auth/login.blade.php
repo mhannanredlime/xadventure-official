@@ -106,7 +106,7 @@
         {{-- Success --}}
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show">
-                <i class="fas fa-check-circle"></i> {{ session('success') }}
+                <i class="bi  bi-check-circle"></i> {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -114,7 +114,7 @@
         {{-- Error --}}
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show">
-                <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+                <i class="bi  bi-exclamation-triangle"></i> {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -122,7 +122,7 @@
         {{-- Validation Errors --}}
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show">
-                <i class="fas fa-exclamation-triangle"></i> Please correct the following errors:
+                <i class="bi  bi-exclamation-triangle"></i> Please correct the following errors:
                 <ul class="mb-0 mt-2">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -150,7 +150,7 @@
                 <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
                     name="password" placeholder="Password" required>
                 <label for="password">Password</label>
-                <span class="password-toggle"><i id="toggleIcon" class="fas fa-eye"></i></span>
+                <span class="password-toggle"><i id="toggleIcon" class="bi  bi-eye"></i></span>
                 @error('password')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -165,13 +165,13 @@
             {{-- Submit --}}
             <div class="d-grid mb-3">
                 <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                    <i class="bi  bi-sign-in-alt me-2"></i> Sign In
                 </button>
             </div>
 
             <div class="text-center">
                 <a href="{{ url('/') }}" class="text-decoration-none text-primary">
-                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                    <i class="bi  bi-arrow-left me-1"></i> Back to Home
                 </a>
             </div>
         </form>

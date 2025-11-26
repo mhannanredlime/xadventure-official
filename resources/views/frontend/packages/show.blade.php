@@ -89,21 +89,21 @@
   <div class="container main-container">
     @if(session('error'))
       <div class="error-message">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="bi  bi-exclamation-triangle"></i>
         {{ session('error') }}
       </div>
     @endif
 
     @if(session('success'))
       <div class="success-message">
-        <i class="fas fa-check-circle"></i>
+        <i class="bi  bi-check-circle"></i>
         {{ session('success') }}
       </div>
     @endif
 
     @if($errors->any())
       <div class="error-message">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="bi  bi-exclamation-triangle"></i>
         <ul class="mb-0">
           @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
@@ -121,13 +121,13 @@
             <img src="{{ asset('storage/' . $package->image) }}" alt="{{ $package->name }}" class="package-image">
           @else
             <div class="package-image bg-light d-flex align-items-center justify-content-center">
-              <i class="fas fa-mountain fa-5x text-muted"></i>
+              <i class="bi  bi-mountain fa-5x text-muted"></i>
             </div>
           @endif
-          
+
           <h1 class="mb-3">{{ $package->name }}</h1>
           <p class="text-muted mb-4">{{ $package->description }}</p>
-          
+
           <div class="mb-4">
             <h4>Available for:</h4>
             @foreach($package->vehicleTypes as $vehicleType)
@@ -181,14 +181,14 @@
       <div class="col-lg-4">
         <div class="package-detail-card">
           <h4>Book This Package</h4>
-          
+
           <form id="booking-form" action="{{ route('frontend.cart.add') }}" method="POST">
             @csrf
             <input type="hidden" name="variant_id" id="selected-variant-id" required>
-            
+
             <div class="mb-3">
               <label for="booking-date" class="form-label">Select Date</label>
-              <input type="date" class="form-control date-picker" id="booking-date" name="date" 
+              <input type="date" class="form-control date-picker" id="booking-date" name="date"
                      min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
             </div>
 
@@ -196,14 +196,14 @@
               <label class="form-label">Select Time Slot</label>
               <div id="time-slots">
                 <div class="loading">
-                  <i class="fas fa-spinner fa-spin"></i> Loading available slots...
+                  <i class="bi  bi-spinner fa-spin"></i> Loading available slots...
                 </div>
               </div>
             </div>
 
             <div class="mb-3">
               <label for="quantity" class="form-label">Number of People</label>
-              <input type="number" class="form-control" id="quantity" name="quantity" 
+              <input type="number" class="form-control" id="quantity" name="quantity"
                      min="1" max="10" value="1" required>
             </div>
 
@@ -238,17 +238,17 @@
   $('.select-variant-btn').click(function() {
     const variantId = $(this).data('variant-id');
     selectedVariantId = variantId;
-    
+
     $('.variant-card').removeClass('selected');
     $(this).closest('.variant-card').addClass('selected');
-    
+
     $('#selected-variant-id').val(variantId);
-    
+
     // Load time slots if date is selected
     if (selectedDate) {
       loadTimeSlots();
     }
-    
+
     updateTotalPrice();
     updateAddToCartButton();
   });
@@ -271,7 +271,7 @@
   function loadTimeSlots() {
     if (!selectedVariantId || !selectedDate) return;
 
-    $('#time-slots').html('<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+    $('#time-slots').html('<div class="loading"><i class="bi  bi-spinner fa-spin"></i> Loading...</div>');
 
     $.get('{{ route("frontend.packages.availability") }}', {
       variant_id: selectedVariantId,
@@ -284,7 +284,7 @@
           const isAvailable = slot.available_capacity > 0;
           const slotClass = isAvailable ? 'slot-option' : 'slot-option disabled';
           const clickHandler = isAvailable ? `onclick="selectSlot(${slot.schedule_slot_id})"` : '';
-          
+
           slotsHtml += `
             <div class="${slotClass}" ${clickHandler}>
               <div class="d-flex justify-content-between align-items-center">
@@ -315,13 +315,13 @@
     selectedSlotId = slotId;
     $('.slot-option').removeClass('selected');
     $(`[onclick="selectSlot(${slotId})"]`).addClass('selected');
-    
+
     // Add hidden input for slot_id
     if ($('#selected-slot-id').length === 0) {
       $('#booking-form').append('<input type="hidden" name="slot_id" id="selected-slot-id">');
     }
     $('#selected-slot-id').val(slotId);
-    
+
     updateTotalPrice();
     updateAddToCartButton();
   }
@@ -337,7 +337,7 @@
     const selectedSlot = $(`.slot-option[onclick*="${selectedSlotId}"]`);
     const priceText = selectedSlot.find('.price-display').text();
     const price = parseInt(priceText.replace('TK ', '').replace(',', ''));
-    
+
     const total = price * quantity;
     $('#total-price').text(`TK ${total.toLocaleString()}`);
   }

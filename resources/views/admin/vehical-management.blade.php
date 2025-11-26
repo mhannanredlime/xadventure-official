@@ -10,7 +10,7 @@
       border: none;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
-    
+
     .modal-header {
       border-bottom: 1px solid #e9ecef;
       padding: 1.5rem;
@@ -18,38 +18,38 @@
       color: white;
       border-radius: 15px 15px 0 0;
     }
-    
+
     .modal-body {
       padding: 2rem;
     }
-    
+
     .modal-footer {
       border-top: 1px solid #e9ecef;
       padding: 1.5rem;
     }
-    
+
     .btn-close {
       filter: invert(1);
     }
-    
+
     .form-label {
       font-weight: 600;
       color: #495057;
       margin-bottom: 0.5rem;
     }
-    
+
     .form-control, .form-select {
       border-radius: 8px;
       border: 2px solid #e9ecef;
       padding: 0.75rem;
       transition: all 0.3s ease;
     }
-    
+
     .form-control:focus, .form-select:focus {
       border-color: #ff6b35;
       box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
     }
-    
+
     .btn-primary-custom {
       background: linear-gradient(135deg, #ff6b35, #f7931e);
       border: none;
@@ -58,12 +58,12 @@
       font-weight: 600;
       transition: all 0.3s ease;
     }
-    
+
     .btn-primary-custom:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
     }
-    
+
     .btn-secondary-custom {
       background: #6c757d;
       border: none;
@@ -72,12 +72,12 @@
       font-weight: 600;
       transition: all 0.3s ease;
     }
-    
+
     .btn-secondary-custom:hover {
       background: #5a6268;
       transform: translateY(-2px);
     }
-    
+
     .vehicle-img {
       width: 60px;
       height: 60px;
@@ -85,7 +85,7 @@
       border-radius: 8px;
       border: 2px solid #e9ecef;
     }
-    
+
     .action-icons a, .action-icons button {
       margin: 0 0.25rem;
       padding: 0.5rem;
@@ -96,94 +96,94 @@
       align-items: center;
       justify-content: center;
     }
-    
+
     .action-icons a:hover, .action-icons button:hover {
       background-color: #f8f9fa;
       transform: scale(1.1);
     }
-    
+
     .action-icon {
       transition: all 0.3s ease;
       filter: brightness(0.7);
     }
-    
+
     .action-icons a:hover .action-icon {
       filter: brightness(1);
       transform: scale(1.1);
     }
-    
+
     .action-icons a[title="Edit"]:hover .action-icon {
       filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
     }
-    
+
     .action-icons a[title="View"]:hover .action-icon {
       filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
     }
-    
+
     .toggle-icon.active {
       color: #28a745;
     }
-    
+
     .toggle-icon.inactive {
       color: #6c757d;
     }
-    
+
     .action-icons button:hover .toggle-icon.active {
       color: #dc3545;
     }
-    
+
     .action-icons button:hover .toggle-icon.inactive {
       color: #28a745;
     }
-    
+
     .status-badge {
       padding: 0.25rem 0.75rem;
       border-radius: 20px;
       font-size: 0.875rem;
       font-weight: 600;
     }
-    
+
     .status-active {
       background-color: #d4edda;
       color: #155724;
     }
-    
+
     .status-inactive {
       background-color: #f8d7da;
       color: #721c24;
     }
-    
+
     .alert {
       border-radius: 10px;
       border: none;
       padding: 1rem 1.5rem;
     }
-    
+
     .alert-success {
       background: linear-gradient(135deg, #d4edda, #c3e6cb);
       color: #155724;
     }
-    
+
     .alert-danger {
       background: linear-gradient(135deg, #f8d7da, #f5c6cb);
       color: #721c24;
     }
-    
+
     .loading-spinner {
       display: none;
     }
-    
+
     .loading .loading-spinner {
       display: inline-block;
     }
-    
+
     .image-preview {
       max-width: 200px;
       max-height: 200px;
       border-radius: 8px;
       border: 2px solid #e9ecef;
     }
-    
+
     .form-check-input:checked {
       background-color: #ff6b35;
       border-color: #ff6b35;
@@ -228,8 +228,8 @@
                 <td data-label="Image">
                   @php
                     $displayImage = null;
-                    
-                    
+
+
                     // If no vehicle images, try vehicle type images
                     if (!$displayImage && $vehicle->vehicleType) {
                         $vehicleTypePrimaryImage = $vehicle->vehicleType->primaryImage()->first();
@@ -242,10 +242,10 @@
                             }
                         }
                     }
-                    
+
                   @endphp
-                  
-                  <img src="{{ $displayImage }}" alt="{{ $vehicle->name }}" class="vehicle-img" 
+
+                  <img src="{{ $displayImage }}" alt="{{ $vehicle->name }}" class="vehicle-img"
                        data-fallback="{{ asset('admin/images/vehicle-type.svg') }}"
                        onerror="this.src=this.dataset.fallback">
                 </td>
@@ -290,7 +290,7 @@
             @empty
               <tr>
                 <td colspan="7" class="text-center py-4">
-                  <i class="fas fa-motorcycle fa-3x text-muted mb-3 d-block"></i>
+                  <i class="bi  bi-motorcycle fa-3x text-muted mb-3 d-block"></i>
                   <h5>No Vehicles Found</h5>
                   <p class="text-muted">Add your first vehicle to get started.</p>
                 </td>
@@ -342,7 +342,7 @@ $(document).ready(function() {
     $(document).on('click', '.toggle-status-btn', function() {
         const vehicleId = $(this).data('vehicle-id');
         const button = $(this);
-        
+
         $.ajax({
             url: `/admin/vehicles/${vehicleId}/toggle`,
             method: 'PATCH',
@@ -354,7 +354,7 @@ $(document).ready(function() {
                 if (response.success) {
                     const row = button.closest('tr');
                     const statusCell = row.find('td:eq(4)');
-                    
+
                     if (response.is_active) {
                         statusCell.html('<span class="status-badge status-active">Active</span>');
                         button.find('.toggle-icon').removeClass('inactive').addClass('active');
@@ -364,7 +364,7 @@ $(document).ready(function() {
                         button.find('.toggle-icon').removeClass('active').addClass('inactive');
                         button.attr('title', 'Activate');
                     }
-                    
+
                     showAlert(response.message, 'success');
                 } else {
                     showAlert('Error updating vehicle status', 'danger');
@@ -386,7 +386,7 @@ $(document).ready(function() {
     $('#confirmDeleteBtn').click(function() {
         const button = $(this);
         button.addClass('loading').prop('disabled', true);
-        
+
         $.ajax({
             url: `/admin/vehicles/${currentVehicleId}`,
             method: 'DELETE',

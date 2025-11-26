@@ -77,7 +77,7 @@
                         const alertDiv = document.createElement('div');
                         alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
                         alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle"></i> Export completed successfully!
+                    <i class="bi  bi-check-circle"></i> Export completed successfully!
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
                         document.querySelector('.dashboard-area').appendChild(alertDiv);
@@ -197,14 +197,14 @@
 
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle"></i> {{ session('success') }}
+                <i class="bi  bi-check-circle"></i> {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+                <i class="bi  bi-exclamation-triangle"></i> {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -385,7 +385,7 @@
                         @empty
                             <tr>
                                 <td colspan="13" class="text-center py-4">
-                                    <i class="fas fa-calendar-alt fa-3x text-muted mb-3 d-block"></i>
+                                    <i class="bi  bi-calendar-alt fa-3x text-muted mb-3 d-block"></i>
                                     <h5>No Past Reservations Found</h5>
                                     <p class="text-muted">No past reservations found matching your filters.</p>
                                 </td>

@@ -118,7 +118,7 @@
                             <div class="card-body pricing-body">
                                 <ul class="pricing-features">
                                     @foreach ($features as $feature)
-                                        <li><i class="fas fa-check"></i> {{ $feature }}</li>
+                                        <li><i class="bi  bi-check"></i> {{ $feature }}</li>
                                     @endforeach
                                 </ul>
                                 <a href="{{ route('custom-packages') }}" class="btn btn-pricing">Learn More</a>

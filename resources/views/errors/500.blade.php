@@ -183,20 +183,20 @@
     .error-number {
       font-size: 6rem;
     }
-    
+
     .error-title {
       font-size: 2rem;
     }
-    
+
     .error-message {
       font-size: 1rem;
     }
-    
+
     .error-actions {
       flex-direction: column;
       align-items: center;
     }
-    
+
     .btn-home, .btn-refresh {
       width: 200px;
     }
@@ -210,15 +210,15 @@
       <div class="error-number">500</div>
       <h1 class="error-title">Oops! Server Error</h1>
       <p class="error-message">
-        Something went wrong on our end! Our team has been notified and is working to fix the issue. 
+        Something went wrong on our end! Our team has been notified and is working to fix the issue.
         Please try again in a few moments.
       </p>
       <div class="error-actions">
         <a href="{{ url('/') }}" class="btn-home">
-          <i class="fas fa-home me-2"></i>Go Home
+          <i class="bi  bi-home me-2"></i>Go Home
         </a>
         <a href="javascript:location.reload()" class="btn-refresh">
-          <i class="fas fa-redo me-2"></i>Try Again
+          <i class="bi  bi-redo me-2"></i>Try Again
         </a>
       </div>
     </div>
@@ -232,12 +232,12 @@
           <p class="lead text-muted">Our support team is here to help you</p>
         </div>
       </div>
-      
+
       <div class="row g-4">
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-phone"></i>
+              <i class="bi  bi-phone"></i>
             </div>
             <h3 class="feature-title">Call Us</h3>
             <p class="feature-text">
@@ -245,11 +245,11 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-envelope"></i>
+              <i class="bi  bi-envelope"></i>
             </div>
             <h3 class="feature-title">Email Support</h3>
             <p class="feature-text">
@@ -257,11 +257,11 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-comments"></i>
+              <i class="bi  bi-comments"></i>
             </div>
             <h3 class="feature-title">Live Chat</h3>
             <p class="feature-text">
@@ -270,14 +270,14 @@
           </div>
         </div>
       </div>
-      
+
       <div class="contact-info">
         <h3 class="text-center mb-4">Contact Information</h3>
         <div class="row">
           <div class="col-md-4">
             <div class="contact-item">
               <div class="contact-icon">
-                <i class="fas fa-phone"></i>
+                <i class="bi  bi-phone"></i>
               </div>
               <div>
                 <strong>Phone</strong><br>
@@ -288,7 +288,7 @@
           <div class="col-md-4">
             <div class="contact-item">
               <div class="contact-icon">
-                <i class="fas fa-envelope"></i>
+                <i class="bi  bi-envelope"></i>
               </div>
               <div>
                 <strong>Email</strong><br>
@@ -299,7 +299,7 @@
           <div class="col-md-4">
             <div class="contact-item">
               <div class="contact-icon">
-                <i class="fas fa-clock"></i>
+                <i class="bi  bi-clock"></i>
               </div>
               <div>
                 <strong>Hours</strong><br>
@@ -309,11 +309,11 @@
           </div>
         </div>
       </div>
-      
+
       <div class="row mt-5 text-center">
         <div class="col-12">
           <a href="{{ url('/') }}" class="btn btn-lg jatio-bg-color text-white px-5 py-3">
-            <i class="fas fa-home me-2"></i>Return to Homepage
+            <i class="bi  bi-home me-2"></i>Return to Homepage
           </a>
         </div>
       </div>

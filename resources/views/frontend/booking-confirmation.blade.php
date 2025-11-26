@@ -11,7 +11,7 @@
       padding: 20px;
       background-color: #f9fafb;
     }
-    
+
     .package-title {
       color: #e66000;
       font-size: 1.2rem;
@@ -20,7 +20,7 @@
       padding-bottom: 10px;
       border-bottom: 2px solid #e66000;
     }
-    
+
     .alert-info {
       background-color: #e7f3ff;
       border: 1px solid #b3d9ff;
@@ -29,11 +29,11 @@
       border-radius: 8px;
       margin-bottom: 20px;
     }
-    
+
     .alert-info i {
       margin-right: 8px;
     }
-    
+
     .transaction-details {
       background-color: #f0f8ff;
       border: 1px solid #b3d9ff;
@@ -48,19 +48,19 @@
     <div class="receipt-container">
       <header class="receipt-header">
         @if($reservation->packageVariant->package->images->isNotEmpty())
-          <img src="{{ asset('storage/' . $reservation->packageVariant->package->images->first()->image_path) }}" 
-               alt="{{ $reservation->packageVariant->package->name }}" 
+          <img src="{{ asset('storage/' . $reservation->packageVariant->package->images->first()->image_path) }}"
+               alt="{{ $reservation->packageVariant->package->name }}"
                style="width: 100%; height: 250px; object-fit: cover;">
         @else
           <img src="{{ asset('frontEnd/images/confirm.svg') }}" alt="Adventure confirmation">
         @endif
       </header>
-      
+
       <main class="receipt-body">
         <!-- Success Message -->
         <div class="text-center">
           <div class="success-icon">
-            <i class="fas fa-check-circle"></i>
+            <i class="bi  bi-check-circle"></i>
           </div>
           <p class="confirmation-title">Booking Confirmed!</p>
           <h1 class="customer-name">Hello {{ $reservation->customer->name }}!</h1>
@@ -73,20 +73,20 @@
         <!-- Booking Summary -->
         <div class="booking-summary">
           <h3 class="section-title">Booking Summary</h3>
-          
+
           @if(count($allReservations) > 1)
             <div class="alert alert-info mb-4">
-              <i class="fas fa-info-circle"></i>
+              <i class="bi  bi-info-circle"></i>
               <strong>Multiple Packages Booked:</strong> You have booked {{ count($allReservations) }} packages in this transaction.
             </div>
           @endif
-          
+
           @foreach($allReservations as $index => $res)
             <div class="package-booking-details {{ $index > 0 ? 'mt-4' : '' }}">
               @if(count($allReservations) > 1)
                 <h4 class="package-title">Package {{ $index + 1 }}: {{ $res->packageVariant->package->name }}</h4>
               @endif
-              
+
               <table class="details-table">
                 <tbody>
                   <tr>
@@ -141,7 +141,7 @@
               </table>
             </div>
           @endforeach
-          
+
           <!-- Transaction Details -->
           <div class="transaction-details mt-4">
             <table class="details-table">
@@ -243,30 +243,30 @@
         <!-- Booking Acknowledgment -->
         <section class="acknowledgment-section" style="margin: 40px 0; padding: 30px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 2px solid #28a745;">
           <h2 class="section-title" style="color: #28a745; text-align: center; margin-bottom: 25px;">
-            <i class="fas fa-handshake me-2"></i>Booking Acknowledgment
+            <i class="bi  bi-handshake me-2"></i>Booking Acknowledgment
           </h2>
-          
+
           <div class="acknowledgment-content" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <div class="alert alert-success" style="border-left: 4px solid #28a745;">
-              <i class="fas fa-check-circle me-2"></i>
+              <i class="bi  bi-check-circle me-2"></i>
               <strong>You have successfully agreed to the following terms and conditions:</strong>
             </div>
-            
+
             @if($reservation->acknowledgment_data)
               <div class="acknowledgment-details" style="margin: 20px 0;">
                 @if(isset($reservation->acknowledgment_data['driver_license_requirement']) && $reservation->acknowledgment_data['driver_license_requirement'])
                   <div class="d-flex align-items-start mb-3" style="padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
-                    <i class="fas fa-check-circle text-success me-3 mt-1" style="font-size: 1.2rem;"></i>
+                    <i class="bi  bi-check-circle text-success me-3 mt-1" style="font-size: 1.2rem;"></i>
                     <div>
                       <strong style="color: #28a745;">Driver's License Requirement</strong><br>
                       <small class="text-muted">I understand that for Each vehicle reservation, we will have at least one person have Motorcycle or Car Driver's licenses</small>
                     </div>
                   </div>
                 @endif
-                
+
                 @if(isset($reservation->acknowledgment_data['license_show_requirement']) && $reservation->acknowledgment_data['license_show_requirement'])
                   <div class="d-flex align-items-start mb-3" style="padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
-                    <i class="fas fa-check-circle text-success me-3 mt-1" style="font-size: 1.2rem;"></i>
+                    <i class="bi  bi-check-circle text-success me-3 mt-1" style="font-size: 1.2rem;"></i>
                     <div>
                       <strong style="color: #28a745;">License Show Requirement</strong><br>
                       <small class="text-muted">I understand I have to carry show my driver's license before the ride start. Failure the show my physical license, Xadventure will Deny the Ride, and I will not get my money back.</small>
@@ -279,13 +279,13 @@
             @if($reservation->signature_data)
               <div class="signature-display" style="text-align: center; margin-top: 25px;">
                 <h4 style="color: #495057; margin-bottom: 15px;">
-                  <i class="fas fa-signature me-2"></i>Your Digital Signature
+                  <i class="bi  bi-signature me-2"></i>Your Digital Signature
                 </h4>
                 <div class="signature-container" style="border: 3px solid #28a745; border-radius: 12px; padding: 20px; background: white; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                   <img src="{{ $reservation->signature_data }}" alt="Digital Signature" style="max-width: 300px; max-height: 120px; border-radius: 6px;">
                   <div class="mt-3">
                     <small class="text-muted" style="font-weight: 500;">
-                      <i class="fas fa-calendar-alt me-1"></i>
+                      <i class="bi  bi-calendar-alt me-1"></i>
                       Signed on {{ $reservation->created_at->format('M d, Y \a\t g:i A') }}
                     </small>
                   </div>
@@ -302,25 +302,25 @@
           <div class="expectation-content">
             <h3>{{ $reservation->packageVariant->package->name }}</h3>
             <p class="sub-text">Get ready for an unforgettable adventure experience! Our professional team is committed to providing you with the best possible adventure while ensuring your safety and enjoyment throughout the journey.</p>
-            
+
             <div class="highlights-grid">
               <div class="highlight-item">
-                <i class="fas fa-map-marked-alt"></i>
+                <i class="bi  bi-map-marked-alt"></i>
                 <h4>Expert Guides</h4>
                 <p>Professional and experienced guides will lead your adventure</p>
               </div>
               <div class="highlight-item">
-                <i class="fas fa-shield-alt"></i>
+                <i class="bi  bi-shield-alt"></i>
                 <h4>Safety First</h4>
                 <p>All safety equipment and briefings provided</p>
               </div>
               <div class="highlight-item">
-                <i class="fas fa-camera"></i>
+                <i class="bi  bi-camera"></i>
                 <h4>Photo Opportunities</h4>
                 <p>Capture amazing moments throughout your adventure</p>
               </div>
               <div class="highlight-item">
-                <i class="fas fa-heart"></i>
+                <i class="bi  bi-heart"></i>
                 <h4>Memorable Experience</h4>
                 <p>Create lasting memories with friends and family</p>
               </div>
@@ -331,27 +331,27 @@
         <!-- Important Information -->
         <section class="important-info">
           <h2 class="section-title">Important Information</h2>
-          
+
           <div class="info-grid">
             <div class="info-card">
-              <h4><i class="fas fa-clock"></i> Check-in Time</h4>
+              <h4><i class="bi  bi-clock"></i> Check-in Time</h4>
               <p>Please arrive at least 30 minutes before your scheduled time slot for check-in and safety briefing.</p>
             </div>
-            
+
             <div class="info-card">
-              <h4><i class="fas fa-map-marker-alt"></i> Meeting Point</h4>
+              <h4><i class="bi  bi-map-marker-alt"></i> Meeting Point</h4>
               <p>Our adventure center is located at [Address]. Look for our branded signage and staff members.</p>
             </div>
-            
+
             <div class="info-card">
-              <h4><i class="fas fa-phone"></i> Contact Information</h4>
+              <h4><i class="bi  bi-phone"></i> Contact Information</h4>
               <p>For any questions or changes, contact us at:<br>
               Phone: +880 1234-567890<br>
               Email: info@atvutvadventures.com</p>
             </div>
-            
+
             <div class="info-card">
-              <h4><i class="fas fa-exclamation-triangle"></i> Weather Policy</h4>
+              <h4><i class="bi  bi-exclamation-triangle"></i> Weather Policy</h4>
               <p>Adventures may be rescheduled due to severe weather conditions. We'll notify you in advance if needed.</p>
             </div>
           </div>
@@ -360,10 +360,10 @@
         <!-- Terms & Conditions -->
         <section class="terms-section">
           <h2 class="section-title">Terms & Conditions</h2>
-          
+
           <div class="terms-content">
             <div class="term-group">
-              <h4><i class="fas fa-calendar-check"></i> Booking Policy</h4>
+              <h4><i class="bi  bi-calendar-check"></i> Booking Policy</h4>
               <ul class="content-list">
                 <li>Bookings must be made at least 24 hours in advance</li>
                 <li>Full payment is required at the time of booking</li>
@@ -373,7 +373,7 @@
             </div>
 
             <div class="term-group">
-              <h4><i class="fas fa-user-check"></i> Participant Requirements</h4>
+              <h4><i class="bi  bi-user-check"></i> Participant Requirements</h4>
               <ul class="content-list">
                 <li>Minimum age for participants is 18 years (or as specified for the package)</li>
                 <li>Participants must have a valid government-issued ID</li>
@@ -384,7 +384,7 @@
             </div>
 
             <div class="term-group">
-              <h4><i class="fas fa-shield-alt"></i> Safety Rules</h4>
+              <h4><i class="bi  bi-shield-alt"></i> Safety Rules</h4>
               <ul class="content-list">
                 <li>All provided safety equipment must be worn at all times</li>
                 <li>Follow the guide's instructions strictly</li>
@@ -395,7 +395,7 @@
             </div>
 
             <div class="term-group">
-              <h4><i class="fas fa-undo"></i> Cancellation Policy</h4>
+              <h4><i class="bi  bi-undo"></i> Cancellation Policy</h4>
               <ul class="content-list">
                 <li>Cancellations made more than 72 hours before the adventure: Full refund</li>
                 <li>Cancellations made between 24-72 hours before: 50% refund</li>
@@ -406,7 +406,7 @@
             </div>
 
             <div class="term-group">
-              <h4><i class="fas fa-camera"></i> Photography & Media</h4>
+              <h4><i class="bi  bi-camera"></i> Photography & Media</h4>
               <ul class="content-list">
                 <li>Professional photos may be taken during your adventure</li>
                 <li>Photos may be used for promotional purposes unless you opt out</li>
@@ -422,19 +422,19 @@
           <h2 class="section-title">Need Help?</h2>
           <div class="contact-grid">
             <div class="contact-item">
-              <i class="fas fa-phone"></i>
+              <i class="bi  bi-phone"></i>
               <h4>Call Us</h4>
               <p>+880 1234-567890</p>
               <small>Available 9 AM - 6 PM</small>
             </div>
             <div class="contact-item">
-              <i class="fas fa-envelope"></i>
+              <i class="bi  bi-envelope"></i>
               <h4>Email Us</h4>
               <p>info@atvutvadventures.com</p>
               <small>Response within 24 hours</small>
             </div>
             <div class="contact-item">
-              <i class="fas fa-comments"></i>
+              <i class="bi  bi-comments"></i>
               <h4>Live Chat</h4>
               <p>Available on our website</p>
               <small>Real-time support</small>

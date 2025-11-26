@@ -19,7 +19,7 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\Reservation::count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            <i class="bi  bi-calendar fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\Package::where('is_active', true)->count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                            <i class="bi  bi-box fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\Customer::count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                            <i class="bi  bi-users fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\Reservation::where('payment_status', 'pending')->count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-coins fa-2x text-gray-300"></i>
+                            <i class="bi  bi-coins fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -88,22 +88,22 @@
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <a href="{{ route('admin.reservations.index') }}" class="btn btn-primary btn-block">
-                                <i class="fas fa-calendar"></i> Manage Reservations
+                                <i class="bi  bi-calendar"></i> Manage Reservations
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{{ route('admin.packages.index') }}" class="btn btn-success btn-block">
-                                <i class="fas fa-box"></i> Manage Packages
+                                <i class="bi  bi-box"></i> Manage Packages
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{{ route('admin.availabilities.index') }}" class="btn btn-info btn-block">
-                                <i class="fas fa-clock"></i> Manage Availability
+                                <i class="bi  bi-clock"></i> Manage Availability
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{{ route('admin.promo-codes.index') }}" class="btn btn-warning btn-block">
-                                <i class="fas fa-tag"></i> Manage Promo Codes
+                                <i class="bi  bi-tag"></i> Manage Promo Codes
                             </a>
                         </div>
                     </div>

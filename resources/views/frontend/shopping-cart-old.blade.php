@@ -846,7 +846,7 @@
 
         @if (session('error'))
             <div class="error-message" id="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="bi  bi-exclamation-triangle"></i>
                 {{ session('error') }}
                 <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -856,7 +856,7 @@
 
         @if (session('success'))
             <div class="success-message" id="success-message">
-                <i class="fas fa-check-circle"></i>
+                <i class="bi  bi-check-circle"></i>
                 {{ session('success') }}
                 <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -866,7 +866,7 @@
 
         @if (isset($errors) && is_object($errors) && method_exists($errors, 'any') && $errors->any())
             <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="bi  bi-exclamation-triangle"></i>
                 <strong>Please fix the following errors:</strong>
                 <ul class="mb-0 mt-2">
                     @foreach ($errors->all() as $error)
@@ -877,7 +877,7 @@
         @endif
         @if (isset($cartErrors) && is_array($cartErrors) && !empty($cartErrors))
             <div class="error-message">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+                <i class="bi  bi-exclamation-triangle me-2"></i>
                 <strong>Cart Issues:</strong>
                 <ul class="mb-0 mt-2">
                     @foreach ($cartErrors as $error)
@@ -889,7 +889,7 @@
 
         @if (empty($packages))
             <div class="empty-cart">
-                <i class="fas fa-shopping-cart"></i>
+                <i class="bi  bi-shopping-cart"></i>
                 <h3>Your cart is empty</h3>
                 <p class="text-muted">Add some adventure packages to get started!</p>
                 <a href="{{ route('adventure') }}" class="btn btn-orange jatio-bg-color">
@@ -965,7 +965,7 @@
                                             style="background-color: #ff6f0044; height: 100px;  width: 30px; padding:80px 2px">
                                             <button type="button" class="remove-btn "
                                                 onclick="confirmRemove('{{ $packageData['key'] }}')" title="Remove Item">
-                                                <i class="fas fa-times"></i>
+                                                <i class="bi  bi-times"></i>
                                             </button>
                                         </div>
 
@@ -1070,7 +1070,7 @@
                     @if ($appliedPromoCode)
                         <button class="btn btn-danger me-2" onclick="removePromo()" id="remove-promo-btn"
                             title="Remove Promo Code">
-                            <i class="fas fa-times"></i>
+                            <i class="bi  bi-times"></i>
                         </button>
                     @endif
                     <button class="btn btn-apply" onclick="applyPromo()" id="apply-promo-btn"
@@ -1083,7 +1083,7 @@
                 <div id="promo-message" class="mt-2">
                     @if ($appliedPromoCode)
                         <div class="text-success">
-                            <i class="fas fa-check-circle"></i>
+                            <i class="bi  bi-check-circle"></i>
                             Promo code "{{ $appliedPromoCode->code }}" applied! Discount: TK
                             {{ number_format($promoDiscount) }}
                         </div>
@@ -1128,12 +1128,12 @@
                         <label class="form-label fw-bold">Quantity:</label>
                         <div class="quantity-controls-large d-inline-flex align-items-center border rounded p-2">
                             <button type="button" class="btn btn-outline-secondary quantity-btn-large" id="decreaseBtn">
-                                <i class="fas fa-minus"></i>
+                                <i class="bi  bi-minus"></i>
                             </button>
                             <input type="number" id="quantityInput" class="form-control quantity-input-large"
                                 min="1" value="1" style="width: 80px; text-align: center; border: none;">
                             <button type="button" class="btn btn-outline-secondary quantity-btn-large" id="increaseBtn">
-                                <i class="fas fa-plus"></i>
+                                <i class="bi  bi-plus"></i>
                             </button>
                         </div>
                     </div>
@@ -1147,7 +1147,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="saveQuantityBtn">
-                        <i class="fas fa-save me-2"></i>Save Changes
+                        <i class="bi  bi-save me-2"></i>Save Changes
                     </button>
                 </div>
             </div>
@@ -1194,7 +1194,7 @@
                     // Show loading state
                     const removeBtn = event.target;
                     const originalContent = removeBtn.innerHTML;
-                    removeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    removeBtn.innerHTML = '<i class="bi  bi-spinner fa-spin"></i>';
                     removeBtn.disabled = true;
 
                     // Submit the form - this will redirect back to cart page
@@ -1221,7 +1221,7 @@
 
             if (applyBtn) {
                 const originalText = applyBtn.textContent;
-                applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
+                applyBtn.innerHTML = '<i class="bi  bi-spinner fa-spin"></i> Applying...';
                 applyBtn.disabled = true;
                 promoInput.disabled = true;
 
@@ -1243,7 +1243,7 @@
                             // Show success message
                             promoMessage.innerHTML = `
             <div class="text-success">
-              <i class="fas fa-check-circle"></i>
+              <i class="bi  bi-check-circle"></i>
               Promo code "${promoCode}" applied! Discount: ${data.discount_formatted}
             </div>
           `;
@@ -1257,7 +1257,7 @@
                             const removeBtn = document.createElement('button');
                             removeBtn.className = 'btn btn-danger me-2';
                             removeBtn.id = 'remove-promo-btn';
-                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            removeBtn.innerHTML = '<i class="bi  bi-times"></i>';
                             removeBtn.onclick = removePromo;
                             removeBtn.title = 'Remove Promo Code';
 
@@ -1273,7 +1273,7 @@
                             // Show error message
                             promoMessage.innerHTML = `
             <div class="text-danger">
-              <i class="fas fa-exclamation-circle"></i>
+              <i class="bi  bi-exclamation-circle"></i>
               ${data.message}
             </div>
           `;
@@ -1290,7 +1290,7 @@
                         console.error('Error applying promo code:', error);
                         promoMessage.innerHTML = `
           <div class="text-danger">
-            <i class="fas fa-exclamation-circle"></i>
+            <i class="bi  bi-exclamation-circle"></i>
             Error applying promo code. Please try again.
           </div>
         `;
@@ -1316,7 +1316,7 @@
                 const promoMessage = document.getElementById('promo-message');
 
                 if (removeBtn) {
-                    removeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    removeBtn.innerHTML = '<i class="bi  bi-spinner fa-spin"></i>';
                     removeBtn.disabled = true;
 
                     // Make real API call
@@ -1354,7 +1354,7 @@
                                 showNotification(data.message, 'success');
                             } else {
                                 // Reset button state
-                                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                                removeBtn.innerHTML = '<i class="bi  bi-times"></i>';
                                 removeBtn.disabled = false;
 
                                 showNotification('Error removing promo code. Please try again.', 'error');
@@ -1364,7 +1364,7 @@
                             console.error('Error removing promo code:', error);
 
                             // Reset button state
-                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            removeBtn.innerHTML = '<i class="bi  bi-times"></i>';
                             removeBtn.disabled = false;
 
                             showNotification('Error removing promo code. Please try again.', 'error');
@@ -1596,18 +1596,18 @@
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
+
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
+
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
-    
+
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-5px); }

@@ -46,7 +46,7 @@
           <div class="row calendar-months">
             <div class="col-md-6">
               <div class="calendar-header">
-                <button class="calendar-nav"><i class="fas fa-chevron-left"></i></button>
+                <button class="calendar-nav"><i class="bi  bi-chevron-left"></i></button>
                 <h5>February 2022</h5>
               </div>
               <div class="calendar-grid">
@@ -92,7 +92,7 @@
             <div class="col-md-6">
               <div class="calendar-header justify-content-end">
                 <h5>March 2022</h5>
-                <button class="calendar-nav"><i class="fas fa-chevron-right"></i></button>
+                <button class="calendar-nav"><i class="bi  bi-chevron-right"></i></button>
               </div>
               <div class="calendar-grid">
                 <div class="day-name">Su</div>

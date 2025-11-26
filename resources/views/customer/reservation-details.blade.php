@@ -123,22 +123,22 @@
                 <div class="col-12 mb-4">
                   <label class="form-label fw-semibold text-muted">Booking Acknowledgment</label>
                   <div class="alert alert-info">
-                    <i class="fas fa-check-circle me-2"></i>
+                    <i class="bi  bi-check-circle me-2"></i>
                     <strong>You have agreed to the following terms:</strong>
                   </div>
-                  
+
                   @if($reservation->acknowledgment_data)
                     <div class="acknowledgment-details mb-3">
                       @if(isset($reservation->acknowledgment_data['driver_license_requirement']) && $reservation->acknowledgment_data['driver_license_requirement'])
                         <div class="d-flex align-items-start mb-2">
-                          <i class="fas fa-check text-success me-2 mt-1"></i>
+                          <i class="bi  bi-check text-success me-2 mt-1"></i>
                           <small class="text-muted">I understand that for Each vehicle reservation, we will have at least one person have Motorcycle or Car Driver's licenses</small>
                         </div>
                       @endif
-                      
+
                       @if(isset($reservation->acknowledgment_data['license_show_requirement']) && $reservation->acknowledgment_data['license_show_requirement'])
                         <div class="d-flex align-items-start mb-2">
-                          <i class="fas fa-check text-success me-2 mt-1"></i>
+                          <i class="bi  bi-check text-success me-2 mt-1"></i>
                           <small class="text-muted">I understand I have to carry show my driver's license before the ride start. Failure the show my physical license, Xadventure will Deny the Ride, and I will not get my money back.</small>
                         </div>
                       @endif
@@ -152,7 +152,7 @@
                         <img src="{{ $reservation->signature_data }}" alt="Digital Signature" style="max-width: 100%; max-height: 150px; border-radius: 4px;">
                         <div class="mt-2">
                           <small class="text-muted">
-                            <i class="fas fa-signature me-1"></i>
+                            <i class="bi  bi-signature me-1"></i>
                             Digital signature provided on {{ $reservation->created_at->format('M d, Y \a\t g:i A') }}
                           </small>
                         </div>
@@ -249,7 +249,7 @@
                   <p class="text-muted small mb-0">{{ \Carbon\Carbon::parse($reservation->created_at)->format('M d, Y g:i A') }}</p>
                 </div>
               </div>
-              
+
               @if($reservation->booking_status === 'confirmed')
                 <div class="timeline-item">
                   <div class="timeline-marker bg-success"></div>
@@ -259,7 +259,7 @@
                   </div>
                 </div>
               @endif
-              
+
               @if($reservation->booking_status === 'completed')
                 <div class="timeline-item">
                   <div class="timeline-marker bg-success"></div>
@@ -269,7 +269,7 @@
                   </div>
                 </div>
               @endif
-              
+
               @if($reservation->booking_status === 'cancelled')
                 <div class="timeline-item">
                   <div class="timeline-marker bg-danger"></div>
@@ -382,70 +382,70 @@
     padding-top: 2rem !important;
     padding-bottom: 2rem !important;
   }
-  
+
   h1 {
     font-size: 2rem !important;
   }
-  
+
   .btn {
     padding: 0.75rem 1rem;
   }
-  
+
   /* Enhanced mobile optimizations */
   .card-body {
     padding: 1.5rem !important;
   }
-  
+
   .form-label {
     font-size: 0.9rem;
   }
-  
+
   .badge {
     font-size: 0.7rem;
     padding: 0.4em 0.6em;
   }
-  
+
   /* Timeline mobile optimization */
   .timeline {
     padding-left: 1.5rem;
   }
-  
+
   .timeline::before {
     left: 0.25rem;
   }
-  
+
   .timeline-marker {
     left: -1.25rem;
     width: 0.75rem;
     height: 0.75rem;
   }
-  
+
   .timeline-content h6 {
     font-size: 0.9rem;
   }
-  
+
   .timeline-content p {
     font-size: 0.8rem;
   }
-  
+
   /* Information layout mobile optimization */
   .col-md-6 {
     margin-bottom: 1rem;
   }
-  
+
   .form-label {
     margin-bottom: 0.25rem;
   }
-  
+
   .fw-bold.fs-5 {
     font-size: 1rem !important;
   }
-  
+
   /* Sidebar mobile optimization */
   .col-lg-4 .card-body {
     padding: 1rem !important;
   }
-  
+
   .d-grid.gap-3 .btn {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
@@ -458,25 +458,25 @@
     padding-top: 3rem !important;
     padding-bottom: 3rem !important;
   }
-  
+
   h1 {
     font-size: 2.2rem !important;
   }
-  
+
   .card-body {
     padding: 1.25rem !important;
   }
-  
+
   .timeline {
     padding-left: 1.75rem;
   }
-  
+
   .timeline-marker {
     left: -1.375rem;
     width: 0.875rem;
     height: 0.875rem;
   }
-  
+
   .fw-bold.fs-5 {
     font-size: 1.1rem !important;
   }
@@ -488,78 +488,78 @@
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
   }
-  
+
   h1 {
     font-size: 1.8rem !important;
   }
-  
+
   .card-body {
     padding: 1rem !important;
   }
-  
+
   .form-label {
     font-size: 0.85rem;
   }
-  
+
   .btn {
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
   }
-  
+
   .badge {
     font-size: 0.65rem;
     padding: 0.3em 0.5em;
   }
-  
+
   /* Timeline small mobile optimization */
   .timeline {
     padding-left: 1.25rem;
   }
-  
+
   .timeline::before {
     left: 0.125rem;
     width: 1px;
   }
-  
+
   .timeline-marker {
     left: -1rem;
     width: 0.625rem;
     height: 0.625rem;
   }
-  
+
   .timeline-content h6 {
     font-size: 0.8rem;
   }
-  
+
   .timeline-content p {
     font-size: 0.7rem;
   }
-  
+
   /* Information layout small mobile optimization */
   .col-md-6 {
     margin-bottom: 0.75rem;
   }
-  
+
   .fw-bold.fs-5 {
     font-size: 0.9rem !important;
   }
-  
+
   /* Sidebar small mobile optimization */
   .col-lg-4 .card-body {
     padding: 0.75rem !important;
   }
-  
+
   .d-grid.gap-3 .btn {
     padding: 0.625rem 0.875rem;
     font-size: 0.8rem;
   }
-  
+
   /* Stack header buttons on small mobile */
   .d-flex.gap-3 {
     flex-direction: column;
     gap: 0.75rem !important;
   }
-  
+
   .d-flex.gap-3 .btn {
     width: 100%;
   }
@@ -571,37 +571,37 @@
     padding-top: 4rem !important;
     padding-bottom: 4rem !important;
   }
-  
+
   h1 {
     font-size: 2.8rem !important;
   }
-  
+
   .card-body {
     padding: 2rem !important;
   }
-  
+
   .timeline {
     padding-left: 2.5rem;
   }
-  
+
   .timeline-marker {
     left: -1.75rem;
     width: 1.25rem;
     height: 1.25rem;
   }
-  
+
   .timeline-content h6 {
     font-size: 1rem;
   }
-  
+
   .timeline-content p {
     font-size: 0.9rem;
   }
-  
+
   .fw-bold.fs-5 {
     font-size: 1.2rem !important;
   }
-  
+
   .d-grid.gap-3 .btn {
     padding: 1rem 1.25rem;
     font-size: 1rem;
@@ -614,37 +614,37 @@
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
   }
-  
+
   h1 {
     font-size: 1.5rem !important;
   }
-  
+
   .card-body {
     padding: 1rem !important;
   }
-  
+
   .timeline {
     padding-left: 1.25rem;
   }
-  
+
   .timeline-marker {
     left: -1rem;
     width: 0.625rem;
     height: 0.625rem;
   }
-  
+
   .timeline-content h6 {
     font-size: 0.8rem;
   }
-  
+
   .timeline-content p {
     font-size: 0.7rem;
   }
-  
+
   .btn {
     padding: 0.5rem 0.75rem;
   }
-  
+
   .d-grid.gap-3 .btn {
     padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
@@ -658,28 +658,28 @@
     width: 100%;
     margin-bottom: 1rem;
   }
-  
+
   /* Optimize label and value spacing */
   .form-label {
     margin-bottom: 0.25rem;
     font-weight: 600;
   }
-  
+
   .fw-bold.fs-5 {
     margin-bottom: 0.5rem;
   }
-  
+
   /* Improve badge display */
   .badge {
     display: inline-block;
     margin-top: 0.25rem;
   }
-  
+
   /* Optimize timeline for mobile */
   .timeline-item {
     margin-bottom: 1rem;
   }
-  
+
   .timeline-item:last-child {
     margin-bottom: 0;
   }
@@ -692,25 +692,25 @@
   .alert {
     display: none !important;
   }
-  
+
   .card {
     border: 1px solid #000 !important;
     box-shadow: none !important;
   }
-  
+
   .container-fluid {
     background: white !important;
   }
-  
+
   .timeline::before {
     background-color: #000 !important;
   }
-  
+
   .timeline-marker {
     border: 2px solid #000 !important;
     background-color: #fff !important;
   }
-  
+
   .fw-bold.fs-5 {
     color: #000 !important;
   }

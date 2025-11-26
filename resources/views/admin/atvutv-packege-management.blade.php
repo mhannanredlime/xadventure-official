@@ -18,21 +18,21 @@
 
     @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <i class="bi  bi-check-circle"></i> {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
 
     @if(session('error'))
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+        <i class="bi  bi-exclamation-triangle"></i> {{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
 
     @if($errors->any())
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i> Please correct the following errors:
+        <i class="bi  bi-exclamation-triangle"></i> Please correct the following errors:
         <ul class="mb-0 mt-2">
           @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
@@ -50,7 +50,7 @@
             <label class="form-label">Vehicle Type Images</label>
             <div id="vehicle-type-images" class="vehicle-type-images-container">
               <div class="text-center text-muted py-4">
-                <i class="fas fa-image fa-3x mb-3"></i>
+                <i class="bi  bi-image fa-3x mb-3"></i>
                 <p>Select a vehicle type to see its images</p>
               </div>
             </div>
@@ -66,7 +66,7 @@
                       $imagesJson = $vehicleType->images->toJson();
                       $displayImage = $vehicleType->display_image_url;
                     @endphp
-                    <option value="{{ $vehicleType->name }}" 
+                    <option value="{{ $vehicleType->name }}"
                             data-images="{{ $imagesJson }}"
                             data-display-image="{{ $displayImage }}"
                             {{ old('vehicleType', (isset($package) && $package->type === strtolower($vehicleType->name)) ? $vehicleType->name : '') == $vehicleType->name ? 'selected' : '' }}>
@@ -221,39 +221,39 @@
       const vehicleTypeSelect = document.getElementById('vehicleType');
       const imageContainer = document.getElementById('vehicle-type-images');
       const selectedOption = vehicleTypeSelect.options[vehicleTypeSelect.selectedIndex];
-      
+
       if (!selectedOption || !selectedOption.value) {
         imageContainer.innerHTML = `
           <div class="text-center text-muted py-4">
-            <i class="fas fa-image fa-3x mb-3"></i>
+            <i class="bi  bi-image fa-3x mb-3"></i>
             <p>Select a vehicle type to see its images</p>
           </div>
         `;
         return;
       }
-      
+
       try {
         const images = JSON.parse(selectedOption.dataset.images || '[]');
         const displayImage = selectedOption.dataset.displayImage;
-        
+
         if (images.length === 0 && !displayImage) {
           imageContainer.innerHTML = `
             <div class="text-center text-muted py-4">
-              <i class="fas fa-image fa-3x mb-3"></i>
+              <i class="bi  bi-image fa-3x mb-3"></i>
               <p>No images available for ${selectedOption.text}</p>
             </div>
           `;
           return;
         }
-        
+
         let imageHtml = '<div class="vehicle-type-images-grid">';
-        
+
         if (images.length > 0) {
           images.forEach((image, index) => {
             const isPrimary = image.is_primary ? 'border-primary' : 'border-secondary';
             imageHtml += `
               <div class="vehicle-type-image-item ${isPrimary}">
-                <img src="${image.url}" alt="${image.alt_text || selectedOption.text}" 
+                <img src="${image.url}" alt="${image.alt_text || selectedOption.text}"
                      class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;">
                 ${image.is_primary ? '<span class="badge bg-primary position-absolute top-0 end-0 m-1">Primary</span>' : ''}
               </div>
@@ -262,20 +262,20 @@
         } else if (displayImage) {
           imageHtml += `
             <div class="vehicle-type-image-item border-primary">
-              <img src="${displayImage}" alt="${selectedOption.text}" 
+              <img src="${displayImage}" alt="${selectedOption.text}"
                    class="img-fluid rounded" style="max-height: 200px; width: 100%; object-fit: cover;">
             </div>
           `;
         }
-        
+
         imageHtml += '</div>';
         imageContainer.innerHTML = imageHtml;
-        
+
       } catch (error) {
         // Error parsing vehicle type images
         imageContainer.innerHTML = `
           <div class="text-center text-muted py-4">
-            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+            <i class="bi  bi-exclamation-triangle fa-3x mb-3"></i>
             <p>Error loading images for ${selectedOption.text}</p>
           </div>
         `;
@@ -298,7 +298,7 @@
                newImg.style.objectFit = 'cover';
                newImg.src = e.target.result;
                newImg.alt = 'Package Image';
-               
+
                // Replace the div with the new img
                imageElement.parentNode.replaceChild(newImg, imageElement);
              } else {
@@ -321,7 +321,7 @@
       if (hiddenWeekday && hiddenWeekday.value) selectedDays.weekday = hiddenWeekday.value;
       if (hiddenWeekend && hiddenWeekend.value) selectedDays.weekend = hiddenWeekend.value;
       const form = document.getElementById('{{ isset($package) ? "updateForm" : "createForm" }}');
-      
+
       // Get form field values
       const vehicleType = document.getElementById('vehicleType').value;
       const packageName = document.getElementById('packageName').value;
@@ -332,9 +332,9 @@
       const weekdayDouble = document.getElementById('weekdayDouble').value;
       const weekendSingle = document.getElementById('weekendSingle').value;
       const weekendDouble = document.getElementById('weekendDouble').value;
-      
+
       // ATV/UTV Form values logged
-      
+
       // Update hidden form fields
       form.querySelector('input[name="vehicleType"]').value = vehicleType;
       form.querySelector('input[name="packageName"]').value = packageName;
@@ -345,11 +345,11 @@
       form.querySelector('input[name="weekdayDouble"]').value = weekdayDouble;
       form.querySelector('input[name="weekendSingle"]').value = weekendSingle;
       form.querySelector('input[name="weekendDouble"]').value = weekendDouble;
-      
+
       // Update selected day states
       form.querySelector('input[name="selected_weekday"]').value = selectedDays.weekday;
       form.querySelector('input[name="selected_weekend"]').value = selectedDays.weekend;
-       
+
        // Handle multiple image upload
        if (window.multipleImageUploadInstance) {
          const selectedFiles = window.multipleImageUploadInstance.getSelectedFiles();
@@ -367,18 +367,18 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize vehicle type image display
       initializeVehicleTypeImages();
-      
+
       // Handle vehicle type selection change
       document.getElementById('vehicleType').addEventListener('change', function() {
         updateVehicleTypeImages();
       });
-      
+
       // Handle weekday selector clicks
        const weekdayButtons = document.querySelectorAll('#weekdaySelector .btn');
        weekdayButtons.forEach(button => {
          button.addEventListener('click', function(e) {
            e.preventDefault();
-           
+
            // Save current prices to the previously active button
            const previouslyActive = document.querySelector('#weekdaySelector .btn.active');
            if (previouslyActive) {
@@ -387,24 +387,24 @@
              previouslyActive.setAttribute('data-single', currentSingle);
              previouslyActive.setAttribute('data-double', currentDouble);
            }
-           
+
            // Remove active class from all weekday buttons
            weekdayButtons.forEach(b => b.classList.remove('active'));
            // Add active class to clicked button
            this.classList.add('active');
-           
+
            // Update the label and prices
            const selectedDay = this.getAttribute('data-day');
            const singlePrice = this.getAttribute('data-single');
            const doublePrice = this.getAttribute('data-double');
-           
+
            document.getElementById('selectedWeekday').textContent = this.textContent;
            document.getElementById('weekdaySingle').value = singlePrice;
            document.getElementById('weekdayDouble').value = doublePrice;
-           
+
            // Save the selected weekday state
            selectedDays.weekday = selectedDay;
-           
+
            // Switched to weekday
          });
        });
@@ -414,7 +414,7 @@
        weekendButtons.forEach(button => {
          button.addEventListener('click', function(e) {
            e.preventDefault();
-           
+
            // Save current prices to the previously active button
            const previouslyActive = document.querySelector('#weekendSelector .btn.active');
            if (previouslyActive) {
@@ -423,24 +423,24 @@
              previouslyActive.setAttribute('data-single', currentSingle);
              previouslyActive.setAttribute('data-double', currentDouble);
            }
-           
+
            // Remove active class from all weekend buttons
            weekendButtons.forEach(b => b.classList.remove('active'));
            // Add active class to clicked button
            this.classList.add('active');
-           
+
            // Update the label and prices
            const selectedDay = this.getAttribute('data-day');
            const singlePrice = this.getAttribute('data-single');
            const doublePrice = this.getAttribute('data-double');
-           
+
            document.getElementById('selectedWeekend').textContent = this.textContent;
            document.getElementById('weekendSingle').value = singlePrice;
            document.getElementById('weekendDouble').value = doublePrice;
-           
+
            // Save the selected weekend day state
            selectedDays.weekend = selectedDay;
-           
+
            // Switched to weekend
          });
        });
@@ -451,7 +451,7 @@
         vehicleTypeSelect.addEventListener('change', function() {
           const selectedType = this.value;
           // Vehicle type changed
-          
+
           // Update package name based on vehicle type
           const packageNameInput = document.getElementById('packageName');
           if (packageNameInput && !packageNameInput.value && selectedType) {
@@ -467,7 +467,7 @@
       submitButtons.forEach(button => {
         button.addEventListener('click', function(e) {
           e.preventDefault();
-          
+
           // Validate form before submission
           if (validateForm()) {
             updateFormData();
@@ -483,7 +483,7 @@
         input.addEventListener('blur', function() {
           validateField(this);
         });
-        
+
         input.addEventListener('input', function() {
           clearFieldError(this);
         });
@@ -492,12 +492,12 @@
              // Add hover effect for image upload
        const imageContainer = document.querySelector('.package-image-container');
        const overlay = document.querySelector('.image-upload-overlay');
-       
+
        if (imageContainer && overlay) {
          imageContainer.addEventListener('mouseenter', function() {
            overlay.style.opacity = '1';
          });
-         
+
          imageContainer.addEventListener('mouseleave', function() {
            overlay.style.opacity = '0';
          });
@@ -524,7 +524,7 @@
              activeWeekdayButton.setAttribute('data-double', weekdayDouble.value);
            }
          }
-         
+
          // Initialize weekend pricing
          const activeWeekendButton = document.querySelector('#weekendSelector .btn.active');
          if (activeWeekendButton) {
@@ -538,7 +538,7 @@
            }
          }
        }
-       
+
        // Call initialization
        initializeDayPricing();
 
@@ -550,7 +550,7 @@
            if (value < 0) {
              this.value = 0;
            }
-           
+
            // Update the corresponding day button's data attributes
            if (this.id === 'weekdaySingle') {
              const activeWeekdayButton = document.querySelector('#weekdaySelector .btn.active');
@@ -574,14 +574,14 @@
              }
            }
          });
-         
+
          // Also save on blur to ensure changes are captured
          input.addEventListener('blur', function() {
            const value = parseFloat(this.value);
            if (value < 0) {
              this.value = 0;
            }
-           
+
            // Update the corresponding day button's data attributes
            if (this.id === 'weekdaySingle') {
              const activeWeekdayButton = document.querySelector('#weekdaySelector .btn.active');
@@ -611,7 +611,7 @@
     function validateForm() {
       let isValid = true;
       const requiredFields = document.querySelectorAll('input[required], select[required]');
-      
+
       requiredFields.forEach(field => {
         if (!validateField(field)) {
           isValid = false;
@@ -633,12 +633,12 @@
 
     function validateField(field) {
       const value = field.value.trim();
-      
+
       if (field.hasAttribute('required') && !value) {
         showFieldError(field, 'This field is required');
         return false;
       }
-      
+
       if (field.type === 'number' && value) {
         const numValue = parseFloat(value);
         if (isNaN(numValue) || numValue < 0) {
@@ -646,7 +646,7 @@
           return false;
         }
       }
-      
+
       clearFieldError(field);
       return true;
     }
@@ -654,7 +654,7 @@
     function showFieldError(field, message) {
       clearFieldError(field);
       field.classList.add('is-invalid');
-      
+
       const errorDiv = document.createElement('div');
       errorDiv.className = 'invalid-feedback';
       errorDiv.textContent = message;
@@ -684,14 +684,14 @@
       padding: 20px;
       background-color: #f8f9fa;
     }
-    
+
     .vehicle-type-images-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
       margin-top: 15px;
     }
-    
+
     .vehicle-type-image-item {
       position: relative;
       border: 2px solid #dee2e6;
@@ -700,16 +700,16 @@
       background-color: white;
       transition: all 0.3s ease;
     }
-    
+
     .vehicle-type-image-item:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    
+
     .vehicle-type-image-item.border-primary {
       border-color: #0d6efd;
     }
-    
+
     .vehicle-type-image-item img {
       border-radius: 4px;
     }

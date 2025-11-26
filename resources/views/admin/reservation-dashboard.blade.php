@@ -17,23 +17,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Exporting...';
             this.classList.add('disabled');
-            
+
             // Re-enable after a short delay (in case of error)
             setTimeout(() => {
                 this.innerHTML = originalText;
                 this.classList.remove('disabled');
             }, 5000);
-            
+
             // Show success message after download starts
             setTimeout(() => {
                 const alertDiv = document.createElement('div');
                 alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
                 alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle"></i> Export completed successfully!
+                    <i class="bi  bi-check-circle"></i> Export completed successfully!
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
                 document.querySelector('.dashboard-area').appendChild(alertDiv);
-                
+
                 // Auto-remove after 5 seconds
                 setTimeout(() => {
                     if (alertDiv.parentNode) {
@@ -47,13 +47,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Date range filtering enhancements
     const dateFromInput = document.getElementById('date_from');
     const dateToInput = document.getElementById('date_to');
-    
+
     // Set today as default for date_from if not set
     if (dateFromInput && !dateFromInput.value) {
         const today = new Date().toISOString().split('T')[0];
         dateFromInput.value = today;
     }
-    
+
     // Validate date range
     function validateDateRange() {
         if (dateFromInput.value && dateToInput.value) {
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     // Add event listeners for date validation
     if (dateFromInput) {
         dateFromInput.addEventListener('change', function() {
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
             validateDateRange();
         });
     }
-    
+
     if (dateToInput) {
         dateToInput.addEventListener('change', function() {
             if (dateFromInput && !dateFromInput.value) {
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             validateDateRange();
         });
     }
-    
+
 });
 </script>
 @endpush
@@ -150,13 +150,13 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </form>
     </div>
-    
+
     <!-- Date Range Info -->
     <div class="alert alert-info d-flex align-items-center" role="alert">
       <i class="bi bi-calendar-event me-2"></i>
       <div>
         @if(request('date_from') || request('date_to'))
-          <strong>Showing:</strong> 
+          <strong>Showing:</strong>
           @if(request('date_from') && request('date_to'))
             Bookings from {{ \Carbon\Carbon::parse(request('date_from'))->format('M j, Y') }} to {{ \Carbon\Carbon::parse(request('date_to'))->format('M j, Y') }}
           @elseif(request('date_from'))
@@ -171,17 +171,17 @@ document.addEventListener('DOMContentLoaded', function() {
         <small class="text-muted">Current date: {{ now()->format('F j, Y') }}</small>
       </div>
     </div>
-    
+
     @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <i class="bi  bi-check-circle"></i> {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
 
     @if(session('error'))
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+        <i class="bi  bi-exclamation-triangle"></i> {{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     @endif
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             @empty
               <tr>
                 <td colspan="14" class="text-center py-4">
-                  <i class="fas fa-calendar-alt fa-3x text-muted mb-3 d-block"></i>
+                  <i class="bi  bi-calendar-alt fa-3x text-muted mb-3 d-block"></i>
                   <h5>No Reservations Found</h5>
                   <p class="text-muted">No reservations found for today or future dates.</p>
                 </td>
@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           @endforeach
                         </select>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="package_variant_id" class="form-label fw-semibold">Package Variant</label>
                         <select class="form-select form-control-rounded" id="package_variant_id" name="package_variant_id" required>
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           @endforeach
                         </select>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="schedule_slot_id" class="form-label fw-semibold">Schedule Slot</label>
                         <select class="form-select form-control-rounded" id="schedule_slot_id" name="schedule_slot_id" required>
@@ -491,12 +491,12 @@ document.addEventListener('DOMContentLoaded', function() {
                           @endforeach
                         </select>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="date" class="form-label fw-semibold">Date</label>
                         <input type="date" class="form-control form-control-rounded" id="date" name="date" required>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="party_size" class="form-label fw-semibold">Party Size</label>
                         <input type="number" class="form-control form-control-rounded" id="party_size" name="party_size" min="1" required>
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                   </div>
                 </div>
-              
+
                               <div class="col-md-6">
                   <div class="card h-100 card-elevated">
                     <div class="card-header card-header-muted">
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           <input type="number" step="0.01" class="form-control form-control-rounded-right" id="subtotal" name="subtotal" required>
                         </div>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="discount_amount" class="form-label fw-semibold">Discount Amount</label>
                         <div class="input-group">
@@ -528,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           <input type="number" step="0.01" class="form-control form-control-rounded-right" id="discount_amount" name="discount_amount" value="0">
                         </div>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="tax_amount" class="form-label fw-semibold">Tax Amount</label>
                         <div class="input-group">
@@ -536,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           <input type="number" step="0.01" class="form-control form-control-rounded-right" id="tax_amount" name="tax_amount" value="0">
                         </div>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="total_amount" class="form-label fw-semibold">Total Amount</label>
                         <div class="input-group">
@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           <input type="number" step="0.01" class="form-control form-control-rounded-right" id="total_amount" name="total_amount" required>
                         </div>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="deposit_amount" class="form-label fw-semibold">Deposit Amount</label>
                         <div class="input-group">
@@ -552,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           <input type="number" step="0.01" class="form-control form-control-rounded-right" id="deposit_amount" name="deposit_amount" value="0">
                         </div>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="balance_amount" class="form-label fw-semibold">Balance Amount</label>
                         <div class="input-group">
@@ -564,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   </div>
                 </div>
                           </div>
-              
+
               <div class="row mt-4">
                 <div class="col-md-6">
                   <div class="card card-elevated">
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           <option value="completed">Completed</option>
                         </select>
                       </div>
-                      
+
                       <div class="mb-3">
                         <label for="payment_status" class="form-label fw-semibold">Payment Status</label>
                         <select class="form-select form-control-rounded" id="payment_status" name="payment_status" required>
@@ -596,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="col-md-6">
                   <div class="card card-elevated">
                     <div class="card-header card-header-muted">
@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
             </div>
           @endif
-          
+
           <div class="row g-3 g-md-4">
             <div class="col-12">
               <div class="card h-100 card-elevated">
@@ -827,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function() {
                       </tbody>
                     </table>
                   </div>
-                  
+
                   <h6 class="text-primary mb-3">Package Details</h6>
                   <div class="table-responsive">
                     <table class="table table-sm table-borderless mb-0">
@@ -847,7 +847,7 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
             </div>
           </div>
-          
+
           <div class="row mt-3 mt-md-4">
             <div class="col-12">
               <div class="card card-elevated">
@@ -891,7 +891,7 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
             </div>
           </div>
-          
+
           @if($reservation->notes)
           <div class="row mt-4">
             <div class="col-12">
@@ -930,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           <small class="text-muted">Driver's License Requirement: At least one person must have Motorcycle or Car Driver's license</small>
                         </div>
                       @endif
-                      
+
                       @if(isset($reservation->acknowledgment_data['license_show_requirement']) && $reservation->acknowledgment_data['license_show_requirement'])
                         <div class="d-flex align-items-start mb-2 p-2" style="background: #f8f9fa; border-radius: 6px; border-left: 4px solid #28a745;">
                           <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
@@ -1007,8 +1007,8 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <div>
-                  <strong>Multi-Package Booking:</strong> This booking contains {{ $reservations->count() }} packages. 
-                  You are editing Package {{ $loop->iteration }} of {{ $reservations->count() }}. 
+                  <strong>Multi-Package Booking:</strong> This booking contains {{ $reservations->count() }} packages.
+                  You are editing Package {{ $loop->iteration }} of {{ $reservations->count() }}.
                   Changes will only affect this specific package.
                 </div>
               </div>
@@ -1025,7 +1025,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     @endforeach
                   </select>
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="package_variant_id{{ $reservation->id }}" class="form-label">Package Variant</label>
                   <select class="form-select" id="package_variant_id{{ $reservation->id }}" name="package_variant_id" required>
@@ -1036,7 +1036,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     @endforeach
                   </select>
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="schedule_slot_id{{ $reservation->id }}" class="form-label">Schedule Slot</label>
                   <select class="form-select" id="schedule_slot_id{{ $reservation->id }}" name="schedule_slot_id" required>
@@ -1047,51 +1047,51 @@ document.addEventListener('DOMContentLoaded', function() {
                     @endforeach
                   </select>
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="date{{ $reservation->id }}" class="form-label">Date</label>
                   <input type="date" class="form-control" id="date{{ $reservation->id }}" name="date" value="{{ $reservation->date ? $reservation->date->format('Y-m-d') : '' }}" required>
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="party_size{{ $reservation->id }}" class="form-label">Party Size</label>
                   <input type="number" class="form-control" id="party_size{{ $reservation->id }}" name="party_size" value="{{ $reservation->party_size }}" min="1" required>
                 </div>
               </div>
-              
+
               <div class="col-md-6">
                 <div class="mb-3">
                   <label for="subtotal{{ $reservation->id }}" class="form-label">Subtotal</label>
                   <input type="number" step="0.01" class="form-control" id="subtotal{{ $reservation->id }}" name="subtotal" value="{{ $reservation->subtotal }}" required>
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="discount_amount{{ $reservation->id }}" class="form-label">Discount Amount</label>
                   <input type="number" step="0.01" class="form-control" id="discount_amount{{ $reservation->id }}" name="discount_amount" value="{{ $reservation->discount_amount ?? 0 }}">
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="tax_amount{{ $reservation->id }}" class="form-label">Tax Amount</label>
                   <input type="number" step="0.01" class="form-control" id="tax_amount{{ $reservation->id }}" name="tax_amount" value="{{ $reservation->tax_amount ?? 0 }}">
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="total_amount{{ $reservation->id }}" class="form-label">Total Amount</label>
                   <input type="number" step="0.01" class="form-control" id="total_amount{{ $reservation->id }}" name="total_amount" value="{{ $reservation->total_amount }}" required>
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="deposit_amount{{ $reservation->id }}" class="form-label">Deposit Amount</label>
                   <input type="number" step="0.01" class="form-control" id="deposit_amount{{ $reservation->id }}" name="deposit_amount" value="{{ $reservation->deposit_amount ?? 0 }}">
                 </div>
-                
+
                 <div class="mb-3">
                   <label for="balance_amount{{ $reservation->id }}" class="form-label">Balance Amount</label>
                   <input type="number" step="0.01" class="form-control" id="balance_amount{{ $reservation->id }}" name="balance_amount" value="{{ $reservation->balance_amount ?? 0 }}">
                 </div>
               </div>
             </div>
-            
+
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">
@@ -1104,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   </select>
                 </div>
               </div>
-              
+
               <div class="col-md-6">
                 <div class="mb-3">
                   <label for="payment_status{{ $reservation->id }}" class="form-label">Payment Status</label>
@@ -1117,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
               </div>
             </div>
-            
+
             <div class="mb-3">
               <label for="notes{{ $reservation->id }}" class="form-label">Notes</label>
               <textarea class="form-control" id="notes{{ $reservation->id }}" name="notes" rows="3">{{ $reservation->notes }}</textarea>
@@ -1247,7 +1247,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             const isMulti = this.dataset.isMulti === 'true';
             const count = parseInt(this.dataset.count);
-            
+
             if (isMulti && count > 1) {
                 if (!confirm('Are you sure you want to delete this multi-package booking? This will delete all ' + count + ' packages in this booking.')) {
                     e.preventDefault();
@@ -1261,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     // Initialize date fields when modals are shown
     const editModals = document.querySelectorAll('[id^="editModal"]');
-    
+
     editModals.forEach(modal => {
         modal.addEventListener('shown.bs.modal', function() {
             const dateInput = this.querySelector('input[type="date"]');
@@ -1275,7 +1275,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Ensure all date inputs have proper format
     const dateInputs = document.querySelectorAll('input[type="date"]');
     dateInputs.forEach(input => {

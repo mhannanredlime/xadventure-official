@@ -679,7 +679,7 @@
                                     <button
                                         style="height: 100%; background-color: #FFD2B9; border-radius: 0px 10px 10px 0px"
                                         class="remove-btn" onclick="removeItem('{{ $key }}')" title="Remove item">
-                                        <i class="fas fa-times"></i>
+                                        <i class="bi  bi-times"></i>
                                     </button>
                                 </div>
 
@@ -696,11 +696,11 @@
                                 <div class="calendar">
                                     <div class="calendar-header">
                                         <button class="calendar-nav" onclick="previousMonth()">
-                                            <i class="fas fa-chevron-left"></i>
+                                            <i class="bi  bi-chevron-left"></i>
                                         </button>
                                         <span class="calendar-title" id="currentMonth">February 2024</span>
                                         <button class="calendar-nav" onclick="nextMonth()">
-                                            <i class="fas fa-chevron-right"></i>
+                                            <i class="bi  bi-chevron-right"></i>
                                         </button>
                                     </div>
                                     <div class="calendar-grid" id="calendarGrid">
@@ -719,7 +719,7 @@
                         </div>
                     @else
                         <div class="empty-cart">
-                            <i class="fas fa-shopping-cart"></i>
+                            <i class="bi  bi-shopping-cart"></i>
                             <h3>Your cart is empty</h3>
                             <p>Add some regular packages to get started with your booking.</p>
                             <a href="{{ route('custom-packages') }}" class="continue-shopping-btn">
@@ -868,7 +868,7 @@
                 if (!timeSlotsContainer) return;
 
                 timeSlotsContainer.innerHTML =
-                    '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading time slots...</div>';
+                    '<div class="text-center"><i class="bi  bi-spinner fa-spin"></i> Loading time slots...</div>';
 
                 if (!selectedDate) {
                     timeSlotsContainer.innerHTML = '<p class="text-muted">Please select a date first</p>';
@@ -931,7 +931,7 @@
                             if (slot.is_open && slot.available_total > 0) {
                                 slotElement.innerHTML = `
               <div><strong>${slot.name}</strong></div>
-             
+
             `;
                                 // <div style="font-size: 12px; margin-top: 4px;">${slot.label}</div>
                                 // <div style="font-size: 11px; margin-top: 2px; color: #28a745;">Available</div>
@@ -967,7 +967,7 @@
                         console.error('Error loading time slots:', error);
                         timeSlotsContainer.innerHTML = `
           <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="bi  bi-exclamation-triangle"></i>
             <strong>Error loading time slots:</strong><br>
             ${error.message || 'Please try again.'}
           </div>

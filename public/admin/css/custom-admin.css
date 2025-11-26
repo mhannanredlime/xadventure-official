@@ -280,8 +280,8 @@ Sidebar
 }
 
 .sidebar-menu .nav-link.active {
-    background-color: #ffcc80;
-    color: #333 !important;
+    background-color: #E05A2A;
+    color: #e9ecef !important;
     font-weight: 600;
 }
 
@@ -289,6 +289,12 @@ Sidebar
     background-color: #ff6600;
     color: white !important;
 }
+
+.bg-warning {
+    background-color: #ff6600 !important;
+    color: #e9ecef !important;
+}
+
 
 /*
 ===========================
@@ -546,7 +552,7 @@ Responsive styles (Media Queries)
     }
 }
 
-/* 
+/*
 ===========================
 Cards & Components
 =========================== */
@@ -596,7 +602,7 @@ Cards & Components
     color: var(--text-color);
 }
 
-/* 
+/*
 ===========================
 Calendar
 =========================== */
@@ -694,9 +700,9 @@ Calendar
     font-weight: bold;
 }
 
-/* 
+/*
 ===========================
-Pricing bar 
+Pricing bar
 =========================== */
 .pricing-section-container {
     padding: 0;
@@ -764,7 +770,7 @@ Pricing bar
     border-color: rgb(202, 194, 254);
 }
 
-/* 
+/*
 ===========================
 For Responsive
 =========================== */

@@ -154,20 +154,20 @@
     .error-number {
       font-size: 6rem;
     }
-    
+
     .error-title {
       font-size: 2rem;
     }
-    
+
     .error-message {
       font-size: 1rem;
     }
-    
+
     .error-actions {
       flex-direction: column;
       align-items: center;
     }
-    
+
     .btn-home, .btn-back {
       width: 200px;
     }
@@ -181,15 +181,15 @@
       <div class="error-number">404</div>
       <h1 class="error-title">Oops! Page Not Found</h1>
       <p class="error-message">
-        The adventure you're looking for seems to have taken a detour! 
+        The adventure you're looking for seems to have taken a detour!
         The page you're trying to reach doesn't exist or has been moved to a different location.
       </p>
       <div class="error-actions">
         <a href="{{ url('/') }}" class="btn-home">
-          <i class="fas fa-home me-2"></i>Go Home
+          <i class="bi  bi-home me-2"></i>Go Home
         </a>
         <a href="javascript:history.back()" class="btn-back">
-          <i class="fas fa-arrow-left me-2"></i>Go Back
+          <i class="bi  bi-arrow-left me-2"></i>Go Back
         </a>
       </div>
     </div>
@@ -203,12 +203,12 @@
           <p class="lead text-muted">Explore our exciting adventures and activities</p>
         </div>
       </div>
-      
+
       <div class="row g-4">
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-motorcycle"></i>
+              <i class="bi  bi-motorcycle"></i>
             </div>
             <h3 class="feature-title">ATV Adventures</h3>
             <p class="feature-text">
@@ -216,11 +216,11 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-bow-arrow"></i>
+              <i class="bi  bi-bow-arrow"></i>
             </div>
             <h3 class="feature-title">Archery & Target</h3>
             <p class="feature-text">
@@ -228,11 +228,11 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-lg-4 col-md-6">
           <div class="feature-card">
             <div class="feature-icon">
-              <i class="fas fa-mountain"></i>
+              <i class="bi  bi-mountain"></i>
             </div>
             <h3 class="feature-title">Rock Climbing</h3>
             <p class="feature-text">
@@ -241,11 +241,11 @@
           </div>
         </div>
       </div>
-      
+
       <div class="row mt-5 text-center">
         <div class="col-12">
           <a href="{{ url('/adventure') }}" class="btn btn-lg jatio-bg-color text-white px-5 py-3">
-            <i class="fas fa-compass me-2"></i>Explore All Adventures
+            <i class="bi  bi-compass me-2"></i>Explore All Adventures
           </a>
         </div>
       </div>

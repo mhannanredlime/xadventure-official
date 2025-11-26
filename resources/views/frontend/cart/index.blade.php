@@ -91,21 +91,21 @@
 
     @if(session('error'))
       <div class="error-message">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="bi  bi-exclamation-triangle"></i>
         {{ session('error') }}
       </div>
     @endif
 
     @if(session('success'))
       <div class="success-message">
-        <i class="fas fa-check-circle"></i>
+        <i class="bi  bi-check-circle"></i>
         {{ session('success') }}
       </div>
     @endif
 
     @if($errors->any())
       <div class="error-message">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="bi  bi-exclamation-triangle"></i>
         <ul class="mb-0">
           @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
@@ -116,7 +116,7 @@
 
     @if(empty($packages))
       <div class="empty-cart">
-        <i class="fas fa-shopping-cart"></i>
+        <i class="bi  bi-shopping-cart"></i>
         <h3>Your cart is empty</h3>
         <p class="text-muted">Add some adventure packages to get started!</p>
         <a href="{{ route('frontend.packages.index') }}" class="btn btn-orange jatio-bg-color">
@@ -132,10 +132,10 @@
               $quantity = $packageData['quantity'];
               $date = $packageData['date'];
               $slotId = $packageData['slot_id'];
-              
+
               // Get slot info
               $slot = \App\Models\ScheduleSlot::find($slotId);
-              
+
               // Calculate price
               $dayOfWeek = date('N', strtotime($date));
               $priceType = ($dayOfWeek >= 6) ? 'weekend' : 'weekday';
@@ -143,7 +143,7 @@
               $unitPrice = $price ? $price->amount : 0;
               $subtotal = $unitPrice * $quantity;
             @endphp
-            
+
             <div class="cart-item">
               <div class="row align-items-center">
                 <div class="col-md-2">
@@ -151,11 +151,11 @@
                     <img src="{{ asset('storage/' . $variant->package->image) }}" alt="{{ $variant->package->name }}" class="cart-item-image">
                   @else
                     <div class="cart-item-image bg-light d-flex align-items-center justify-content-center">
-                      <i class="fas fa-mountain text-muted"></i>
+                      <i class="bi  bi-mountain text-muted"></i>
                     </div>
                   @endif
                 </div>
-                
+
                 <div class="col-md-6">
                   <h5 class="mb-1">{{ $variant->package->name }}</h5>
                   <p class="text-muted mb-1">{{ $variant->variant_name }}</p>
@@ -168,20 +168,20 @@
                     <strong>Unit Price:</strong> <span class="price-display">TK {{ number_format($unitPrice) }}</span>
                   </p>
                 </div>
-                
+
                 <div class="col-md-2">
                   <label class="form-label">Quantity</label>
-                  <input type="number" value="{{ $quantity }}" min="1" max="10" class="form-control quantity-input" 
+                  <input type="number" value="{{ $quantity }}" min="1" max="10" class="form-control quantity-input"
                          data-key="{{ $variant->id }}_{{ $date }}_{{ $slotId }}">
                 </div>
-                
+
                 <div class="col-md-2 text-end">
                   <div class="price-display mb-2">TK {{ number_format($subtotal) }}</div>
                   <form action="{{ route('frontend.cart.remove') }}" method="POST" style="display: inline;">
                     @csrf
                     <input type="hidden" name="key" value="{{ $variant->id }}_{{ $date }}_{{ $slotId }}">
                     <button type="submit" class="remove-btn" onclick="return confirm('Remove this item from cart?')">
-                      <i class="fas fa-trash"></i> Remove
+                      <i class="bi  bi-trash"></i> Remove
                     </button>
                   </form>
                 </div>
@@ -208,7 +208,7 @@
         <div class="col-lg-4">
           <div class="order-summary">
             <h4>Order Summary</h4>
-            
+
             @php
               $subtotal = 0;
               $discount = 0;
@@ -216,42 +216,42 @@
                 $variant = $packageData['variant'];
                 $quantity = $packageData['quantity'];
                 $date = $packageData['date'];
-                
+
                 $dayOfWeek = date('N', strtotime($date));
                 $priceType = ($dayOfWeek >= 6) ? 'weekend' : 'weekday';
                 $price = $variant->prices->where('price_type', $priceType)->first();
                 $unitPrice = $price ? $price->amount : 0;
                 $subtotal += $unitPrice * $quantity;
               }
-              
+
               $tax = $subtotal * 0.15; // 15% VAT
               $total = $subtotal + $tax - $discount;
             @endphp
-            
+
             <div class="summary-row">
               <span>Subtotal</span>
               <span>TK {{ number_format($subtotal) }}</span>
             </div>
-            
+
             <div class="summary-row" id="discount-row" style="display: none;">
               <span>Discount</span>
               <span id="discount-amount">- TK 0</span>
             </div>
-            
+
             <div class="summary-row">
               <span>VAT (15%)</span>
               <span>TK {{ number_format($tax) }}</span>
             </div>
-            
+
             <div class="summary-row">
               <span>Total</span>
               <span id="total-amount">TK {{ number_format($total) }}</span>
             </div>
-            
+
             <a href="{{ route('frontend.checkout.index') }}" class="btn btn-orange jatio-bg-color w-100 mt-3">
               Proceed to Checkout
             </a>
-            
+
             <a href="{{ route('frontend.packages.index') }}" class="btn btn-outline-secondary w-100 mt-2">
               Continue Shopping
             </a>
@@ -273,7 +273,7 @@
   $('.quantity-input').change(function() {
     const key = $(this).data('key');
     const quantity = $(this).val();
-    
+
     // Update cart via AJAX
     $.post('{{ route("frontend.cart.add") }}', {
       _token: '{{ csrf_token() }}',
@@ -297,7 +297,7 @@
     }
 
     $('#apply-promo-btn').prop('disabled', true).text('Applying...');
-    
+
     $.post('{{ route("frontend.checkout.process") }}', {
       _token: '{{ csrf_token() }}',
       promo_code: promoCode,

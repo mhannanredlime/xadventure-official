@@ -5,7 +5,7 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Vehicle Types</h1>
         <a href="{{ route('admin.vehicle-types.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Add Vehicle Type
+            <i class="bi  bi-plus fa-sm text-white-50"></i> Add Vehicle Type
         </a>
     </div>
 
@@ -44,7 +44,7 @@
                                     <img src="{{ asset('storage/' . $vehicleType->image_path) }}" alt="{{ $vehicleType->name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                                 @else
                                     <div style="width: 50px; height: 50px; background-color: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-image text-muted"></i>
+                                        <i class="bi  bi-image text-muted"></i>
                                     </div>
                                 @endif
                             </td>
@@ -58,13 +58,13 @@
                             <td data-label="Created">{{ $vehicleType->created_at->format('M d, Y') }}</td>
                             <td data-label="Actions">
                                 <a href="{{ route('admin.vehicle-types.edit', $vehicleType) }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-edit"></i> Edit
+                                    <i class="bi  bi-edit"></i> Edit
                                 </a>
                                 <form action="{{ route('admin.vehicle-types.destroy', $vehicleType) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this vehicle type?')">
-                                        <i class="fas fa-trash"></i> Delete
+                                        <i class="bi  bi-trash"></i> Delete
                                     </button>
                                 </form>
                             </td>
