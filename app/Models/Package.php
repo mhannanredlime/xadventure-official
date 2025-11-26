@@ -97,7 +97,7 @@ class Package extends Model
         if (isset($this->attributes['display_starting_price']) && $this->attributes['display_starting_price'] !== null) {
             return $this->attributes['display_starting_price'];
         }
-        
+
         // Fallback to calculating from variants
         $minPrice = $this->variants()
             ->where('is_active', true)
@@ -106,7 +106,7 @@ class Package extends Model
                 return $variant->prices()->pluck('amount');
             })
             ->min();
-            
+
         return $minPrice ?: 0;
     }
 
@@ -116,14 +116,14 @@ class Package extends Model
     public function getVehicleTypeImages()
     {
         $images = collect();
-        
+
         foreach ($this->vehicleTypes as $vehicleType) {
             $vehicleTypeImages = $vehicleType->images;
             if ($vehicleTypeImages->isNotEmpty()) {
                 $images = $images->merge($vehicleTypeImages);
             }
         }
-        
+
         return $images->unique('id');
     }
 
@@ -136,20 +136,20 @@ class Package extends Model
         $matchingVehicleType = $this->vehicleTypes->first(function($vehicleType) {
             return strtolower($vehicleType->name) === $this->type;
         });
-        
+
         if ($matchingVehicleType) {
             $primaryImage = $matchingVehicleType->primaryImage()->first();
             if ($primaryImage) {
                 return $primaryImage;
             }
-            
+
             // Fallback to first image from matching vehicle type
             $firstImage = $matchingVehicleType->images()->first();
             if ($firstImage) {
                 return $firstImage;
             }
         }
-        
+
         // If no matching vehicle type or no images, try any vehicle type
         foreach ($this->vehicleTypes as $vehicleType) {
             $primaryImage = $vehicleType->primaryImage()->first();
@@ -157,7 +157,7 @@ class Package extends Model
                 return $primaryImage;
             }
         }
-        
+
         // Fallback to first image from any vehicle type
         foreach ($this->vehicleTypes as $vehicleType) {
             $firstImage = $vehicleType->images()->first();
@@ -165,7 +165,7 @@ class Package extends Model
                 return $firstImage;
             }
         }
-        
+
         return null;
     }
 
@@ -180,20 +180,20 @@ class Package extends Model
             $matchingVehicleType = $this->vehicleTypes->first(function($vehicleType) {
                 return strtolower($vehicleType->name) === $this->type;
             });
-            
+
             if ($matchingVehicleType) {
                 $vehicleTypeImage = $matchingVehicleType->primaryImage()->first();
                 if ($vehicleTypeImage) {
                     return $vehicleTypeImage->url;
                 }
-                
+
                 // Fallback to first image from matching vehicle type
                 $firstImage = $matchingVehicleType->images()->first();
                 if ($firstImage) {
                     return $firstImage->url;
                 }
             }
-            
+
             // If no matching vehicle type found, fall back to any vehicle type image
             $vehicleTypeImage = $this->getPrimaryVehicleTypeImage();
             if ($vehicleTypeImage) {
@@ -213,8 +213,5 @@ class Package extends Model
         if ($firstImage) {
             return $firstImage->url;
         }
-
-        // Default fallback
-        return asset('admin/images/package.svg');
     }
 }

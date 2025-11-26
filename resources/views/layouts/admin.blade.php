@@ -52,6 +52,9 @@
             border-top: 1px solid #dee2e6;
         }
     </style>
+    {!! ToastMagic::styles() !!}
+
+</head>
 
 <body>
     <nav class="navbar navbar-expand-lg fixed-top">
@@ -101,7 +104,7 @@
                             <a class="nav-link {{ request()->is('admin/reservation-dashboard') ? 'active' : '' }}"
                                 href="{{ url('/admin/reservation-dashboard') }}">
                                 <i class="bi bi-clipboard-check"></i>
-                                <span class="menu-text">Reservation<br>Dashboard</span>
+                                <span class="menu-text">Reservation  Dashboard</span>
                             </a>
                         </li>
                     @endcan
@@ -110,7 +113,7 @@
                             <a class="nav-link {{ request()->is('admin/view-reservation-dashboard') ? 'active' : '' }}"
                                 href="{{ url('/admin/view-reservation-dashboard') }}">
                                 <i class="bi bi-clock-history"></i>
-                                <span class="menu-text">Reservation<br>History</span>
+                                <span class="menu-text">Reservation History</span>
                             </a>
                         </li>
                     @endcan
@@ -121,7 +124,7 @@
                             <a class="nav-link {{ request()->is('admin/customer/contacts') ? 'active' : '' }}"
                                 href="{{ url('/admin/customer/contacts') }}">
                                 <i class="bi bi-clock-history"></i>
-                                <span class="menu-text">Contact<br>Messages</span>
+                                <span class="menu-text">Contact Messages</span>
                             </a>
                         </li>
                     @endcan
@@ -132,14 +135,14 @@
                             <a class="nav-link {{ request()->is('admin/calendar*') ? 'active' : '' }}"
                                 href="{{ url('/admin/calendar') }}">
                                 <i class="bi bi-calendar-event"></i>
-                                <span class="menu-text">Availability &<br>Pricing Setup</span>
+                                <span class="menu-text">Availability & Pricing Setup</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/slot-presets*') ? 'active' : '' }}"
                                 href="{{ url('/admin/slot-presets') }}">
                                 <i class="bi bi-list-check"></i>
-                                <span class="menu-text">Time Slot<br>Presets</span>
+                                <span class="menu-text">Time Slot Presets</span>
                             </a>
                         </li>
                     @endcan
@@ -150,7 +153,7 @@
                             <a class="nav-link {{ request()->is('admin/add-packege-management*') || request()->is('admin/packages*') ? 'active' : '' }}"
                                 href="{{ url('/admin/add-packege-management') }}">
                                 <i class="bi bi-box-seam"></i>
-                                <span class="menu-text">Package<br>Management</span>
+                                <span class="menu-text">Package Management</span>
                             </a>
                         </li>
                     @endcan
@@ -161,7 +164,7 @@
                             <a class="nav-link {{ request()->is('admin/vehical-setup*') || request()->is('admin/vehicle-types*') ? 'active' : '' }}"
                                 href="{{ url('/admin/vehical-setup') }}">
                                 <i class="bi bi-truck"></i>
-                                <span class="menu-text">Vehicle Type<br>Setup</span>
+                                <span class="menu-text">Vehicle Type Setup</span>
                             </a>
                         </li>
                     @endcan
@@ -170,7 +173,7 @@
                             <a class="nav-link {{ request()->is('admin/vehical-management*') || request()->is('admin/vehicles*') ? 'active' : '' }}"
                                 href="{{ url('/admin/vehical-management') }}">
                                 <i class="bi bi-gear"></i>
-                                <span class="menu-text">Vehicle<br>Management</span>
+                                <span class="menu-text">Vehicle Management</span>
                             </a>
                         </li>
                     @endcan
@@ -181,7 +184,7 @@
                             <a class="nav-link {{ request()->is('admin/gallery*') ? 'active' : '' }}"
                                 href="{{ url('/admin/gallery') }}">
                                 <i class="bi bi-images"></i>
-                                <span class="menu-text">Image<br>Gallery</span>
+                                <span class="menu-text">Image Gallery</span>
                             </a>
                         </li>
                     @endcan
@@ -191,8 +194,8 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/promo*') || request()->is('admin/promo-codes*') ? 'active' : '' }}"
                                 href="{{ url('/admin/promo') }}">
-                                <i class="bi bi-tag-percent"></i>
-                                <span class="menu-text">Promo Code<br>Setup</span>
+                                <i class="bi bi-box-seam"></i>
+                                <span class="menu-text">Promo Code Setup</span>
                             </a>
                         </li>
                     @endcan
@@ -203,7 +206,7 @@
                             <a class="nav-link {{ request()->is('admin/reports*') ? 'active' : '' }}"
                                 href="{{ url('/admin/reports') }}">
                                 <i class="bi bi-graph-up"></i>
-                                <span class="menu-text">Reports &<br>Analytics</span>
+                                <span class="menu-text">Reports & Analytics</span>
                             </a>
                         </li>
                     @endcan
@@ -215,7 +218,7 @@
                                 href="#" id="userManagementDropdown" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">
                                 <i class="bi bi-people"></i>
-                                <span class="menu-text">User<br>Management</span>
+                                <span class="menu-text">User Management</span>
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="userManagementDropdown">
                                 <li>
@@ -247,7 +250,7 @@
                             <a class="nav-link {{ request()->is('admin/roles*') ? 'active' : '' }}"
                                 href="{{ url('/admin/roles') }}">
                                 <i class="bi bi-shield-check"></i>
-                                <span class="menu-text">Role & Permission<br>Management</span>
+                                <span class="menu-text">Role & Permission Management</span>
                             </a>
                         </li>
                     @endcan
@@ -258,7 +261,7 @@
                             <a class="nav-link {{ request()->is('admin/settings*') ? 'active' : '' }}"
                                 href="{{ url('/admin/settings') }}">
                                 <i class="bi bi-gear-fill"></i>
-                                <span class="menu-text">System<br>Settings</span>
+                                <span class="menu-text">System Settings</span>
                             </a>
                         </li>
                     @endcan
@@ -298,6 +301,7 @@
         });
     </script>
     @stack('scripts')
+    {!! ToastMagic::scripts() !!}
 </body>
 
 </html>

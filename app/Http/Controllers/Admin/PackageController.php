@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+
 
 class PackageController extends Controller
 {
@@ -96,7 +98,6 @@ class PackageController extends Controller
 
     public function storeRegular(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'packageName' => 'required|string|max:255',
             'subTitle' => 'nullable|string|max:255',
@@ -155,8 +156,8 @@ class PackageController extends Controller
             'display_starting_price' => $validated['displayStartingPrice'] ?? null,
             'min_participants' => $validated['minParticipant'],
             'max_participants' => $validated['maxParticipant'],
-            'selected_weekday' => $validated['selected_weekday'] ?? 'monday',
-            'selected_weekend' => $validated['selected_weekend'] ?? 'friday',
+            'selected_weekday' => $validated['selected_weekday'] ,
+            'selected_weekend' => $validated['selected_weekend'],
             'is_active' => true,
         ]);
 
@@ -186,9 +187,8 @@ class PackageController extends Controller
             ['price_type' => 'weekday', 'amount' => $validated['weekdayPrice']],
             ['price_type' => 'weekend', 'amount' => $validated['weekendPrice']],
         ]);
-
-        return redirect()->route('admin.add-packege-management')
-            ->with('success', 'Regular package created successfully.');
+        ToastMagic::success('Package created successfully!');
+        return redirect()->route('admin.add-packege-management');
     }
 
     public function storeAtvUtv(Request $request)
@@ -309,6 +309,7 @@ class PackageController extends Controller
     public function editRegular(Package $package)
     {
         $package->load(['variants.prices', 'images']);
+        // dd($package);
         return view('admin.regular-packege-management', compact('package'));
     }
 
