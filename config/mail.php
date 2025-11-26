@@ -115,6 +115,12 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+
+     'to' => [
+        'address' => env('MAIL_TO_SUPPORT', 'xadventurebandarbanbd@yopmail.com')
+    ],
+
+
     /*
     |--------------------------------------------------------------------------
     | Email Notifications

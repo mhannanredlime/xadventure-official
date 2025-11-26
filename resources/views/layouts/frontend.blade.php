@@ -338,7 +338,7 @@
                     <p><i class="fas fa-clock text-warning"></i> 9 AM - 10 PM, Monday - Saturday</p>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor</p>
                     <div class="social-icons-footer mt-3">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.facebook.com/xadventure" target="_blank"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-youtube"></i></a>
@@ -355,7 +355,7 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{{ versioned_asset('frontEnd/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ versioned_asset('frontEnd/js/custom.js') }}"></script>
+    <script src="{{ versioned_asset('frontEnd/js/custom.js') }}"></script>f
     <script src="{{ versioned_asset('admin/js/toast-notifications.js') }}"></script>
     <script src="{{ versioned_asset('admin/js/modal-system.js') }}"></script>
 
@@ -527,7 +527,7 @@
             }
         });
 
-      
+
     </script>
     <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     @stack('scripts')
-    
+
 </body>
 
 

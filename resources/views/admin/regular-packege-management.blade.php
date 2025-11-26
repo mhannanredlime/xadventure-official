@@ -1,55 +1,294 @@
 @extends('layouts.admin')
 
-@section('title', 'Add Regular Package')
+@section('title', isset($package) ? 'Edit Regular Package' : 'Add Regular Package')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('admin/css/multiple-image-upload.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
     <style>
-        /* Pills styling */
-        .pricing-pills .nav-link {
-            border-radius: 50px;
-            padding: 0.5rem 1rem;
-            color: #2b2929;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: 1px solid #ddd;
+        /* ---------- General Improvements ---------- */
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
         }
 
-        .pricing-pills .nav-link.active {
-            background-color: #F76B19FF;
-            color: #fff;
-            border-color: #F76B19FF;
-        }
-
-        .pricing-pills .nav-link:hover {
-            background-color: #F76B19FF;
-            color: #fff;
-        }
-
-        /* Card spacing */
         .card-title {
-            font-weight: 600;
-            margin-bottom: 1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            font-size: 1.25rem;
         }
 
         .form-label {
-            font-weight: 500;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
         }
 
-        .ms-3 {
-            margin-left: 1rem !important;
+        .form-control,
+        .form-select {
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
         }
 
-        .btn-save {
-            min-width: 150px;
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #F76B19;
+            box-shadow: 0 0 0 0.2rem rgba(247, 107, 25, 0.25);
         }
 
-        /* Badge for main image in uploader */
+        /* ---------- Image Uploader ---------- */
+        .image-upload-section {
+            background: #f8f9fa;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
         .badge.jatio-bg-color {
-            background-color: #F76B19FF;
+            background-color: #F76B19;
             color: #fff;
+            font-weight: 600;
+        }
+
+        /* ---------- Pricing Card ---------- */
+        .pricing-card {
+            border: 1px solid #e9ecef;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            background: #ffffff;
+            margin: 1.5rem 0;
+        }
+
+        .pricing-section-title {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* ---------- Pills Improvements ---------- */
+        .pricing-pills {
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-pills .nav-link {
+            border-radius: 0.6rem;
+            border: 1px solid #e0e0e0;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            color: #495057;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .pricing-pills .nav-link.active {
+            background-color: #F76B19 !important;
+            border-color: #F76B19 !important;
+            color: #fff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(247, 107, 25, 0.3);
+        }
+
+        .pricing-pills .nav-link:hover:not(.active) {
+            background-color: #f8f9fa;
+            border-color: #F76B19;
+            color: #F76B19;
+            transform: translateY(-1px);
+        }
+
+        /* ---------- Price Input Styling ---------- */
+        .price-input .input-group {
+            max-width: 300px;
+        }
+
+        .price-input .input-group-text {
+            font-weight: 600;
+            background: #f8f9fa;
+            border-color: #dee2e6;
+            color: #495057;
+        }
+
+        .price-input .form-control {
+            border-left: none;
+        }
+
+        .price-input .input-group:focus-within .input-group-text {
+            border-color: #F76B19;
+            background: #fffaf7;
+        }
+
+        /* ---------- Selected Day Display ---------- */
+        .selected-day-display {
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #F76B19;
+        }
+
+        .selected-day-display strong {
+            color: #495057;
+        }
+
+        .selected-day-display span {
+            color: #F76B19;
+            font-weight: 600;
+        }
+
+        /* ---------- Professional Save Button ---------- */
+        .btn-save {
+            background: linear-gradient(135deg, #F76B19 0%, #e55e14 100%);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            padding: 1rem 2.5rem;
+            border: none;
+            box-shadow: 0 6px 20px rgba(247, 107, 25, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(247, 107, 25, 0.4);
+            background: linear-gradient(135deg, #e55e14 0%, #d95f17 100%);
+        }
+
+        .btn-save:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-save.btn-loading {
+            pointer-events: none;
+            color: transparent;
+        }
+
+        .btn-save.btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: button-spinner 0.8s linear infinite;
+        }
+
+        @keyframes button-spinner {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ---------- Alert Improvements ---------- */
+        .alert {
+            border: none;
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background: #d1f2eb;
+            color: #0d5d47;
+            border-left: 4px solid #0d5d47;
+        }
+
+        .alert-danger {
+            background: #fde8e8;
+            color: #c53030;
+            border-left: 4px solid #c53030;
+        }
+
+        /* ---------- Page Header ---------- */
+        .page-header h1 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .breadcrumb-custom {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-bottom: 0;
+        }
+
+        /* ---------- Responsive Design ---------- */
+        @media (max-width: 768px) {
+            .pricing-card {
+                padding: 1.5rem;
+            }
+
+            .pricing-pills .nav-link {
+                min-width: 80px;
+                padding: 0.6rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .btn-save {
+                width: 100%;
+                padding: 0.875rem 2rem;
+            }
+
+            .price-input .input-group {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 1.25rem;
+            }
+
+            .pricing-pills {
+                justify-content: center;
+            }
+
+            .pricing-pills .nav-link {
+                min-width: 70px;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ---------- Validation States ---------- */
+        .is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        .invalid-feedback {
             font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        .text-muted {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        /* ---------- Section Dividers ---------- */
+        .section-divider {
+            border-top: 2px solid #e9ecef;
+            margin: 2rem 0;
         }
     </style>
 @endpush
@@ -59,249 +298,300 @@
         <header class="d-flex justify-content-between align-items-center page-header mb-4">
             <div>
                 <h1>{{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}</h1>
-                <p class="breadcrumb-custom">Package Management >
-                    {{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}</p>
+                <p class="breadcrumb-custom">
+                    <i class="bi bi-home me-1"></i> Package Management >
+                    {{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}
+                </p>
             </div>
+            <a href="" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Packages
+            </a>
         </header>
 
-        {{-- Alerts --}}
+        {{-- Alert Messages --}}
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle"></i> {{ session('success') }}
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <div>{{ session('success') }}</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <div>{{ session('error') }}</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle"></i> Please correct the following errors:
-                <ul class="mb-0 mt-2">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <div>
+                        <strong>Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-2 ps-3">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
         <div class="card mb-4">
             <div class="card-body p-4">
-                <h5 class="card-title">Package Details</h5>
-
                 <form id="packageForm" method="POST"
                     action="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : route('admin.regular-packege-management.store') }}"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" novalidate>
                     @csrf
                     @if (isset($package))
                         @method('PUT')
                     @endif
 
-                    <div class="row g-4">
-                        <!-- Multiple Image Uploader -->
-                        <div class="col-lg-12 package-multiple-image-upload-form ms-3">
-                            <label for="multiple-image-upload" class="form-label">Upload Images</label>
+                    {{-- Image Upload Section --}}
+                    <div class="image-upload-section">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-images me-2"></i>Package Images
+                        </h5>
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="multiple-image-upload" class="form-label">Upload Package Images (Max 4
+                                    images)</label>
 
-                            <div id="multiple-image-upload" data-model-type="App\Models\Package"
-                                data-model-id="{{ $package->id ?? '' }}"
-                                data-upload-url="{{ route('admin.regular-packege-management.store') }}"
-                                data-update-url="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : '' }}"
-                                data-images-url="{{ route('admin.images.get') }}"
-                                data-primary-url="{{ url('admin/images') }}/:id/primary"
-                                data-reorder-url="{{ route('admin.images.reorder') }}"
-                                data-alt-text-url="{{ url('admin/images') }}/:id/alt-text"
-                                data-delete-url="{{ url('admin/images') }}/:id"
-                                data-existing-images="{{ isset($package) ? $package->images->toJson() : '[]' }}"
-                                data-max-files="12" data-max-file-size="{{ 5 * 1024 * 1024 }}">
+                                <div id="multiple-image-upload" data-model-type="App\Models\Package"
+                                    data-model-id="{{ $package->id ?? '' }}"
+                                    data-upload-url="{{ route('admin.regular-packege-management.store') }}"
+                                    data-update-url="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : '' }}"
+                                    data-images-url="{{ route('admin.images.get') }}"
+                                    data-primary-url="{{ url('admin/images') }}/:id/primary"
+                                    data-reorder-url="{{ route('admin.images.reorder') }}"
+                                    data-alt-text-url="{{ url('admin/images') }}/:id/alt-text"
+                                    data-delete-url="{{ url('admin/images') }}/:id"
+                                    data-existing-images="{{ isset($package) ? $package->images->toJson() : '[]' }}"
+                                    data-max-files="12" data-max-file-size="{{ 5 * 1024 * 1024 }}">
+                                </div>
+
+                                <input type="file" id="package_images_input" name="images[]" multiple accept="image/*"
+                                    style="display:none;">
+                                <input type="hidden" id="gallery_images_input" name="gallery_images" value="">
+
+                                <small class="text-muted mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Supported formats: JPG, PNG, WebP. Max file size: 5MB. First image will be used as main
+                                    display.
+                                </small>
                             </div>
+                        </div>
+                    </div>
 
-                            <input type="file" id="package_images_input" name="images[]" multiple accept="image/*"
-                                style="display:none;">
-                            <input type="hidden" id="gallery_images_input" name="gallery_images" value="">
+                    {{-- Package Details Section --}}
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle me-2"></i>Package Details
+                    </h5>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label for="packageName" class="form-label">Package Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('packageName') is-invalid @enderror"
+                                id="packageName" name="packageName" value="{{ old('packageName', $package->name ?? '') }}"
+                                placeholder="Enter package name" required>
+                            @error('packageName')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
-                        <!-- Package fields -->
-                        <div class="col-lg-12">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label for="packageName" class="form-label">Package Name</label>
-                                    <input type="text" class="form-control @error('packageName') is-invalid @enderror"
-                                        id="packageName" name="packageName"
-                                        value="{{ old('packageName', $package->name ?? '') }}" required>
-                                    @error('packageName')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                        <div class="col-md-6">
+                            <label for="subTitle" class="form-label">Sub Title</label>
+                            <input type="text" class="form-control @error('subTitle') is-invalid @enderror"
+                                id="subTitle" name="subTitle" value="{{ old('subTitle', $package->subtitle ?? '') }}"
+                                placeholder="Enter package subtitle">
+                            @error('subTitle')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                                <div class="col-md-6">
-                                    <label for="subTitle" class="form-label">Sub Title</label>
-                                    <input type="text" class="form-control @error('subTitle') is-invalid @enderror"
-                                        id="subTitle" name="subTitle"
-                                        value="{{ old('subTitle', $package->subtitle ?? '') }}">
-                                    @error('subTitle')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                        <div class="col-md-6">
+                            <label for="packageType" class="form-label">Package Type <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select @error('packageType') is-invalid @enderror" id="packageType"
+                                name="packageType" required>
+                                <option value="">Select Package Type</option>
+                                <option value="Single"
+                                    {{ old('packageType', optional($package?->variants->first())->variant_name) == 'Single' ? 'selected' : '' }}>
+                                    Single Package
+                                </option>
+                                <option value="Bundle"
+                                    {{ old('packageType', optional($package?->variants->first())->variant_name) == 'Bundle' ? 'selected' : '' }}>
+                                    Bundle Package
+                                </option>
+                                <option value="Group"
+                                    {{ old('packageType', optional($package?->variants->first())->variant_name) == 'Group' ? 'selected' : '' }}>
+                                    Group Package
+                                </option>
+                            </select>
+                            @error('packageType')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                                <div class="col-md-6">
-                                    <label for="packageType" class="form-label">Package Type</label>
-                                    <select class="form-select @error('packageType') is-invalid @enderror" id="packageType"
-                                        name="packageType" required>
-                                        <option value="">Select Package Type</option>
-                                        <option value="Single"
-                                            {{ old('packageType', optional($package?->variants->first())->variant_name) == 'Single' ? 'selected' : '' }}>
-                                            Single</option>
-                                        <option value="Bundle"
-                                            {{ old('packageType', optional($package?->variants->first())->variant_name) == 'Bundle' ? 'selected' : '' }}>
-                                            Bundle</option>
-                                        <option value="Group"
-                                            {{ old('packageType', optional($package?->variants->first())->variant_name) == 'Group' ? 'selected' : '' }}>
-                                            Group</option>
-                                    </select>
-                                    @error('packageType')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                        <div class="col-12">
+                            <label for="details" class="form-label">Package Details</label>
+                            <textarea class="form-control @error('details') is-invalid @enderror" id="details" name="details" rows="5"
+                                placeholder="Describe the package details, features, and inclusions...">{{ old('details', $package->details ?? '') }}</textarea>
+                            @error('details')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                                <div class="col-12">
-                                    <label for="details" class="form-label">Details</label>
-                                    <textarea class="form-control @error('details') is-invalid @enderror" id="details" name="details" rows="4"
-                                        placeholder="Type here...">{{ old('details', $package->details ?? '') }}</textarea>
-                                    @error('details')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                        <div class="col-md-4">
+                            <label for="displayStartingPrice" class="form-label">Display Starting Price (৳)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">৳</span>
+                                <input type="number" step="0.01"
+                                    class="form-control @error('displayStartingPrice') is-invalid @enderror"
+                                    id="displayStartingPrice" name="displayStartingPrice"
+                                    value="{{ old('displayStartingPrice', $package->display_starting_price ?? '') }}"
+                                    placeholder="0.00" min="0">
+                            </div>
 
-                                <div class="col-md-6">
-                                    <label for="displayStartingPrice" class="form-label">Display Starting Price
-                                        (TK)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">৳</span>
-                                        <input type="number" step="0.01"
-                                            class="form-control @error('displayStartingPrice') is-invalid @enderror"
-                                            id="displayStartingPrice" name="displayStartingPrice"
-                                            value="{{ old('displayStartingPrice', $package->display_starting_price ?? '') }}"
-                                            placeholder="e.g., 99.00">
+                            @error('displayStartingPrice')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="minParticipant" class="form-label">Minimum Participants <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('minParticipant') is-invalid @enderror"
+                                id="minParticipant" name="minParticipant"
+                                value="{{ old('minParticipant', $package->min_participants ?? 5) }}" min="1"
+                                required>
+                            @error('minParticipant')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="maxParticipant" class="form-label">Maximum Participants <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('maxParticipant') is-invalid @enderror"
+                                id="maxParticipant" name="maxParticipant"
+                                value="{{ old('maxParticipant', $package->max_participants ?? 50) }}" min="1"
+                                required>
+                            @error('maxParticipant')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Pricing Section --}}
+                    <div class="pricing-card">
+                        <h5 class="pricing-section-title">
+                            <i class="bi bi-tag me-2"></i>Pricing Configuration
+                        </h5>
+
+                        <div class="row g-4">
+                            {{-- Weekday Pricing --}}
+                            <div class="col-lg-6">
+                                <div class="pricing-day-section">
+                                    <label class="fw-semibold mb-3">Weekday Prices</label>
+
+                                    <ul class="nav nav-pills pricing-pills mb-4" id="weekdayPills" role="tablist">
+                                        @foreach (['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'] as $day)
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link {{ $day == 'monday' ? 'active' : '' }}"
+                                                    data-day="{{ $day }}"
+                                                    data-price="{{ old('weekday_price_' . $day, '') }}" type="button">
+                                                    {{ ucfirst($day) }}
+                                                </button>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+
+                                    <div class="selected-day-display">
+                                        <strong>Selected Weekday:</strong>
+                                        <span id="selectedWeekday">Monday</span>
                                     </div>
-                                    <small class="form-text text-muted">This price will be displayed as "Starting from TK
-                                        X". Leave empty to use calculated min price.</small>
-                                    @error('displayStartingPrice')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
 
-                                <div class="col-md-6">
-                                    <label for="minParticipant" class="form-label">Minimum Participant</label>
-                                    <input type="number"
-                                        class="form-control @error('minParticipant') is-invalid @enderror"
-                                        id="minParticipant" name="minParticipant"
-                                        value="{{ old('minParticipant', $package->min_participants ?? 5) }}" required>
-                                    @error('minParticipant')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <div class="price-input">
+                                        <label class="form-label">Price (৳) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">৳</span>
+                                            <input type="number" step="0.01" id="weekdayPrice" name="weekdayPrice"
+                                                class="form-control" value="{{ old('weekdayPrice') }}"
+                                                placeholder="0.00" min="0" required>
+                                        </div>
+                                        <small class="text-muted">Price for the selected weekday</small>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div class="col-md-6">
-                                    <label for="maxParticipant" class="form-label">Maximum Participant</label>
-                                    <input type="number"
-                                        class="form-control @error('maxParticipant') is-invalid @enderror"
-                                        id="maxParticipant" name="maxParticipant"
-                                        value="{{ old('maxParticipant', $package->max_participants ?? 50) }}" required>
-                                    @error('maxParticipant')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                            {{-- Weekend Pricing --}}
+                            <div class="col-lg-6">
+                                <div class="pricing-day-section">
+                                    <label class="fw-semibold mb-3">Weekend Prices</label>
+
+                                    <ul class="nav nav-pills pricing-pills mb-4" id="weekendPills" role="tablist">
+                                        @foreach (['friday', 'saturday'] as $day)
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link {{ $day == 'friday' ? 'active' : '' }}"
+                                                    data-day="{{ $day }}"
+                                                    data-price="{{ old('weekend_price_' . $day, '') }}" type="button">
+                                                    {{ ucfirst($day) }}
+                                                </button>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+
+                                    <div class="selected-day-display">
+                                        <strong>Selected Weekend:</strong>
+                                        <span id="selectedWeekend">Friday</span>
+                                    </div>
+
+                                    <div class="price-input">
+                                        <label class="form-label">Price (৳) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">৳</span>
+                                            <input type="number" step="0.01" id="weekendPrice" name="weekendPrice"
+                                                class="form-control" value="{{ old('weekendPrice') }}"
+                                                placeholder="0.00" min="0" required>
+                                        </div>
+                                        <small class="text-muted">Price for the selected weekend day</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Pricing card -->
-                    <div class="card mt-4">
-                        <div class="card-body p-4">
-                            <h5 class="card-title">Pricing Details</h5>
+                    {{-- Hidden Fields --}}
+                    <input type="hidden" id="selected_weekday" name="selected_weekday"
+                        value="{{ old('selected_weekday', 'monday') }}">
+                    <input type="hidden" id="selected_weekend" name="selected_weekend"
+                        value="{{ old('selected_weekend', 'friday') }}">
 
-                            <!-- Weekdays -->
-                            <div class="mb-4">
-                                <label class="form-label">Weekdays Prices</label>
-                                <ul class="nav nav-pills pricing-pills mb-3" id="weekdayPills">
-                                    @foreach (['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'] as $day)
-                                        <li class="nav-item">
-                                            <a href="#" class="nav-link {{ $day == 'monday' ? 'active' : '' }}"
-                                                data-day="{{ $day }}">
-                                                {{ ucfirst($day) }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
-
-                                <div class="d-flex align-items-center mb-2">
-                                    <strong class="me-2">Selected Weekday:</strong>
-                                    <span id="selectedWeekday">Monday</span>
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label for="weekdayPrice" class="form-label">Price</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">৳</span>
-                                        <input type="number" step="0.01" class="form-control" id="weekdayPrice"
-                                            name="weekdayPrice" value="1000">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Weekends -->
-                            <div>
-                                <label class="form-label">Weekend Prices</label>
-                                <ul class="nav nav-pills pricing-pills mb-3" id="weekendPills">
-                                    @foreach (['friday', 'saturday'] as $day)
-                                        <li class="nav-item">
-                                            <a href="#" class="nav-link {{ $day == 'friday' ? 'active' : '' }}"
-                                                data-day="{{ $day }}">
-                                                {{ ucfirst($day) }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
-
-                                <div class="d-flex align-items-center mb-2">
-                                    <strong class="me-2">Selected Weekend:</strong>
-                                    <span id="selectedWeekend">Friday</span>
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label for="weekendPrice" class="form-label">Price</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">৳</span>
-                                        <input type="number" step="0.01" class="form-control" id="weekendPrice"
-                                            name="weekendPrice" value="1500">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hidden fields -->
-                    <input type="hidden" id="selected_weekday" name="selected_weekday" value="monday">
-                    <input type="hidden" id="selected_weekend" name="selected_weekend" value="friday">
-
-                    <div class="mt-3">
-                        <button id="submitBtn" class="btn btn-save jatio-bg-color">
-                            <i class="fas fa-save me-2"></i> {{ isset($package) ? 'Update Package' : 'Save Package' }}
+                    <div class="d-flex justify-content-between align-items-center pt-4 border-top">
+                        <a href="{{ url('admin/add-packege-management') }}" class="btn btn-outline-danger btn-lg px-4">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                        <button id="submitBtn" type="button" class="btn  jatio-bg-color btn-lg px-5">
+                            <i class="bi bi-check-lg me-2"></i>
+                            {{ isset($package) ? 'Update Package' : 'Save Package' }}
                         </button>
-
                     </div>
                 </form>
             </div>
         </div>
     </main>
 @endsection
-
 
 @push('scripts')
     <script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>

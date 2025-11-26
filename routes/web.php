@@ -40,6 +40,21 @@ use App\Http\Controllers\Frontend\PackageController as FrontendPackageController
 |
 */
 
+
+use App\Mail\ContactFormSubmitted;
+
+Route::get('/test-contact-mail', function () {
+    $name = 'John Doe';
+    $email = 'johndoe@yopmail.com';
+    $subject = 'Test Contact Form';
+    $user_message = "This is a test message from the contact form.";
+    $received_at = now()->format('F j, Y \a\t g:i A');
+    
+    return new ContactFormSubmitted($name, $email, $subject, $user_message, $received_at);
+});
+
+
+
 // Frontend Routes (Public)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
