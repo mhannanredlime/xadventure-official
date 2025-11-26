@@ -6,8 +6,6 @@ cd /home/xadventurebandarban/htdocs/xadventurebandarban.com
 
 
 
-
-
 November 25, 2025 – Task Summary
 
 1. Xadventure – Updated the login page UI by fixing layout issues and implementing a cleaner, modern design.
