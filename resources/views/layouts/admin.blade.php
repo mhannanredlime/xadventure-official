@@ -52,6 +52,29 @@
             border-top: 1px solid #dee2e6;
         }
     </style>
+
+    <style>
+        /* Smooth transition on toggle */
+        .user-toggle {
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .user-toggle:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Dropdown menu fade + scale */
+        .dropdown-menu {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
     {!! ToastMagic::styles() !!}
 
 </head>
@@ -66,26 +89,59 @@
             <a class="navbar-brand" href="{{ url('/admin/reservation-dashboard') }}">
                 <img src="{{ asset('admin/images/admin-logo.svg') }}" class="navbar-logo" alt="Admin Logo">
             </a>
+
             <div class="collapse navbar-collapse justify-content-end">
-                <ul class="navbar-nav">
+
+
+
+
+                <ul class="navbar-nav align-items-center">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle user-dropdown jatio-bg-color rounded-3" href="#"
-                            id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">{{ Auth::user()->name ?? 'User' }}</a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="{{ route('admin.profile.index') }}"><i
-                                        class="bi bi-person me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.settings.index') }}"><i
-                                        class="bi bi-gear me-2"></i>Settings</a></li>
+
+                        <!-- User Toggle -->
+                        <a class="nav-link dropdown-toggle d-flex align-items-center px-3 py-2 rounded-3 user-toggle"
+                            href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <!-- Larger Avatar Icon -->
+                            <i class="bi bi-person-circle me-2 fs-3"></i>
+                            <span class="fw-semibold">{{ Auth::user()->name ?? 'User' }}</span>
+                        </a>
+
+                        <!-- Dropdown Menu -->
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-3"
+                            aria-labelledby="userMenuDropdown">
+
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center"
+                                    href="{{ route('admin.profile.index') }}">
+                                    <i class="bi bi-person me-2 fs-5"></i> Profile
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center"
+                                    href="{{ route('admin.settings.index') }}">
+                                    <i class="bi bi-gear me-2 fs-5"></i> Settings
+                                </a>
+                            </li>
+
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{{ route('logout') }}"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i
-                                        class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-danger"
+                                    href="{{ route('logout') }}"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="bi bi-box-arrow-right me-2 fs-5"></i> Logout
+                                </a>
+                            </li>
+
                         </ul>
                     </li>
                 </ul>
+
             </div>
         </div>
     </nav>
@@ -104,7 +160,7 @@
                             <a class="nav-link {{ request()->is('admin/reservation-dashboard') ? 'active' : '' }}"
                                 href="{{ url('/admin/reservation-dashboard') }}">
                                 <i class="bi bi-clipboard-check"></i>
-                                <span class="menu-text">Reservation  Dashboard</span>
+                                <span class="menu-text">Reservation Dashboard</span>
                             </a>
                         </li>
                     @endcan
