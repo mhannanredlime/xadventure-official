@@ -283,7 +283,7 @@
                 <input type="hidden" id="selected_weekend" name="selected_weekend" value="{{ old('selected_weekend','friday') }}">
 
                 <div class="d-flex justify-content-between align-items-center pt-4 border-top">
-                    <a href="#" class="btn btn-outline-danger btn-lg px-4">
+                    <a href="{{  url('admin/add-packege-management') }}" class="btn btn-outline-danger btn-lg px-4">
                         <i class="bi bi-x-circle me-2"></i>Cancel
                     </a>
                     <button id="submitBtn" type="button" class="btn jatio-bg-color btn-lg px-5">
