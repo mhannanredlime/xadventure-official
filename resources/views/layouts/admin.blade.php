@@ -94,7 +94,7 @@
         .content-area {
             margin-left: 250px;
             /* Sidebar width */
-            margin-top: 56px;
+            /* margin-top: 56px; */
             /* Navbar height */
             padding: 20px;
         }
@@ -136,6 +136,26 @@
             </div>
             <div class="sidebar-content">
                 <ul class="nav flex-column sidebar-menu">
+                    {{-- Fix dropdown issue i want to open dropdown on click smoothly  --}}
+                    <li class="nav-item">
+                        <a href="#dashboardSubmenu" class="nav-link d-flex justify-content-between align-items-center"
+                            data-bs-toggle="collapse" aria-expanded="false">
+                            <div>
+                                <i class="bi bi-clipboard-check"></i>
+                                <span>Dashboard</span>
+                            </div>
+                            <i class="bi bi-chevron-down"></i>
+                        </a>
+                        <ul class="collapse list-unstyled ps-3" id="dashboardSubmenu">
+                            <li class="nav-item">
+                                <a href="../../index.html" class="nav-link">
+                                    <i class="bi bi-circle me-2"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     {{-- Dashboard --}}
                     @can('dashboard.view')
                         <li class="nav-item">
@@ -244,22 +264,25 @@
                     @endcan
                     {{-- User & Role Management --}}
                     @can('users.view')
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {{ request()->is('admin/users*') ? 'active' : '' }}"
-                                href="#" id="userManagementDropdown" role="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                <i class="bi bi-people"></i>
-                                <span class="menu-text">User Management</span>
+                        <li class="nav-item">
+                            <a href="#userManagementSubmenu"
+                                class="nav-link d-flex justify-content-between align-items-center {{ request()->is('admin/users*') ? 'active' : '' }}"
+                                data-bs-toggle="collapse" aria-expanded="false">
+                                <div>
+                                    <i class="bi bi-people me-2"></i>
+                                    <span>User Management</span>
+                                </div>
+                                <i class="bi bi-chevron-down"></i>
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="userManagementDropdown">
-                                <li>
-                                    <a class="dropdown-item {{ request('user_type') == 'admin' ? 'active' : '' }}"
+                            <ul class="collapse list-unstyled ps-3" id="userManagementSubmenu">
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request('user_type') == 'admin' ? 'active' : '' }}"
                                         href="{{ url('/admin/users?user_type=admin') }}">
                                         <i class="bi bi-person-check me-2"></i>Admins
                                     </a>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item {{ request('user_type') == 'customer' ? 'active' : '' }}"
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request('user_type') == 'customer' ? 'active' : '' }}"
                                         href="{{ url('/admin/users?user_type=customer') }}">
                                         <i class="bi bi-person me-2"></i>Customers
                                     </a>
@@ -267,8 +290,8 @@
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
-                                <li>
-                                    <a class="dropdown-item {{ request('user_type') == 'all' ? 'active' : '' }}"
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request('user_type') == 'all' ? 'active' : '' }}"
                                         href="{{ url('/admin/users?user_type=all') }}">
                                         <i class="bi bi-people me-2"></i>All Users
                                     </a>
