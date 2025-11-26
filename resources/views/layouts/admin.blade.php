@@ -6,55 +6,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin')</title>
+
+    <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Bootstrap & Custom CSS -->
     <link rel="stylesheet" href="{{ versioned_asset('admin/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('admin/css/custom-admin.css') }}">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <base href="{{ asset('admin/') }}/">
     @stack('styles')
     <style>
-        /* Ensure dropdown menus work properly in sidebar */
-        .sidebar .dropdown-menu {
-            position: absolute;
-            top: 100%;
+        /* ================= Sidebar ================= */
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            top: 0;
             left: 0;
-            z-index: 1000;
-            min-width: 200px;
-            background-color: #fff;
-            border: 1px solid rgba(0, 0, 0, .15);
-            border-radius: 0.375rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .175);
+            height: 100vh;
+            background-color: #f8f9fa;
+            border-right: 1px solid #ddd;
+            z-index: 1020;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Sidebar Logo fixed at top */
+        .sidebar-logo {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+            /* position: sticky; */
+            top: 0;
+            z-index: 1050;
+        }
+
+        .sidebar-logo img {
+            max-width: 150px;
+            height: auto;
+        }
+
+        /* Sidebar menu scrollable */
+        .sidebar-content {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding-top: 10px;
+        }
+
+        .sidebar .nav-link {
+            color: #333;
+            padding: 10px 20px;
+            transition: 0.2s;
+        }
+
+
+
+        .sidebar .dropdown-menu {
+            position: static;
+            float: none;
+            min-width: 100%;
+            background-color: #f8f9fa;
+            border: none;
+            box-shadow: none;
         }
 
         .sidebar .dropdown-item {
-            padding: 0.5rem 1rem;
-            color: #333;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
+            padding-left: 40px;
         }
 
-        .sidebar .dropdown-item:hover {
-            background-color: #f8f9fa;
-            color: #000;
+        /* ================= Top Navbar ================= */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            /* sidebar width */
+            right: 0;
+            z-index: 1030;
+            height: 56px;
         }
 
-        .sidebar .dropdown-item.active {
-            background-color: #0d6efd;
-            color: #fff;
+        /* ================= Content Area ================= */
+        .content-area {
+            margin-left: 250px;
+            /* Sidebar width */
+            margin-top: 56px;
+            /* Navbar height */
+            padding: 20px;
         }
 
-        .sidebar .dropdown-divider {
-            margin: 0.5rem 0;
-            border-top: 1px solid #dee2e6;
-        }
-    </style>
-
-    <style>
-        /* Smooth transition on toggle */
+        /* User toggle */
         .user-toggle {
             transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
         }
@@ -63,7 +108,7 @@
             transform: translateY(-1px);
         }
 
-        /* Dropdown menu fade + scale */
+        /* Dropdown fade + scale */
         .dropdown-menu {
             opacity: 0;
             transform: scale(0.95);
@@ -75,86 +120,23 @@
             transform: scale(1);
         }
     </style>
-    {!! ToastMagic::styles() !!}
 
+    {!! ToastMagic::styles() !!}
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarCollapse"
-                aria-controls="sidebarCollapse" aria-expanded="false" aria-label="Toggle sidebar">
-                <i class="bi bi-list"></i>
-            </button>
-            <a class="navbar-brand" href="{{ url('/admin/reservation-dashboard') }}">
-                <img src="{{ asset('admin/images/admin-logo.svg') }}" class="navbar-logo" alt="Admin Logo">
-            </a>
+    <div class="main-wrapper d-flex">
 
-            <div class="collapse navbar-collapse justify-content-end">
-
-
-
-
-                <ul class="navbar-nav align-items-center">
-                    <li class="nav-item dropdown">
-
-                        <!-- User Toggle -->
-                        <a class="nav-link dropdown-toggle d-flex align-items-center px-3 py-2 rounded-3 user-toggle"
-                            href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-
-                            <!-- Larger Avatar Icon -->
-                            <i class="bi bi-person-circle me-2 fs-3"></i>
-                            <span class="fw-semibold">{{ Auth::user()->name ?? 'User' }}</span>
-                        </a>
-
-                        <!-- Dropdown Menu -->
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-3"
-                            aria-labelledby="userMenuDropdown">
-
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center"
-                                    href="{{ route('admin.profile.index') }}">
-                                    <i class="bi bi-person me-2 fs-5"></i> Profile
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center"
-                                    href="{{ route('admin.settings.index') }}">
-                                    <i class="bi bi-gear me-2 fs-5"></i> Settings
-                                </a>
-                            </li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center text-danger"
-                                    href="{{ route('logout') }}"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    <i class="bi bi-box-arrow-right me-2 fs-5"></i> Logout
-                                </a>
-                            </li>
-
-                        </ul>
-                    </li>
-                </ul>
-
+        {{-- ================= Sidebar ================= --}}
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <a href="{{ url('/admin/reservation-dashboard') }}">
+                    <img src="{{ asset('admin/images/admin-logo.svg') }}" alt="Admin Logo">
+                </a>
             </div>
-        </div>
-    </nav>
-
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-    </form>
-
-    <div class="main-wrapper">
-        <div class="sidebar collapse collapse-horizontal d-lg-block" id="sidebarCollapse">
             <div class="sidebar-content">
                 <ul class="nav flex-column sidebar-menu">
-                    <!-- Core Operations -->
+                    {{-- Dashboard --}}
                     @can('dashboard.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/reservation-dashboard') ? 'active' : '' }}"
@@ -164,6 +146,7 @@
                             </a>
                         </li>
                     @endcan
+                    {{-- Reservations --}}
                     @can('reservations.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/view-reservation-dashboard') ? 'active' : '' }}"
@@ -173,8 +156,7 @@
                             </a>
                         </li>
                     @endcan
-
-
+                    {{-- Contacts --}}
                     @can('contacts.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/customer/contacts') ? 'active' : '' }}"
@@ -184,8 +166,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- Calendar & Availability -->
+                    {{-- Calendar --}}
                     @can('calendar.manage')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/calendar*') ? 'active' : '' }}"
@@ -202,8 +183,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- Package Management -->
+                    {{-- Package Management --}}
                     @can('packages.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/add-packege-management*') || request()->is('admin/packages*') ? 'active' : '' }}"
@@ -213,8 +193,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- Vehicle Management -->
+                    {{-- Vehicle Management --}}
                     @can('vehicle-types.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/vehical-setup*') || request()->is('admin/vehicle-types*') ? 'active' : '' }}"
@@ -233,8 +212,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- Media & Content -->
+                    {{-- Media & Gallery --}}
                     @can('gallery.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/gallery*') ? 'active' : '' }}"
@@ -244,8 +222,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- Pricing & Promotions -->
+                    {{-- Promo Codes --}}
                     @can('promo-codes.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/promo*') || request()->is('admin/promo-codes*') ? 'active' : '' }}"
@@ -255,8 +232,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- Analytics & Reports -->
+                    {{-- Analytics --}}
                     @can('analytics.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/reports*') ? 'active' : '' }}"
@@ -266,8 +242,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- User & Role Management -->
+                    {{-- User & Role Management --}}
                     @can('users.view')
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ request()->is('admin/users*') ? 'active' : '' }}"
@@ -278,13 +253,13 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="userManagementDropdown">
                                 <li>
-                                    <a class="dropdown-item {{ request()->is('admin/users') && (request('user_type') == 'admin' || !request('user_type')) ? 'active' : '' }}"
+                                    <a class="dropdown-item {{ request('user_type') == 'admin' ? 'active' : '' }}"
                                         href="{{ url('/admin/users?user_type=admin') }}">
                                         <i class="bi bi-person-check me-2"></i>Admins
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item {{ request()->is('admin/users') && request('user_type') == 'customer' ? 'active' : '' }}"
+                                    <a class="dropdown-item {{ request('user_type') == 'customer' ? 'active' : '' }}"
                                         href="{{ url('/admin/users?user_type=customer') }}">
                                         <i class="bi bi-person me-2"></i>Customers
                                     </a>
@@ -293,7 +268,7 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li>
-                                    <a class="dropdown-item {{ request()->is('admin/users') && request('user_type') == 'all' ? 'active' : '' }}"
+                                    <a class="dropdown-item {{ request('user_type') == 'all' ? 'active' : '' }}"
                                         href="{{ url('/admin/users?user_type=all') }}">
                                         <i class="bi bi-people me-2"></i>All Users
                                     </a>
@@ -310,8 +285,7 @@
                             </a>
                         </li>
                     @endcan
-
-                    <!-- Settings -->
+                    {{-- System Settings --}}
                     @can('settings.view')
                         <li class="nav-item">
                             <a class="nav-link {{ request()->is('admin/settings*') ? 'active' : '' }}"
@@ -323,39 +297,91 @@
                     @endcan
                 </ul>
             </div>
-        </div>
+        </aside>
 
-        <div class="content-area flex-grow-1">
+        {{-- ================= Top Navbar ================= --}}
+        <nav class="navbar navbar-expand-lg bg-white shadow-sm fixed-top">
+            <div class="container-fluid">
+                {{-- Sidebar toggle for smaller screens --}}
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
+                                class="bi bi-list"></i></a>
+                    </li>
+
+                </ul>
+                {{-- Right User Menu --}}
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center px-3 py-2 rounded-3 user-toggle"
+                            href="#" id="userMenuDropdownTop" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-person-circle me-2 fs-3"></i>
+                            <span class="fw-semibold">{{ Auth::user()->name ?? 'User' }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-2"
+                            aria-labelledby="userMenuDropdownTop">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center"
+                                    href="{{ route('admin.profile.index') }}">
+                                    <i class="bi bi-person me-2 fs-5"></i> Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center"
+                                    href="{{ route('admin.settings.index') }}">
+                                    <i class="bi bi-gear me-2 fs-5"></i> Settings
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center text-danger"
+                                    href="{{ route('logout') }}"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="bi bi-box-arrow-right me-2 fs-5"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        {{-- ================= Content Area ================= --}}
+        <main class="content-area">
             @yield('content')
-        </div>
-    </div>
+        </main>
 
+        {{-- ================= Logout Form ================= --}}
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            @csrf
+        </form>
+
+    </div> {{-- End main-wrapper --}}
+
+    <!-- JS Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{{ versioned_asset('admin/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ versioned_asset('admin/js/toast-notifications.js') }}"></script>
     <script src="{{ versioned_asset('admin/js/modal-system.js') }}"></script>
+
     <script>
-        // Icon fallback mechanism
+        // Bootstrap Icons fallback
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if Bootstrap Icons are loaded
             const testIcon = document.createElement('i');
             testIcon.className = 'bi bi-check';
             testIcon.style.position = 'absolute';
             testIcon.style.left = '-9999px';
             document.body.appendChild(testIcon);
 
-            const computedStyle = window.getComputedStyle(testIcon, ':before');
-            const content = computedStyle.getPropertyValue('content');
-
-            if (content === 'none' || content === '') {
-                // Bootstrap Icons not loaded, using fallback
-                // Add fallback class to body
-                document.body.classList.add('bi-fallback');
-            }
-
+            const content = window.getComputedStyle(testIcon, ':before').getPropertyValue('content');
+            if (content === 'none' || content === '') document.body.classList.add('bi-fallback');
             document.body.removeChild(testIcon);
         });
     </script>
+
     @stack('scripts')
     {!! ToastMagic::scripts() !!}
 </body>
