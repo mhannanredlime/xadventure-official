@@ -297,92 +297,95 @@
                         </div>
                     </div>
 
-                    {{-- ---------- Pricing Section ---------- --}}
-                    <div class="pricing-card">
-                        <h5 class="pricing-section-title"><i class="bi bi-tag me-2"></i>Pricing Configuration</h5>
-                        <div class="row g-4">
-                            @php
-                                $weekdays = weekdays();
-                                $weekends = weekends();
-                            @endphp
+                   {{-- ---------- Pricing Section ---------- --}}
+<div class="pricing-card">
+    <h5 class="pricing-section-title"><i class="bi bi-tag me-2"></i>Pricing Configuration</h5>
+    <div class="row g-4">
+        @php
+            $weekdays = weekdays();
+            $weekends = weekends();
+        @endphp
 
-                            {{-- Weekdays --}}
-                            <div class="col-lg-6">
-                                <label class="fw-semibold mb-1">Weekday Prices</label>
-                                <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" id="applyAllWeekdays"
-                                        {{ old('apply_all_weekdays', 0) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="applyAllWeekdays">Apply same price to all
-                                        weekdays</label>
-                                </div>
-                                <ul class="nav nav-pills pricing-pills mb-4" id="weekdayPills">
-                                    @foreach ($weekdays as $day)
-                                        @php
-                                            $dayPrice = old(
-                                                'weekday_price_' . $day,
-                                                $package->weekdayPrices[$day] ?? 0,
-                                            );
-                                            $active = $day == old('selected_weekday', 'monday') ? 'active' : '';
-                                            $disabled = old('apply_all_weekdays', 0) ? 'disabled' : '';
-                                        @endphp
-                                        <li class="nav-item"><button type="button" class="nav-link {{ $active }}"
-                                                data-day="{{ $day }}" data-price="{{ $dayPrice }}"
-                                                {{ $disabled }}>{{ ucfirst($day) }}</button></li>
-                                    @endforeach
-                                </ul>
+        {{-- Weekdays --}}
+        <div class="col-lg-6">
+            <label class="fw-semibold mb-1">Weekday Prices</label>
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="applyAllWeekdays"
+                    {{ old('apply_all_weekdays', 0) ? 'checked' : '' }}>
+                <label class="form-check-label" for="applyAllWeekdays">Apply same price to all weekdays</label>
+            </div>
 
-                                <div class="price-input"><label class="form-label">Price (৳)</label>
-                                    <div class="input-group"><span class="input-group-text">৳</span><input type="number"
-                                            step="0.01" id="weekdayPrice" name="weekdayPrice" class="form-control"
-                                            value="{{ old('weekdayPrice', $package->weekdayPrices['monday'] ?? 0) }}"
-                                            placeholder="0.00" min="0"></div>
-                                </div>
-                            </div>
+            <ul class="nav nav-pills pricing-pills mb-3" id="weekdayPills">
+                @foreach ($weekdays as $day)
+                    @php
+                        $dayPrice = old('weekday.'.$day, $package->weekdayPrices[$day] ?? 0);
+                        $active = in_array($day, explode(',', old('selected_weekday', 'monday'))) ? 'active' : '';
+                    @endphp
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $active }}" data-day="{{ $day }}" data-price="{{ $dayPrice }}">
+                            {{ ucfirst($day) }}
+                        </button>
+                    </li>
+                @endforeach
+            </ul>
 
-                            {{-- Weekends --}}
-                            <div class="col-lg-6">
-                                <label class="fw-semibold mb-1">Weekend Prices</label>
-                                <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" id="applyAllWeekends"
-                                        {{ old('apply_all_weekends', 0) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="applyAllWeekends">Apply same price to all
-                                        weekends</label>
-                                </div>
-                                <ul class="nav nav-pills pricing-pills mb-4" id="weekendPills">
-                                    @foreach ($weekends as $day)
-                                        @php
-                                            $dayPrice = old(
-                                                'weekend_price_' . $day,
-                                                $package->weekendPrices[$day] ?? 0,
-                                            );
-                                            $active = $day == old('selected_weekend', 'friday') ? 'active' : '';
-                                            $disabled = old('apply_all_weekends', 0) ? 'disabled' : '';
-                                        @endphp
-                                        <li class="nav-item"><button type="button" class="nav-link {{ $active }}"
-                                                data-day="{{ $day }}" data-price="{{ $dayPrice }}"
-                                                {{ $disabled }}>{{ ucfirst($day) }}</button></li>
-                                    @endforeach
-                                </ul>
-
-                                <div class="price-input"><label class="form-label">Price (৳)</label>
-                                    <div class="input-group"><span class="input-group-text">৳</span><input type="number"
-                                            step="0.01" id="weekendPrice" name="weekendPrice" class="form-control"
-                                            value="{{ old('weekendPrice', $package->weekendPrices['friday'] ?? 0) }}"
-                                            placeholder="0.00" min="0"></div>
-                                </div>
-                            </div>
-
-                            {{-- Hidden Inputs --}}
-                            <input type="hidden" name="selected_weekday" id="selected_weekday"
-                                value="{{ old('selected_weekday', 'monday') }}">
-                            <input type="hidden" name="selected_weekend" id="selected_weekend"
-                                value="{{ old('selected_weekend', 'friday') }}">
-                            <input type="hidden" name="apply_all_weekdays" id="apply_all_weekdays"
-                                value="{{ old('apply_all_weekdays', 0) }}">
-                            <input type="hidden" name="apply_all_weekends" id="apply_all_weekends"
-                                value="{{ old('apply_all_weekends', 0) }}">
-                        </div>
+            <div id="weekdayPricesContainer">
+                @foreach ($weekdays as $day)
+                    <div class="mb-2 weekday-price-row" data-day="{{ $day }}">
+                        <label>{{ ucfirst($day) }} Price (৳)</label>
+                        <input type="number" step="0.01" class="form-control day-price-input"
+                            name="weekday[{{ $day }}]"
+                            value="{{ old('weekday.'.$day, $package->weekdayPrices[$day] ?? 0) }}"
+                            placeholder="0.00" min="0">
                     </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Weekends --}}
+        <div class="col-lg-6">
+            <label class="fw-semibold mb-1">Weekend Prices</label>
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="applyAllWeekends"
+                    {{ old('apply_all_weekends', 0) ? 'checked' : '' }}>
+                <label class="form-check-label" for="applyAllWeekends">Apply same price to all weekends</label>
+            </div>
+
+            <ul class="nav nav-pills pricing-pills mb-3" id="weekendPills">
+                @foreach ($weekends as $day)
+                    @php
+                        $dayPrice = old('weekend.'.$day, $package->weekendPrices[$day] ?? 0);
+                        $active = in_array($day, explode(',', old('selected_weekend', 'friday'))) ? 'active' : '';
+                    @endphp
+                    <li class="nav-item">
+                        <button type="button" class="nav-link {{ $active }}" data-day="{{ $day }}" data-price="{{ $dayPrice }}">
+                            {{ ucfirst($day) }}
+                        </button>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div id="weekendPricesContainer">
+                @foreach ($weekends as $day)
+                    <div class="mb-2 weekend-price-row" data-day="{{ $day }}">
+                        <label>{{ ucfirst($day) }} Price (৳)</label>
+                        <input type="number" step="0.01" class="form-control day-price-input"
+                            name="weekend[{{ $day }}]"
+                            value="{{ old('weekend.'.$day, $package->weekendPrices[$day] ?? 0) }}"
+                            placeholder="0.00" min="0">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Hidden Inputs to track selected days --}}
+        <input type="hidden" name="selected_weekday" id="selected_weekday" value="{{ old('selected_weekday', 'monday') }}">
+        <input type="hidden" name="selected_weekend" id="selected_weekend" value="{{ old('selected_weekend', 'friday') }}">
+        <input type="hidden" name="apply_all_weekdays" id="apply_all_weekdays" value="{{ old('apply_all_weekdays', 0) }}">
+        <input type="hidden" name="apply_all_weekends" id="apply_all_weekends" value="{{ old('apply_all_weekends', 0) }}">
+    </div>
+</div>
+
 
                     {{-- ---------- Submit Button ---------- --}}
                     <div class="d-flex justify-content-end mt-4">
@@ -504,4 +507,72 @@
 
         });
     </script>
+
+    <script>
+$(function() {
+
+    function updatePills($pills, value, all = false) {
+        $pills.each(function() {
+            $(this).data('price', value);
+            if (all) $(this).text($(this).text().split(' - ')[0] + ' - ৳' + value);
+        });
+    }
+
+    let selectedWeekdays = $('#selected_weekday').val() ? $('#selected_weekday').val().split(',') : [];
+    let selectedWeekends = $('#selected_weekend').val() ? $('#selected_weekend').val().split(',') : [];
+
+    $('#applyAllWeekdays').change(function() {
+        const checked = $(this).is(':checked');
+        $('#apply_all_weekdays').val(checked ? 1 : 0);
+        updatePills($('#weekdayPills .nav-link'), $('.weekday-price-row input').first().val(), checked);
+        $('#weekdayPills .nav-link').prop('disabled', checked);
+        selectedWeekdays = checked ? @json($weekdays) : [];
+        $('#selected_weekday').val(selectedWeekdays.join(','));
+    });
+
+    $('#applyAllWeekends').change(function() {
+        const checked = $(this).is(':checked');
+        $('#apply_all_weekends').val(checked ? 1 : 0);
+        updatePills($('#weekendPills .nav-link'), $('.weekend-price-row input').first().val(), checked);
+        $('#weekendPills .nav-link').prop('disabled', checked);
+        selectedWeekends = checked ? @json($weekends) : [];
+        $('#selected_weekend').val(selectedWeekends.join(','));
+    });
+
+    $('#weekdayPills .nav-link').click(function() {
+        if (!$('#applyAllWeekdays').is(':checked')) {
+            const day = $(this).data('day');
+            $(this).toggleClass('active');
+
+            if ($(this).hasClass('active')) {
+                if (!selectedWeekdays.includes(day)) selectedWeekdays.push(day);
+            } else {
+                selectedWeekdays = selectedWeekdays.filter(d => d !== day);
+            }
+            $('#selected_weekday').val(selectedWeekdays.join(','));
+        }
+    });
+
+    $('#weekendPills .nav-link').click(function() {
+        if (!$('#applyAllWeekends').is(':checked')) {
+            const day = $(this).data('day');
+            $(this).toggleClass('active');
+
+            if ($(this).hasClass('active')) {
+                if (!selectedWeekends.includes(day)) selectedWeekends.push(day);
+            } else {
+                selectedWeekends = selectedWeekends.filter(d => d !== day);
+            }
+            $('#selected_weekend').val(selectedWeekends.join(','));
+        }
+    });
+
+    $('#submitBtn').click(function() {
+        $(this).prop('disabled', true).addClass('btn-loading');
+        $('#packageForm').submit();
+    });
+
+});
+</script>
+
 @endpush
