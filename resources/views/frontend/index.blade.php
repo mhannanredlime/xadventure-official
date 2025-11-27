@@ -121,7 +121,7 @@
                                         <li><i class="bi  bi-check"></i> {{ $feature }}</li>
                                     @endforeach
                                 </ul>
-                                <a href="{{ route('custom-packages') }}" class="btn btn-pricing">Learn More</a>
+                                <a href="{{ route('custom-packages') }}" class="btn btn-pricing primary-btn-border-radius">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                                 Team-Building
                                 Activities</li>
                         </ul>
-                        <a href="#" class="btn btn-orange mt-4">
+                        <a href="#" class="btn btn-orange mt-4 primary-btn-border-radius jatio-bg-color ">
                             About Us <i class="bi bi-arrow-right ms-2"></i>
                         </a>
                     </div>
@@ -291,7 +291,7 @@
                         <li><strong>Archery, Trampoline, and Human Foosball</strong></li>
                         <li><strong>Kids Fun Zone & Team-Building Events</strong></li>
                     </ul>
-                    <a href="#" class="cta-btn mt-4 d-inline-block" style="width: 35%;">Learn More →</a>
+                    <a href="#" class="cta-btn mt-4 d-inline-block primary-btn-border-radius">Learn More →</a>
                 </div>
                 <div class="col-lg-6 image-section">
                     <img src="images/utvl1.jpg" alt="Adventure" class="img-fluid rounded-2 shadow" />
@@ -335,7 +335,7 @@
             <p>Our team is ready to help you plan the perfect day —</p>
             <p>whether it’s a solo ride, family outing, or group event.</p>
             <p>Let’s make your adventure unforgettable!</p>
-            <a href="{{ url('contact') }}" class="btn btn-orange">Get Appointment →</a>
+            <a href="{{ url('contact') }}" class="btn btn-orange primary-btn-border-radius jatio-bg-color">Get Appointment →</a>
         </div>
     </section>
 @endsection
