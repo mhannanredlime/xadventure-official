@@ -2338,6 +2338,25 @@ logo slide
     color: #ccc;
 }
 
+.footer-links li a {
+    color: #bbb;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.footer-links li a:hover {
+    color: #ff7b00;
+    padding-left: 5px;
+}
+
+.footer-contact i {
+    font-size: 18px;
+}
+
+.text-orange {
+    color: #ff7b00;
+}
+
 /* ====================================================
    SECTION 12: Newsletter Section Responsive Design
 =========================================================== */
