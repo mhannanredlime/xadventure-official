@@ -301,22 +301,32 @@
 
     @yield('content')
 
-    <footer class="footer">
+    <footer class="footer bg-dark text-white py-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4">
-                    <h2><span style="color: white; font-weight: bold;">ADVEN</span><span
-                            style="color: orange;">TURE</span></h2>
-                    <p>Xtreme Adventure Bandarban</p>
+                    <h2 class="footer-brand">
+                        <span class="text-white fw-bold">ADVEN</span><span class="text-orange">TURE</span>
+                    </h2>
+                    <p class="text-white-50">Xtreme Adventure Bandarban</p>
                     <div class="contact-info mt-3">
-                        <p><i class="bi  bi-map-marker-alt"></i>Babunagarpara, Ward No. 3,<br>Tongkaboti, Bandarban</p>
-                        <p><i class="bi  bi-envelope"></i>info@xadventurebandarban.com</p>
-                        <p><i class="bi  bi-phone-alt"></i>01893583010, 01893585377</p>
+                        <p class="d-flex align-items-start mb-2">
+                            <i class="bi bi-map-marker-alt text-orange me-2 mt-1"></i>
+                            <span>Babunagarpara, Ward No. 3,<br>Tongkaboti, Bandarban</span>
+                        </p>
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="bi bi-envelope text-orange me-2"></i>
+                            <span>info@xadventurebandarban.com</span>
+                        </p>
+                        <p class="d-flex align-items-center mb-2">
+                            <i class="bi bi-phone-alt text-orange me-2"></i>
+                            <span>01893583010, 01893585377</span>
+                        </p>
                     </div>
                 </div>
                 <div class="col-md-2 mb-4">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
+                    <h5 class="text-white mb-3">Quick Links</h5>
+                    <ul class="list-unstyled footer-links">
                         <li><a href="{{ url('/about') }}">About Us</a></li>
                         <li><a href="{{ url('/adventure') }}">Services</a></li>
                         <li><a href="#">Our Team</a></li>
@@ -324,8 +334,8 @@
                     </ul>
                 </div>
                 <div class="col-md-3 mb-4">
-                    <h5>Useful Links</h5>
-                    <ul class="list-unstyled">
+                    <h5 class="text-white mb-3">Useful Links</h5>
+                    <ul class="list-unstyled footer-links">
                         <li><a href="{{ route('frontend.privacy-policy') }}">Privacy Policy</a></li>
                         <li><a href="{{ route('frontend.terms-conditions') }}">Terms and Conditions</a></li>
                         <li><a href="#">Disclaimer</a></li>
@@ -334,25 +344,64 @@
                     </ul>
                 </div>
                 <div class="col-md-3 mb-4">
-                    <h5>Work Hours</h5>
-                    <p><i class="bi  bi-clock text-warning"></i> 9 AM - 5 PM</p>
-                    <p>Experience the serenity of the Hill Tracts. Your gateway to adventure and relaxation in the heart
-                        of Bandarban.</p>
-                    <div class="social-icons-footer mt-3">
-                        <a href="https://www.facebook.com/xadventure" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    <h5 class="text-white mb-3">Work Hours</h5>
+                    <p class="d-flex align-items-center mb-2">
+                        <i class="bi bi-clock text-warning me-2"></i> 9 AM - 5 PM
+                    </p>
+                    <p class="text-white-50">Experience the serenity of the Hill Tracts. Your gateway to adventure and relaxation in the heart of Bandarban.</p>
+                    <div class="social-icons-footer mt-3 d-flex gap-3">
+                        <a href="https://www.facebook.com/xadventure" target="_blank" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
                     </div>
                 </div>
             </div>
-            <hr style="color: white;">
-            <div class="copyright d-flex justify-content-between flex-wrap">
+            <hr class="border-secondary my-4">
+            <div class="copyright d-flex justify-content-between flex-wrap text-white-50 small">
                 <span>Designed by Mrtect IT Solution</span>
-                <span>Copyright © 2025. All rights reserved.</span>
+                <span>Copyright &copy; 2025. All rights reserved.</span>
             </div>
         </div>
     </footer>
+
+    <style>
+        .footer {
+            background-color: #212529; /* Dark background */
+            color: #f8f9fa; /* Light text */
+        }
+
+        .footer-brand .text-orange {
+            color: #fd7e14 !important; /* Bootstrap orange color */
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.75); /* Lighter white for links */
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #fd7e14; /* Orange on hover */
+        }
+
+        .contact-info i {
+            color: #fd7e14; /* Orange for contact icons */
+        }
+
+        .social-icons-footer a {
+            color: #f8f9fa; /* White for social icons */
+            transition: color 0.3s ease;
+        }
+
+        .social-icons-footer a:hover {
+            color: #fd7e14; /* Orange on hover */
+        }
+
+        .border-secondary {
+            border-color: rgba(255, 255, 255, 0.1) !important; /* Lighter border for HR */
+        }
+    </style>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{{ versioned_asset('frontEnd/js/bootstrap.bundle.min.js') }}"></script>

@@ -327,20 +327,15 @@
             <img src="images/atv7.jpg" class="img-3" alt="Image 4" />
         </div>
     </section>
-
     <!-- CTA -->
-    <section>
+    <section class="hero-section-down shadow">
         <div class="container my-5">
-            <div class="hero-section-down shadow">
-                <div>
-                    <h1>Feel The Adventure Experience With Us,<br>Don't Hesitate To <a href="{{ route('contact') }}"
-                            style="color: #ff6b35; text-decoration: none;">Contact Us</a> !</h1>
-                    <p>Our team is ready to help you plan the perfect day —</p>
-                    <p>whether it’s a solo ride, family outing, or group event.</p>
-                    <p>Let’s make your adventure unforgettable!</p>
-                    <a href="#" class="btn btn-orange">Get Appointment →</a>
-                </div>
-            </div>
+            <h2>Feel The Adventure Experience With Us, <br>Don't Hesitate To <a href="{{ route('contact') }}"
+                    class="text-decoration-none jatio-color">Contact Us</a> !</h2>
+            <p>Our team is ready to help you plan the perfect day —</p>
+            <p>whether it’s a solo ride, family outing, or group event.</p>
+            <p>Let’s make your adventure unforgettable!</p>
+            <a href="{{ url('contact') }}" class="btn btn-orange">Get Appointment →</a>
         </div>
     </section>
 @endsection

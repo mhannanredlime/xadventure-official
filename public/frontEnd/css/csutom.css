@@ -1,13 +1,16 @@
 #videoModal .btn-close {
-  z-index: 1056 !important;
-  background-color: rgba(0, 0, 0, 0.6);
-  border-radius: 50%;
-  padding: 8px;
-  opacity: 1 !important;
+    z-index: 1056 !important;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    padding: 8px;
+    opacity: 1 !important;
 }
+
 .modal-backdrop.show {
-    opacity: 0.5 !important; /* transparency রাখবে */
-    pointer-events: none !important; /* clicks pass-through করবে */
+    opacity: 0.5 !important;
+    /* transparency রাখবে */
+    pointer-events: none !important;
+    /* clicks pass-through করবে */
 }
 
 .jatio-color {
@@ -104,6 +107,7 @@
 .full-cart-section {
     height: auto !important;
 }
+
 .navbar-brand img {
     height: 95px;
     width: auto;
@@ -614,7 +618,8 @@ Hero Image Slider
     }
 
     .social-icons {
-        display: none !important; /* Hide social icons on mobile */
+        display: none !important;
+        /* Hide social icons on mobile */
     }
 
     .play-btn {
@@ -676,13 +681,13 @@ Hero Image Slider
     .hero-content {
         padding: 120px 40px !important;
     }
-    
+
 }
 
 /* ====================================================
 logo slide
 =========================================================== */
-.fontFamily{
+.fontFamily {
     font-family: "M PLUS 1p", Sans-serif;
     font-size: 32px;
     font-weight: 800;
@@ -690,7 +695,8 @@ logo slide
     letter-spacing: -0.5px;
     color: var(--e-global-color-1ee111);
 }
-.fontFamily2{
+
+.fontFamily2 {
     font-family: "M PLUS 1p", Sans-serif;
     font-size: 56px;
     font-weight: 800;
@@ -705,12 +711,14 @@ logo slide
     animation: slideIn 1s ease-out forwards;
     animation-delay: 0.1s;
 }
+
 @keyframes slideIn {
     to {
         opacity: 1;
         transform: translateX(0);
     }
 }
+
 .slider1-container {
     overflow: hidden;
     width: 100%;
@@ -828,16 +836,16 @@ logo slide
     filter: brightness(0.7);
 }
 
-#special-section .container-full.default-active ~ .shared-images .img-0 {
+#special-section .container-full.default-active~.shared-images .img-0 {
     opacity: 1;
     transform: scale(1);
     filter: brightness(1);
 }
 
-#special-section .container-full.hover-0 ~ .shared-images .img-0,
-#special-section .container-full.hover-1 ~ .shared-images .img-1,
-#special-section .container-full.hover-2 ~ .shared-images .img-2,
-#special-section .container-full.hover-3 ~ .shared-images .img-3 {
+#special-section .container-full.hover-0~.shared-images .img-0,
+#special-section .container-full.hover-1~.shared-images .img-1,
+#special-section .container-full.hover-2~.shared-images .img-2,
+#special-section .container-full.hover-3~.shared-images .img-3 {
     opacity: 1;
     transform: scale(1);
     filter: brightness(1);
@@ -1107,8 +1115,7 @@ logo slide
 .counter-box img {
     height: 50px;
     margin-bottom: 20px;
-    filter: brightness(0) saturate(100%) invert(50%) sepia(86%) saturate(747%)
-        hue-rotate(343deg) brightness(100%) contrast(102%);
+    filter: brightness(0) saturate(100%) invert(50%) sepia(86%) saturate(747%) hue-rotate(343deg) brightness(100%) contrast(102%);
 }
 
 .counter-box h2 {
@@ -1476,7 +1483,7 @@ logo slide
     justify-content: center;
     color: white;
     text-align: center;
-    border-radius: 20px;
+    /* border-radius: 20px; */
     padding: 50px 20px;
 }
 
@@ -1501,7 +1508,7 @@ logo slide
 }
 
 .btn-orange:hover {
-    background-color: #c93c00;
+    background-color: #ec5c08;
 }
 
 /* ====================================================
@@ -1618,11 +1625,9 @@ logo slide
 }
 
 .pricing-header {
-    background: linear-gradient(
-        135deg,
-        var(--pricecart-color),
-        var(--sec-pricecart-color)
-    );
+    background: linear-gradient(135deg,
+            var(--pricecart-color),
+            var(--sec-pricecart-color));
     color: white;
     padding: 30px 20px;
     text-align: center;
@@ -1679,11 +1684,9 @@ logo slide
     font-size: 1.1rem;
     font-weight: 600;
     border-radius: 5px;
-    background: linear-gradient(
-        135deg,
-        var(--pricecart-color),
-        var(--sec-pricecart-color)
-    );
+    background: linear-gradient(135deg,
+            var(--pricecart-color),
+            var(--sec-pricecart-color));
     border: none;
     color: white;
     transition: all 0.3s ease;
@@ -2091,7 +2094,7 @@ logo slide
 }
 
 /* ===============================================================
-            Chose us 
+            Choose us 
     ===================================================================== */
 
 .highlight {
@@ -2217,140 +2220,6 @@ logo slide
 
     .cta-btn {
         width: 40% !important;
-    }
-}
-
-/* ===============================================================
-            Blog
-    ===================================================================== */
-
-.section-title {
-    color: #ff5c00;
-    font-weight: 600;
-}
-
-.btn-orange {
-    background-color: #ff5c00;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    transition: 0.3s ease;
-}
-
-.btn-orange:hover {
-    background-color: #e34a00;
-}
-
-.blog-category {
-    color: #ff5c00;
-    font-size: 0.9rem;
-    margin-top: 10px;
-    margin-bottom: 5px;
-}
-
-.blog-card {
-    border: none;
-    border-radius: 10px;
-    transition: 0.3s ease;
-}
-
-.blog-card:hover {
-    transform: translateY(-4px);
-}
-
-.blog-title {
-    font-weight: bold;
-    font-size: 1.2rem;
-    text-decoration: underline;
-}
-
-.read-more {
-    color: #ff5c00;
-    font-weight: 500;
-    text-decoration: none;
-}
-
-.read-more:hover {
-    text-decoration: underline;
-}
-
-.blog-date {
-    font-size: 0.85rem;
-    color: gray;
-}
-
-/* ====================================================
-   SECTION 11: Blog Section Responsive Design
-=========================================================== */
-
-@media (max-width: 576px) {
-    .container.py-5 {
-        padding: 30px 15px !important;
-    }
-
-    .d-flex.justify-content-between.align-items-center.mb-4 {
-        flex-direction: column;
-        align-items: flex-start !important;
-        margin-bottom: 25px;
-    }
-
-    .d-flex.justify-content-between.align-items-center.mb-4 h6 {
-        font-size: 0.9rem;
-        margin-bottom: 5px;
-    }
-
-    .d-flex.justify-content-between.align-items-center.mb-4 h1 {
-        font-size: 1.5rem !important;
-        margin-bottom: 10px;
-    }
-
-    .d-flex.justify-content-between.align-items-center.mb-4 p {
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-    }
-
-    .btn-orange {
-        width: 100% !important;
-        padding: 10px 20px;
-        font-size: 0.95rem;
-    }
-
-    .blog-card {
-        margin-bottom: 20px;
-    }
-
-    .blog-card .card-img-top {
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .blog-title {
-        font-size: 1.1rem !important;
-    }
-
-    .card-text {
-        font-size: 0.9rem;
-    }
-}
-
-@media (min-width: 577px) and (max-width: 768px) {
-    .d-flex.justify-content-between.align-items-center.mb-4 h1 {
-        font-size: 1.8rem !important;
-    }
-
-    .btn-orange {
-        width: 60% !important;
-    }
-}
-
-@media (min-width: 769px) and (max-width: 992px) {
-    .d-flex.justify-content-between.align-items-center.mb-4 h1 {
-        font-size: 2rem !important;
-    }
-
-    .btn-orange {
-        width: 45% !important;
     }
 }
 
@@ -2838,7 +2707,7 @@ About Page
     z-index: 1;
 }
 
-.hero-section-about > div {
+.hero-section-about>div {
     position: relative;
     z-index: 2;
 }
@@ -2978,6 +2847,7 @@ img {
 }
 
 @media (max-width: 576px) {
+
     .container,
     .container-fluid {
         padding-left: 10px;
@@ -2998,6 +2868,7 @@ h6 {
 
 /* Additional Services Section Responsive Fixes */
 @media (max-width: 576px) {
+
     /* Ensure all text elements in Services section are properly sized */
     .text-orange {
         font-size: 0.9rem !important;
@@ -3061,4 +2932,3 @@ h6 {
         margin-top: 1.5rem !important;
     }
 }
-
