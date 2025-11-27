@@ -42,3 +42,27 @@ if (!function_exists('asset_hash')) {
     }
 }
 
+
+if (!function_exists('weekdays')) {
+    /**
+     * Get the list of weekdays (Sunday–Thursday)
+     *
+     * @return array
+     */
+    function weekdays(): array
+    {
+        return ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
+    }
+}
+
+if (!function_exists('weekends')) {
+    /**
+     * Get the list of weekends (Friday–Saturday)
+     *
+     * @return array
+     */
+    function weekends(): array
+    {
+        return ['friday', 'saturday'];
+    }
+}

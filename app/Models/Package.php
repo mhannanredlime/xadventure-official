@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Package extends Model
@@ -24,11 +24,17 @@ class Package extends Model
         'details',
         'selected_weekday',
         'selected_weekend',
+        'weekday_prices',
+        'weekend_prices',
         'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'selected_weekday' => 'array',
+        'selected_weekend' => 'array',
+        'weekday_prices' => 'array',
+        'weekend_prices' => 'array',
     ];
 
     public function variants(): HasMany
@@ -76,6 +82,7 @@ class Package extends Model
     public function getPrimaryImageUrlAttribute()
     {
         $primaryImage = $this->primaryImage()->first();
+
         return $primaryImage ? $primaryImage->url : null;
     }
 
@@ -133,7 +140,7 @@ class Package extends Model
     public function getPrimaryVehicleTypeImage()
     {
         // First try to find a vehicle type that matches the package type
-        $matchingVehicleType = $this->vehicleTypes->first(function($vehicleType) {
+        $matchingVehicleType = $this->vehicleTypes->first(function ($vehicleType) {
             return strtolower($vehicleType->name) === $this->type;
         });
 
@@ -177,7 +184,7 @@ class Package extends Model
         // For ATV/UTV packages, prioritize vehicle type images over package images
         if ($this->type === 'atv' || $this->type === 'utv') {
             // First try to find a vehicle type that matches the package type
-            $matchingVehicleType = $this->vehicleTypes->first(function($vehicleType) {
+            $matchingVehicleType = $this->vehicleTypes->first(function ($vehicleType) {
                 return strtolower($vehicleType->name) === $this->type;
             });
 

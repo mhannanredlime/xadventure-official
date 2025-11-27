@@ -255,7 +255,7 @@
                         </div>
                     @elseif(Auth::check() && Auth::user()->is_admin)
                         <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="accountDropdown"
+                            <button class="btn btn-outline-light dropdown-toggle primary-btn-border-radius" type="button" id="accountDropdown"
                                 data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi  bi-user-shield"></i> {{ Auth::user()->name }}
                             </button>
