@@ -335,7 +335,7 @@
                 </div>
                 <div class="col-md-3 mb-4">
                     <h5>Work Hours</h5>
-                    <p><i class="bi  bi-clock text-warning"></i> 9 AM - 10 PM, Monday - Saturday</p>
+                    <p><i class="bi  bi-clock text-warning"></i> 9 AM - 5 PM</p>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor</p>
                     <div class="social-icons-footer mt-3">
                         <a href="https://www.facebook.com/xadventure" target="_blank"><i class="fab fa-facebook-f"></i></a>

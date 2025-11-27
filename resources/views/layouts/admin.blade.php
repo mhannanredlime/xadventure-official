@@ -34,22 +34,7 @@
             flex-direction: column;
         }
 
-        /* Sidebar Logo fixed at top */
-        .sidebar-logo {
-            flex: 0 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f8f9fa;
-            /* position: sticky; */
-            top: 0;
-            z-index: 1050;
-        }
 
-        .sidebar-logo img {
-            max-width: 150px;
-            height: auto;
-        }
 
         /* Sidebar menu scrollable */
         .sidebar-content {
@@ -93,9 +78,6 @@
         /* ================= Content Area ================= */
         .content-area {
             margin-left: 250px;
-            /* Sidebar width */
-            /* margin-top: 56px; */
-            /* Navbar height */
             padding: 20px;
         }
 
@@ -131,7 +113,7 @@
         <aside class="sidebar">
             <div class="sidebar-logo">
                 <a href="{{ url('/admin/reservation-dashboard') }}">
-                    <img src="{{ asset('admin/images/admin-logo.svg') }}" alt="Admin Logo">
+                    <img src="{{ asset('admin/images/admin-logo.svg') }}" alt="XAdventure">
                 </a>
             </div>
             <div class="sidebar-content">
