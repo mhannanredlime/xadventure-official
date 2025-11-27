@@ -304,22 +304,22 @@
     <footer class="footer bg-dark text-white py-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 mb-4">
+                <div class="col-md-4 mb-4 text-start">
                     <h2 class="footer-brand">
                         <span class="text-white fw-bold">ADVEN</span><span class="text-orange">TURE</span>
                     </h2>
                     <p class="text-white-50">Xtreme Adventure Bandarban</p>
-                    <div class="contact-info mt-3">
+                    <div class=" mt-3">
                         <p class="d-flex align-items-start mb-2">
-                            <i class="bi bi-map-marker-alt text-orange me-2 mt-1"></i>
+                            <i class="bi bi-map-marker-alt text-orange  mt-1"></i>
                             <span>Babunagarpara, Ward No. 3,<br>Tongkaboti, Bandarban</span>
                         </p>
                         <p class="d-flex align-items-center mb-2">
-                            <i class="bi bi-envelope text-orange me-2"></i>
+                            <i class="bi bi-envelope text-orange"></i>
                             <span>info@xadventurebandarban.com</span>
                         </p>
                         <p class="d-flex align-items-center mb-2">
-                            <i class="bi bi-phone-alt text-orange me-2"></i>
+                            <i class="bi bi-phone-alt text-orange"></i>
                             <span>01893583010, 01893585377</span>
                         </p>
                     </div>
@@ -338,8 +338,6 @@
                     <ul class="list-unstyled footer-links">
                         <li><a href="{{ route('frontend.privacy-policy') }}">Privacy Policy</a></li>
                         <li><a href="{{ route('frontend.terms-conditions') }}">Terms and Conditions</a></li>
-                        <li><a href="#">Disclaimer</a></li>
-                        <li><a href="#">Support</a></li>
                         <li><a href="{{ route('frontend.faq') }}">FAQ</a></li>
                     </ul>
                 </div>
@@ -348,9 +346,11 @@
                     <p class="d-flex align-items-center mb-2">
                         <i class="bi bi-clock text-warning me-2"></i> 9 AM - 5 PM
                     </p>
-                    <p class="text-white-50">Experience the serenity of the Hill Tracts. Your gateway to adventure and relaxation in the heart of Bandarban.</p>
+                    <p class="text-white-50">Experience the serenity of the Hill Tracts. Your gateway to adventure and
+                        relaxation in the heart of Bandarban.</p>
                     <div class="social-icons-footer mt-3 d-flex gap-3">
-                        <a href="https://www.facebook.com/xadventure" target="_blank" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="https://www.facebook.com/xadventure" target="_blank" class="text-white"><i
+                                class="fab fa-facebook-f fa-lg"></i></a>
                         <a href="#" class="text-white"><i class="fab fa-twitter fa-lg"></i></a>
                         <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
                         <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
@@ -367,39 +367,48 @@
 
     <style>
         .footer {
-            background-color: #212529; /* Dark background */
-            color: #f8f9fa; /* Light text */
+            background-color: #212529;
+            /* Dark background */
+            color: #f8f9fa;
+            /* Light text */
         }
 
         .footer-brand .text-orange {
-            color: #fd7e14 !important; /* Bootstrap orange color */
+            color: #fd7e14 !important;
+            /* Bootstrap orange color */
         }
 
         .footer-links a {
-            color: rgba(255, 255, 255, 0.75); /* Lighter white for links */
+            color: rgba(255, 255, 255, 0.75);
+            /* Lighter white for links */
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
         .footer-links a:hover {
-            color: #fd7e14; /* Orange on hover */
+            color: #fd7e14;
+            /* Orange on hover */
         }
 
         .contact-info i {
-            color: #fd7e14; /* Orange for contact icons */
+            color: #fd7e14;
+            /* Orange for contact icons */
         }
 
         .social-icons-footer a {
-            color: #f8f9fa; /* White for social icons */
+            color: #f8f9fa;
+            /* White for social icons */
             transition: color 0.3s ease;
         }
 
         .social-icons-footer a:hover {
-            color: #fd7e14; /* Orange on hover */
+            color: #fd7e14;
+            /* Orange on hover */
         }
 
         .border-secondary {
-            border-color: rgba(255, 255, 255, 0.1) !important; /* Lighter border for HR */
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            /* Lighter border for HR */
         }
     </style>
 
