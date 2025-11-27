@@ -6,6 +6,13 @@ cd /home/xadventurebandarban/htdocs/xadventurebandarban.com
 
 
 
+php artisan db:seed --class=PackageTypeSeeder
+php artisan db:seed --class=PackagePriceSeeder
+
+
+
+
+
 
 November 27, 2025 – Task Summary
 

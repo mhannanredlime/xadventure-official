@@ -23,15 +23,11 @@ class Package extends Model
         'image_path',
         'notes',
         'details',
-        'selected_weekday',
-        'selected_weekend',
         'is_active',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'selected_weekday' => 'array',
-        'selected_weekend' => 'array'
+        'is_active' => 'boolean'
     ];
 
     public function variants(): HasMany

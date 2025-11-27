@@ -9,7 +9,7 @@ class PackagePrice extends Model
     protected $fillable = [
         'package_id',
         'type',
-        'days',
+        'day',
         'start_date',
         'end_date',
         'price',
