@@ -359,7 +359,7 @@
                 <h5 class="text-white mb-3">Work Hours</h5>
                 <p class="d-flex align-items-center mb-2">
                     <i class="bi bi-clock text-orange me-2"></i>
-                    9 AM – 5 PM, Monday – Saturday
+                    9 AM – 5 PM
                 </p>
 
                 <p class="text-white-50 small">
