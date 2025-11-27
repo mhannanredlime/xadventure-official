@@ -98,6 +98,7 @@ class PackageController extends Controller
 
     public function storeRegular(Request $request)
     {
+        dd($request->all());
         $validated = $request->validate([
             'packageName' => 'required|string|max:255',
             'subTitle' => 'nullable|string|max:255',
