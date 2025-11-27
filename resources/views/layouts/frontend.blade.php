@@ -336,7 +336,8 @@
                 <div class="col-md-3 mb-4">
                     <h5>Work Hours</h5>
                     <p><i class="bi  bi-clock text-warning"></i> 9 AM - 5 PM</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor</p>
+                    <p>Experience the serenity of the Hill Tracts. Your gateway to adventure and relaxation in the heart
+                        of Bandarban.</p>
                     <div class="social-icons-footer mt-3">
                         <a href="https://www.facebook.com/xadventure" target="_blank"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -526,50 +527,49 @@
                 console.error('Book Now button not found');
             }
         });
-
-
     </script>
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const playBtn = document.getElementById("playVideoBtn");
-    const videoModalEl = document.getElementById("videoModal");
-    const youtubeVideo = document.getElementById("youtubeVideo");
+        document.addEventListener("DOMContentLoaded", function() {
+            const playBtn = document.getElementById("playVideoBtn");
+            const videoModalEl = document.getElementById("videoModal");
+            const youtubeVideo = document.getElementById("youtubeVideo");
 
-    if (!playBtn || !videoModalEl || !youtubeVideo) {
-        console.error("❌ Video modal elements missing.");
-        return;
-    }
+            if (!playBtn || !videoModalEl || !youtubeVideo) {
+                console.error("❌ Video modal elements missing.");
+                return;
+            }
 
-    // YouTube video ID
-   // const videoID = "cZA-b2yUVIg";
- const videoID = "dqWIaDawJRM";
-    // Always get or create instance safely
-    let modalInstance = null;
+            // YouTube video ID
+            // const videoID = "cZA-b2yUVIg";
+            const videoID = "dqWIaDawJRM";
+            // Always get or create instance safely
+            let modalInstance = null;
 
-    // When Play button clicked
-    playBtn.addEventListener("click", function (e) {
-        e.preventDefault();
+            // When Play button clicked
+            playBtn.addEventListener("click", function(e) {
+                e.preventDefault();
 
-        // Re-initialize modal safely every time
-        modalInstance = bootstrap.Modal.getOrCreateInstance(videoModalEl);
-        youtubeVideo.src = `https://www.youtube.com/embed/${videoID}?autoplay=1&rel=0&modestbranding=1`;
-        modalInstance.show();
-    });
+                // Re-initialize modal safely every time
+                modalInstance = bootstrap.Modal.getOrCreateInstance(videoModalEl);
+                youtubeVideo.src =
+                    `https://www.youtube.com/embed/${videoID}?autoplay=1&rel=0&modestbranding=1`;
+                modalInstance.show();
+            });
 
-    // Close button click event (handled directly through Bootstrap)
-    videoModalEl.addEventListener("click", function (e) {
-        if (e.target.classList.contains("btn-close")) {
-            const instance = bootstrap.Modal.getInstance(videoModalEl);
-            if (instance) instance.hide();
-        }
-    });
+            // Close button click event (handled directly through Bootstrap)
+            videoModalEl.addEventListener("click", function(e) {
+                if (e.target.classList.contains("btn-close")) {
+                    const instance = bootstrap.Modal.getInstance(videoModalEl);
+                    if (instance) instance.hide();
+                }
+            });
 
-    // Stop video after modal hides
-    videoModalEl.addEventListener("hidden.bs.modal", function () {
-        youtubeVideo.src = "";
-    });
-});
-</script>
+            // Stop video after modal hides
+            videoModalEl.addEventListener("hidden.bs.modal", function() {
+                youtubeVideo.src = "";
+            });
+        });
+    </script>
 
 
     @stack('scripts')
