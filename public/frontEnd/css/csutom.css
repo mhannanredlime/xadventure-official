@@ -2227,121 +2227,43 @@ logo slide
             Footer
     ===================================================================== */
 
-.footer {
-    background-color: #212529;
-    /* Dark background */
-    color: #f8f9fa;
-    /* Light text */
-}
+/* ===============================================================
+   Footer
+=================================================================== */
 
-.footer-brand .text-orange {
-    color: #fd7e14 !important;
-    /* Bootstrap orange color */
-}
-
-.footer-links a {
-    color: rgba(255, 255, 255, 0.75);
-    /* Lighter white for links */
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.footer-links a:hover {
-    color: #fd7e14;
-    /* Orange on hover */
-}
-
-.contact-info i {
-    color: #fd7e14;
-    /* Orange for contact icons */
-}
-
-.social-icons-footer a {
-    color: #f8f9fa;
-    /* White for social icons */
-    transition: color 0.3s ease;
-}
-
-.social-icons-footer a:hover {
-    color: #fd7e14;
-    /* Orange on hover */
-}
-
-.border-secondary {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    /* Lighter border for HR */
-}
+/* ============================================
+   FOOTER STYLE
+=============================================== */
 
 .footer {
-    background: linear-gradient(rgba(0, 0, 0, 0.866), rgba(0, 0, 0, 0.85)),
-        url("../images/nav-1.webp") center/cover;
+    position: relative;
+    width: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.85)),
+        url("../images/nav-1.webp") center/cover no-repeat;
     padding: 60px 0 30px;
     color: #fff;
-    margin-top: 1px !important;
+    margin-top: 20px !important;
     min-height: 60vh;
 }
 
+/* Headings */
 .footer h5 {
     font-weight: bold;
     margin-bottom: 20px;
 }
 
-.footer a {
-    color: #ddd;
-    text-decoration: none;
-    transition: all 0.3s ease;
+/* Orange Text */
+.text-orange {
+    color: #ff7b00 !important;
 }
 
-.footer a:hover {
-    color: orange;
-    text-decoration: underline;
-}
-
-.footer .contact-info i {
-    color: orange;
-    margin-right: 10px;
-}
-
-.social-icons-footer {
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
-}
-
-.footer .social-icons a {
-    display: inline-block;
-    margin: 0 10px;
-    font-size: 20px;
-    color: #fff;
-    background: #222;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    border-radius: 50%;
-    transition: 0.4s;
-}
-
-.footer .social-icons a:hover {
-    background-color: orange;
-    color: white;
-}
-
-.footer hr {
-    border-top: 1px solid rgba(128, 128, 128, 0.2);
-}
-
-.footer .copyright {
-    text-align: left;
-    padding-top: 20px;
-    font-size: 14px;
-    color: #ccc;
-}
-
+/* Footer Links */
 .footer-links li a {
     color: #bbb;
     text-decoration: none;
-    transition: 0.3s;
+    display: inline-block;
+    padding: 4px 0;
+    transition: 0.3s ease;
 }
 
 .footer-links li a:hover {
@@ -2349,13 +2271,58 @@ logo slide
     padding-left: 5px;
 }
 
-.footer-contact i {
-    font-size: 18px;
+/* Remove wrong background from links */
+.footer-links li a {
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
 }
 
-.text-orange {
+/* Contact Icons */
+.footer-contact i {
+    font-size: 18px;
     color: #ff7b00;
 }
+
+/* Social Icons – White Circle */
+.social-icons-footer a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: #ffffff;
+    color: #ff7b00;
+    border-radius: 50%;
+    font-size: 14px;
+    transition: 0.3s ease;
+    text-decoration: none;
+}
+
+.social-icons-footer a:hover {
+    background: #dd6c02;
+    color: #fff;
+}
+
+/* HR */
+.border-secondary {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Copyright */
+.footer .copyright {
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* Responsive fix */
+@media (max-width: 768px) {
+    .social-icons-footer {
+        gap: 12px;
+    }
+}
+
 
 /* ====================================================
    SECTION 12: Newsletter Section Responsive Design

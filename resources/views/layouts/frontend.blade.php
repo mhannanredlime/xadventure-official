@@ -305,8 +305,7 @@
     @yield('content')
 
     
-
-    <footer class="footer bg-dark text-white py-5">
+<footer class="footer text-white py-5">
     <div class="container">
         <div class="row">
 
@@ -316,9 +315,7 @@
                     <span class="fw-bold text-white">ADVEN</span><span class="text-orange">TOURS</span>
                 </h2>
 
-                <p class="text-white-50 small">
-                    Xtreme Adventure Bandarban
-                </p>
+                <p class="text-white-50 small">Xtreme Adventure Bandarban</p>
 
                 <ul class="list-unstyled mt-3 footer-contact">
                     <li class="d-flex mb-2">
@@ -370,18 +367,10 @@
                 </p>
 
                 <div class="social-icons-footer mt-3 d-flex gap-3">
-                    <a href="https://www.facebook.com/xadventure" target="_blank" class="text-white">
-                        <i class="fab fa-facebook-f fa-lg"></i>
-                    </a>
-                    <a href="#" class="text-white">
-                        <i class="fab fa-twitter fa-lg"></i>
-                    </a>
-                    <a href="#" class="text-white">
-                        <i class="fab fa-instagram fa-lg"></i>
-                    </a>
-                    <a href="#" class="text-white">
-                        <i class="fab fa-youtube fa-lg"></i>
-                    </a>
+                    <a href="https://www.facebook.com/xadventure" target="_blank"><i class="fab fa-facebook-f fa-lg"></i></a>
+                    <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#"><i class="fab fa-youtube fa-lg"></i></a>
                 </div>
             </div>
         </div>
@@ -394,6 +383,8 @@
         </div>
     </div>
 </footer>
+
+
 
 
     
