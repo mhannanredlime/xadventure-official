@@ -365,52 +365,7 @@
         </div>
     </footer>
 
-    <style>
-        .footer {
-            background-color: #212529;
-            /* Dark background */
-            color: #f8f9fa;
-            /* Light text */
-        }
-
-        .footer-brand .text-orange {
-            color: #fd7e14 !important;
-            /* Bootstrap orange color */
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.75);
-            /* Lighter white for links */
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: #fd7e14;
-            /* Orange on hover */
-        }
-
-        .contact-info i {
-            color: #fd7e14;
-            /* Orange for contact icons */
-        }
-
-        .social-icons-footer a {
-            color: #f8f9fa;
-            /* White for social icons */
-            transition: color 0.3s ease;
-        }
-
-        .social-icons-footer a:hover {
-            color: #fd7e14;
-            /* Orange on hover */
-        }
-
-        .border-secondary {
-            border-color: rgba(255, 255, 255, 0.1) !important;
-            /* Lighter border for HR */
-        }
-    </style>
+    
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{{ versioned_asset('frontEnd/js/bootstrap.bundle.min.js') }}"></script>
