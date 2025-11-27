@@ -135,9 +135,6 @@
         .btn-close {
             background-size: 1.2em;
         }
-
-
-
     </style>
 
     @stack('styles')
@@ -283,8 +280,8 @@
                         </div>
                     @else
                         <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle primary-btn-border-radius" type="button" id="accountDropdown"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-outline-light dropdown-toggle primary-btn-border-radius" type="button"
+                                id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi  bi-user"></i> Account
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="accountDropdown">
@@ -296,7 +293,8 @@
                         </div>
                     @endauth
 
-                    <button type="button" class="btn btn-orange jatio-bg-color primary-btn-border-radius" id="bookNowBtn">Book Now</button>
+                    <button type="button" class="btn btn-orange jatio-bg-color primary-btn-border-radius"
+                        id="bookNowBtn">Book Now</button>
                 </div>
             </div>
         </div>
@@ -305,88 +303,85 @@
     @yield('content')
 
 
-<footer class="footer text-white py-5">
-    <div class="container">
-        <div class="row">
+    <footer class="footer text-white py-5">
+        <div class="container">
+            <div class="row">
 
-            <!-- Brand + Address -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <h2 class="footer-brand mb-2">
-                    <span class="fw-bold text-white">ADVEN</span><span class="text-orange">TOURS</span>
-                </h2>
+                <!-- Brand + Address -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h2 class="footer-brand mb-2">
+                        <span class="fw-bold text-white">ADVEN</span><span class="text-orange">TOURS</span>
+                    </h2>
 
-                <p class="text-white-50 small">Xtreme Adventure Bandarban</p>
+                    <p class="text-white-50 small">Xtreme Adventure Bandarban</p>
 
-                <ul class="list-unstyled mt-3 footer-contact">
-                    <li class="d-flex mb-2">
-                        <i class="bi bi-geo-alt text-orange me-2"></i>
-                        <span>Babunagarpara, Ward No.3,<br>Tongkaboti, Bandarban</span>
-                    </li>
-                    <li class="d-flex mb-2">
-                        <i class="bi bi-envelope text-orange me-2"></i>
-                        <span>info@xadventurebandarban.com</span>
-                    </li>
-                    <li class="d-flex mb-2">
-                        <i class="bi bi-telephone text-orange me-2"></i>
-                        <span>01893583010, 01893585377</span>
-                    </li>
-                </ul>
-            </div>
+                    <ul class="list-unstyled mt-3 footer-contact">
+                        <li class="d-flex mb-2">
+                            <i class="bi bi-geo-alt text-orange me-2"></i>
+                            <span>Babunagarpara, Ward No.3,<br>Tongkaboti, Bandarban</span>
+                        </li>
+                        <li class="d-flex mb-2">
+                            <i class="bi bi-envelope text-orange me-2"></i>
+                            <span>info@xadventurebandarban.com</span>
+                        </li>
+                        <li class="d-flex mb-2">
+                            <i class="bi bi-telephone text-orange me-2"></i>
+                            <span>01893583010, 01893585377</span>
+                        </li>
+                    </ul>
+                </div>
 
-            <!-- Quick Links -->
-            <div class="col-lg-2 col-md-6 mb-4">
-                <h5 class="text-white mb-3">Quick Links</h5>
-                <ul class="list-unstyled footer-links">
-                    <li><a href="{{ url('/about') }}">About Us</a></li>
-                    <li><a href="{{ url('/adventure') }}">Services</a></li>
-                    <li><a href="#">Our Team</a></li>
-                    <li><a href="{{ route('contact') }}">Contact</a></li>
-                </ul>
-            </div>
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="text-white mb-3">Quick Links</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url('/about') }}">About Us</a></li>
+                        <li><a href="{{ url('/adventure') }}">Services</a></li>
+                        <li><a href="#">Our Team</a></li>
+                        <li><a href="{{ route('contact') }}">Contact</a></li>
+                    </ul>
+                </div>
 
-            <!-- Useful Links -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <h5 class="text-white mb-3">Useful Links</h5>
-                <ul class="list-unstyled footer-links">
-                    <li><a href="{{ route('frontend.privacy-policy') }}">Privacy Policy</a></li>
-                    <li><a href="{{ route('frontend.terms-conditions') }}">Terms & Conditions</a></li>
-                    <li><a href="{{ route('frontend.faq') }}">FAQ</a></li>
-                </ul>
-            </div>
+                <!-- Useful Links -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="text-white mb-3">Useful Links</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ route('frontend.privacy-policy') }}">Privacy Policy</a></li>
+                        <li><a href="{{ route('frontend.terms-conditions') }}">Terms & Conditions</a></li>
+                        <li><a href="{{ route('frontend.faq') }}">FAQ</a></li>
+                    </ul>
+                </div>
 
-            <!-- Work Hours -->
-            <div class="col-lg-3 col-md-6 mb-4">
-                <h5 class="text-white mb-3">Work Hours</h5>
-                <p class="d-flex align-items-center mb-2">
-                    <i class="bi bi-clock text-orange me-2"></i>
-                    9 AM – 5 PM
-                </p>
+                <!-- Work Hours -->
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="text-white mb-3">Work Hours</h5>
+                    <p class="d-flex align-items-center mb-2">
+                        <i class="bi bi-clock text-orange me-2"></i>
+                        9 AM – 5 PM
+                    </p>
 
-                <p class="text-white-50 small">
-                    Experience the serenity of the Hill Tracts. Your gateway to adventure and relaxation.
-                </p>
+                    <p class="text-white-50 small">
+                        Experience the serenity of the Hill Tracts. Your gateway to adventure and relaxation.
+                    </p>
 
-                <div class="social-icons-footer mt-3 d-flex gap-3">
-                    <a href="https://www.facebook.com/xadventure" target="_blank"><i class="fab fa-facebook-f fa-lg"></i></a>
-                    <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
-                    <a href="#"><i class="fab fa-instagram fa-lg"></i></a>
-                    <a href="#"><i class="fab fa-youtube fa-lg"></i></a>
+                    <div class="social-icons-footer mt-3 d-flex gap-3">
+                        <a href="https://www.facebook.com/xadventure" target="_blank"><i
+                                class="fab fa-facebook-f fa-lg"></i></a>
+                        <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#"><i class="fab fa-youtube fa-lg"></i></a>
+                    </div>
                 </div>
             </div>
+
+            <hr class="border-secondary my-4">
+
+            <div class="d-flex justify-content-between flex-wrap text-white-50 small">
+                <span>Adventure Tours Template © by Jectheme</span>
+                <span>Copyright © 2025. All rights reserved.</span>
+            </div>
         </div>
-
-        <hr class="border-secondary my-4">
-
-        <div class="d-flex justify-content-between flex-wrap text-white-50 small">
-            <span>Adventure Tours Template © by Jectheme</span>
-            <span>Copyright © 2025. All rights reserved.</span>
-        </div>
-    </div>
-</footer>
-
-
-
-
+    </footer>
 
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
