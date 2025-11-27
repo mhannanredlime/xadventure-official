@@ -24,7 +24,7 @@
                 </h1>
 
                 <div class="mt-4 d-flex align-items-center">
-                    <a href="{{ route('contact') }}" class="btn btn-orange jatio-bg-color">Contact Us →</a>
+                    <a href="{{ route('contact') }}" class="btn btn-orange jatio-bg-color primary-btn-border-radius">Contact Us →</a>
                     <a href="#" id="playVideoBtn" class="play-btn" data-bs-toggle="modal"
                         data-bs-target="#videoModal"><i class="bi bi-play-fill"></i></a>
                     <span class="ms-2">Play Video</span>

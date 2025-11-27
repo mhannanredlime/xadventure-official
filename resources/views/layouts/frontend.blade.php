@@ -136,7 +136,7 @@
             background-size: 1.2em;
         }
 
-        
+
 
     </style>
 
@@ -283,7 +283,7 @@
                         </div>
                     @else
                         <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="accountDropdown"
+                            <button class="btn btn-outline-light dropdown-toggle primary-btn-border-radius" type="button" id="accountDropdown"
                                 data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi  bi-user"></i> Account
                             </button>
@@ -296,7 +296,7 @@
                         </div>
                     @endauth
 
-                    <button type="button" class="btn btn-orange jatio-bg-color" id="bookNowBtn">Book Now</button>
+                    <button type="button" class="btn btn-orange jatio-bg-color primary-btn-border-radius" id="bookNowBtn">Book Now</button>
                 </div>
             </div>
         </div>
@@ -304,7 +304,7 @@
 
     @yield('content')
 
-    
+
 <footer class="footer text-white py-5">
     <div class="container">
         <div class="row">
@@ -387,7 +387,7 @@
 
 
 
-    
+
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{{ versioned_asset('frontEnd/js/bootstrap.bundle.min.js') }}"></script>
