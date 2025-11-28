@@ -28,7 +28,7 @@ class PackageController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', '%'.$search.'%')
-                      ->orWhere('subtitle', 'like', '%'.$search.'%');
+                        ->orWhere('subtitle', 'like', '%'.$search.'%');
                 });
             })
             ->orderBy('name')
@@ -98,7 +98,7 @@ class PackageController extends Controller
     public function createRegular()
     {
         $data['package'] = null;
-        $data['page_title'] = "Add Regular Package";
+        $data['page_title'] = 'Add Regular Package';
         $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
         $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -248,11 +248,46 @@ class PackageController extends Controller
 
     public function edit(Package $package)
     {
-        $packages = Package::with(['variants.prices', 'vehicleTypes', 'images'])->orderBy('name')->get();
-        $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
-        $package->load('vehicleTypes');
+        $data['page_title'] = 'Packages Update';
+        $data['page_desc'] = 'Packages Update';
 
-        return view('admin.add-packege-management', compact('packages', 'package', 'vehicleTypes'));
+        // Basic data
+        $data['package'] = $package->load(['packagePrices', 'vehicleTypes', 'images']);
+        $data['items'] = Package::with(['packagePrices', 'vehicleTypes', 'images'])
+            ->orderBy('name')
+            ->get();
+
+        // Dropdown items
+        $data['vehicleTypes'] = VehicleType::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $data['packageTypes'] = PackageType::whereNotNull('parent_id')
+            ->active()
+            ->get();
+
+        $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+        // Selected days from existing prices
+        $selectedDays = $package->packagePrices->pluck('day')->toArray();
+        $data['selectedDays'] = $selectedDays;
+
+        // Day-wise price mapping - ensure all prices are properly formatted
+        $prices = [];
+        foreach ($package->packagePrices as $price) {
+            $prices[$price->day] = (float) $price->price;
+        }
+
+        // Initialize all days with null if not set
+        foreach ($data['days'] as $day) {
+            if (! isset($prices[$day])) {
+                $prices[$day] = null;
+            }
+        }
+
+        $data['dayPrices'] = $prices;
+
+        return view('admin.package.edit', $data);
     }
 
     public function show(Package $package)
@@ -269,6 +304,7 @@ class PackageController extends Controller
     public function editRegular(Package $package)
     {
         $package->load(['variants.prices', 'images']);
+
         return view('admin.regular-packege-management', compact('package'));
     }
 
@@ -524,6 +560,7 @@ class PackageController extends Controller
         $package->variants()->delete();
         $package->delete();
         ToastMagic::success('Package deleted successfully!');
+
         return redirect()->route('admin.packages.index');
     }
 

@@ -11,7 +11,7 @@
                 <p class="text-muted mb-0">{{ $page_desc }}</p>
             </div>
             <div class="col-auto">
-                <span class="badge bg-primary rounded-pill">{{ $items->total() }} package</span>
+                <span class="badge bg-primary rounded-pill">{{ $items->count() }} package</span>
             </div>
         </div>
 
