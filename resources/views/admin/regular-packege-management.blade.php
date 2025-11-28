@@ -278,7 +278,7 @@
                 </div>
                 <div id="priceContainer" class="row"></div>
                 <div class="mt-3">
-                    <label class="fw-semibold">Apply Same Price to All</label>
+                    <label class="fw-semibold">Apply Same Price to Days</label>
                     <input type="number" class="form-control" id="applyAllPrice" placeholder="e.g. 1200">
                     <button type="button" class="btn btn-sm btn-dark mt-2" id="applyAllBtn">Apply</button>
                 </div>
