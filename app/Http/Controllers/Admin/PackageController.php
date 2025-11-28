@@ -18,9 +18,21 @@ use Throwable;
 
 class PackageController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data['items'] = Package::with(['packagePrices', 'vehicleTypes.images', 'images'])->orderBy('name')->paginate(10);
+        $data['items'] = Package::with(['packagePrices', 'vehicleTypes.images', 'images'])
+            ->when($request->has('package_type_id'), function ($query) use ($request) {
+                $query->where('package_type_id', $request->package_type_id);
+            })
+            ->when($request->has('search'), function ($query) use ($request) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%'.$search.'%')
+                      ->orWhere('subtitle', 'like', '%'.$search.'%');
+                });
+            })
+            ->orderBy('name')
+            ->paginate(10);
         $data['page_title'] = 'Packages';
         $data['page_desc'] = null;
         $data['packageTypes'] = PackageType::whereNull('parent_id')->active()->get();

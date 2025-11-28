@@ -18,34 +18,41 @@
         <!-- Search & Filter Section -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <form method="GET" action="{{ url('admin/packege/list') }}">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-5">
-                            <label class="form-label small text-muted mb-1">Search {{ $page_title }}</label>
-                            <input type="text" name="search" class="form-control" placeholder="Search by name, price "
+                <form action="{{ url('admin/packege/list') }}" method="GET">
+                    <div class="row g-3">
+
+                        <!-- Search -->
+                        <div class="col-md-4">
+                            <input type="text" name="search" class="form-control" placeholder="Search package name..."
                                 value="{{ request('search') }}">
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted mb-1">Filter by Type</label>
-                            <select name="type" class="form-select">
+
+                        <!-- Package Type -->
+                        <div class="col-md-3">
+                            <select name="package_type_id" class="form-select">
                                 <option value="">All Types</option>
-                                @foreach ($packageTypes as $packageType)
-                                    <option value="{{ $packageType->slug }}"
-                                        {{ request('type') == $packageType->slug ? 'selected' : '' }}>
-                                        {{ $packageType->name }}</option>
+                                @foreach ($packageTypes as $type)
+                                    <option value="{{ $type->id }}"
+                                        {{ request('package_type_id') == $type->id ? 'selected' : '' }}>
+                                        {{ $type->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
+
+                        <!-- Buttons -->
                         <div class="col-md-3">
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn jatio-bg-color text-white flex-fill">
                                     <i class="bi bi-search me-2"></i>Search
                                 </button>
+
                                 <a href="{{ url('admin/packege/list') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-lg me-2"></i>Clear
                                 </a>
                             </div>
                         </div>
+
                     </div>
                 </form>
             </div>

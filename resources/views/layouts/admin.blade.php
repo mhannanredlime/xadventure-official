@@ -109,7 +109,7 @@
 <body>
     <div class="main-wrapper d-flex">
 
-        @include('../inc/admin_sidebar')
+        @include('inc.admin_sidebar')
 
         {{-- ================= Top Navbar ================= --}}
         <nav class="navbar navbar-expand-lg bg-white shadow-sm fixed-top">
