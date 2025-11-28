@@ -94,7 +94,7 @@
                                         {{ $package->name }} <br>
                                         <small>{{ $package->subtitle }}</small>
                                     </td>
-                                    <td>{{ $package->display_starting_price }}</td>
+                                    <td>৳ {{ $package->display_starting_price }}</td>
                                     <td><span
                                             class="rounded-pill badge {{ $package->is_active ? 'bg-success' : 'bg-danger' }}">{{ $package->is_active ? 'Active' : 'Inactive' }}</span>
                                     </td>
