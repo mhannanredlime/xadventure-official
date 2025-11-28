@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\PackagePrice;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Package extends Model
 {
@@ -15,6 +14,7 @@ class Package extends Model
 
     protected $fillable = [
         'name',
+        'package_type_id',
         'subtitle',
         'type',
         'min_participants',
@@ -27,7 +27,7 @@ class Package extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     public function variants(): HasMany
@@ -214,10 +214,69 @@ class Package extends Model
             return $firstImage->url;
         }
     }
+
     // Newly Added Method
     public function packagePrices()
     {
         return $this->hasMany(PackagePrice::class);
     }
 
+    protected static function booted()
+    {
+        static::saving(function ($package) {
+            if ($package->max_participants <= $package->min_participants) {
+                throw new \Exception('Maximum participants must be greater than minimum participants.');
+            }
+        });
+
+        static::deleting(function ($package) {
+
+            // Delete variant prices first (because they depend on variants)
+            foreach ($package->variants as $variant) {
+                $variant->prices()->delete();
+            }
+
+            // Delete variants
+            $package->variants()->delete();
+
+            // Delete all promo codes
+            $package->promoCodes()->delete();
+
+            // Delete package prices
+            $package->packagePrices()->delete();
+
+            // Delete morph images
+            foreach ($package->images as $image) {
+                $image->delete();
+            }
+
+            // Delete primary image if exists
+            if ($package->primaryImage) {
+                $package->primaryImage->delete();
+            }
+
+            // Detach vehicle types (pivot table)
+            $package->vehicleTypes()->detach();
+        });
+    }
+
+    public function syncPackagePrices($activeDays = null, $dayPrices = null)
+    {
+        $activeDays = $activeDays ?? json_decode($this->active_days ?? '[]', true) ?: [];
+        $dayPrices = $dayPrices ?? json_decode($this->day_prices ?? '[]', true) ?: [];
+
+        $this->packagePrices()->delete();
+
+        if (! empty($activeDays) && is_array($activeDays)) {
+            foreach ($activeDays as $index => $day) {
+                PackagePrice::create([
+                    'package_id' => $this->id,
+                    'type' => in_array(strtolower($day), ['fri', 'sat']) ? 'weekend' : 'weekday',
+                    'day' => strtolower($day),
+                    'price' => $dayPrices[$index] ?? 0,
+                    'is_active' => true,
+                ]);
+            }
+        }
+    }
 }

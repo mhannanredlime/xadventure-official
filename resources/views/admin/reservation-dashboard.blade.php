@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </select>
                       </div>
 
-                      <div class="mb-3">
+                      {{-- <div class="mb-3">
                         <label for="package_variant_id" class="form-label fw-semibold">Package Variant</label>
                         <select class="form-select form-control-rounded" id="package_variant_id" name="package_variant_id" required>
                           <option value="">Select Package Variant</option>
@@ -478,7 +478,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </option>
                           @endforeach
                         </select>
-                      </div>
+                      </div> --}}
 
                       <div class="mb-3">
                         <label for="schedule_slot_id" class="form-label fw-semibold">Schedule Slot</label>

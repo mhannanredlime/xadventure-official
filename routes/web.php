@@ -345,7 +345,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/regular-packege-management/{package}/edit', [PackageController::class, 'editRegular'])->name('regular-packege-management.edit');
         Route::put('/regular-packege-management/{package}', [PackageController::class, 'updateRegular'])->name('regular-packege-management.update');
 
-        Route::get('/add-packege-management', [PackageController::class, 'index'])->name('add-packege-management');
+        Route::get('/packege/list', [PackageController::class, 'index'])->name('packege.list');
     });
 
     Route::middleware(['permission:reservations.view'])->group(function () {

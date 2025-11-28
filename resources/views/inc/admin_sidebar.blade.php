@@ -78,7 +78,7 @@
             @can('packages.view')
                 <li class="nav-item">
                     <a href="#sampleSubmenu"
-                        class="nav-link d-flex justify-content-between align-items-center {{ request()->is('admin/add-packege-management*') || request()->is('admin/packages*') ? 'active' : '' }}"
+                        class="nav-link d-flex justify-content-between align-items-center   {{ request()->is('admin/packages*') ? 'active' : '' }}"
                         data-bs-toggle="collapse" aria-expanded="false">
                         <div>
                             <i class="bi bi-menu-button-wide me-2"></i>
@@ -88,7 +88,7 @@
                     </a>
                     <ul class="collapse list-unstyled ps-3" id="sampleSubmenu">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url('/admin/add-packege-management') }}">
+                            <a class="nav-link" href="{{ route('admin.packege.list') }}">
                                 <i class="bi bi-circle me-2"></i>All Packages
                             </a>
                         </li>

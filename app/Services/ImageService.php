@@ -20,7 +20,6 @@ class ImageService
 
         foreach ($files as $index => $file) {
             if ($file && $file->isValid()) {
-                // Check if this should be the primary image (first image if no existing images)
                 $isPrimary = ($existingImageCount === 0 && $index === 0);
 
                 $image = $this->uploadSingleImage($model, $file, $folder, $createThumbnails, $index, $isPrimary);
@@ -34,11 +33,11 @@ class ImageService
     /**
      * Upload a single image
      */
-    public function uploadSingleImage($model, UploadedFile $file, string $folder = 'images', bool $createThumbnail = true, int $sortOrder = 0, bool $isPrimary = null): Image
+    public function uploadSingleImage($model, UploadedFile $file, string $folder = 'images', bool $createThumbnail = true, int $sortOrder = 0, ?bool $isPrimary = null): Image
     {
         // Generate unique filename
         $filename = $this->generateUniqueFilename($file);
-        $path = $folder . '/' . $filename;
+        $path = $folder.'/'.$filename;
 
         // Store the original image directly in public/storage
         $filePath = $file->storeAs($folder, $filename, 'public_storage');
@@ -48,12 +47,10 @@ class ImageService
             $this->createThumbnail($filePath, $folder);
         }
 
-        // Check if this should be the primary image (if not explicitly set)
         if ($isPrimary === null) {
             $isPrimary = $model->images()->count() === 0;
         }
 
-        // Get MIME type with fallback for missing fileinfo extension
         $mimeType = $this->getMimeTypeWithFallback($file);
 
         // Create image record
@@ -77,10 +74,10 @@ class ImageService
     {
         try {
             $pathInfo = pathinfo($imagePath);
-            $thumbnailPath = $pathInfo['dirname'] . '/thumbnails/' . $pathInfo['basename'];
+            $thumbnailPath = $pathInfo['dirname'].'/thumbnails/'.$pathInfo['basename'];
 
             // Create thumbnails directory if it doesn't exist
-            Storage::disk('public_storage')->makeDirectory($pathInfo['dirname'] . '/thumbnails');
+            Storage::disk('public_storage')->makeDirectory($pathInfo['dirname'].'/thumbnails');
 
             // For now, just copy the original image as thumbnail
             // TODO: Implement proper thumbnail creation with Intervention Image
@@ -88,20 +85,15 @@ class ImageService
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to create thumbnail: ' . $e->getMessage());
+            Log::error('Failed to create thumbnail: '.$e->getMessage());
+
             return false;
         }
     }
 
-    /**
-     * Generate unique filename
-     */
     private function generateUniqueFilename(UploadedFile $file): string
     {
-        $extension = $file->getClientOriginalExtension();
-        $filename = Str::random(40) . '.' . $extension;
-
-        return $filename;
+        return (string) Str::uuid().'.'.$file->getClientOriginalExtension();
     }
 
     /**
@@ -112,9 +104,11 @@ class ImageService
         try {
             // Delete the image record (this will trigger the model's boot method to delete files)
             $image->delete();
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to delete image: ' . $e->getMessage());
+            Log::error('Failed to delete image: '.$e->getMessage());
+
             return false;
         }
     }
@@ -133,7 +127,8 @@ class ImageService
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to set primary image: ' . $e->getMessage());
+            Log::error('Failed to set primary image: '.$e->getMessage());
+
             return false;
         }
     }
@@ -147,9 +142,11 @@ class ImageService
             foreach ($imageIds as $index => $imageId) {
                 Image::where('id', $imageId)->update(['sort_order' => $index]);
             }
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to reorder images: ' . $e->getMessage());
+            Log::error('Failed to reorder images: '.$e->getMessage());
+
             return false;
         }
     }
@@ -161,9 +158,11 @@ class ImageService
     {
         try {
             $image->update(['alt_text' => $altText]);
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to update alt text: ' . $e->getMessage());
+            Log::error('Failed to update alt text: '.$e->getMessage());
+
             return false;
         }
     }

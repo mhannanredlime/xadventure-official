@@ -2,56 +2,45 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreRegularPackageRequest;
 use App\Models\Package;
 use App\Models\PackageType;
 use App\Models\VehicleType;
-use Illuminate\Http\Request;
 use App\Services\ImageService;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\StoreRegularPackage;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
-
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class PackageController extends Controller
 {
     public function index()
     {
-        $packages = Package::with(['variants.prices', 'vehicleTypes.images', 'images'])->orderBy('name')->get();
+        $data['items'] = Package::with(['packagePrices', 'vehicleTypes.images', 'images'])->orderBy('name')->paginate(10);
+        $data['page_title'] = 'Packages';
+        $data['page_desc'] = null;
+        $data['packageTypes'] = PackageType::whereNull('parent_id')->active()->get();
 
-        // Group regular packages by their variant type
-        $regularPackages = $packages->where('type', 'regular');
-        $groupedRegularPackages = [
-            'Single' => collect(),
-            'Bundle' => collect(),
-            'Group' => collect()
-        ];
-
-        foreach ($regularPackages as $package) {
-            $firstVariant = $package->variants->first();
-            if ($firstVariant && isset($groupedRegularPackages[$firstVariant->variant_name])) {
-                $groupedRegularPackages[$firstVariant->variant_name]->push($package);
-            }
-        }
-
-        return view('admin.add-packege-management', compact('packages', 'groupedRegularPackages'));
+        return view('admin.add-packege-management', $data);
     }
 
     public function create()
     {
         $packages = Package::with(['variants.prices', 'vehicleTypes.images', 'images'])->orderBy('name')->get();
         $vehicleTypes = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+
         return view('admin.add-packege-management', compact('packages', 'vehicleTypes'));
     }
-
-    
 
     public function createAtvUtv()
     {
         $vehicleTypes = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
         $package = null;
+
         return view('admin.atvutv-packege-management', compact('vehicleTypes', 'package'));
     }
 
@@ -82,11 +71,11 @@ class PackageController extends Controller
                 'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
             ]);
 
-            $imageService = new ImageService();
+            $imageService = new ImageService;
             $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
         }
 
-        if (!empty($vehicleTypeIds)) {
+        if (! empty($vehicleTypeIds)) {
             $package->vehicleTypes()->attach($vehicleTypeIds);
         }
 
@@ -97,42 +86,60 @@ class PackageController extends Controller
     public function createRegular()
     {
         $data['package'] = null;
-        $data['packageTypes'] =  PackageType::whereNotNull('parent_id')->active()->get();
+        $data['page_title'] = "Add Regular Package";
+        $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
+        $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
         return view('admin.regular-packege-management', $data);
     }
 
-    // public function storeRegular(StoreRegularPackage $request)
-    public function storeRegular(Request $request)
+    public function storeRegular(StoreRegularPackageRequest $request)
     {
-        dd($request->all());
-        $package = Package::create([
-            'name' => $validated['packageName'],
-            'subtitle' => $validated['subTitle'],
-            'type' => 'regular',
-            'details' => $validated['details'],
-            'display_starting_price' => $validated['displayStartingPrice'] ?? null,
-            'min_participants' => $validated['minParticipant'],
-            'max_participants' => $validated['maxParticipant']
-        ]);
+        $validated = $request->validated();
+        $activeDays = json_decode($request->input('active_days', '[]'), true) ?: [];
+        $dayPrices = json_decode($request->input('day_prices', '[]'), true) ?: [];
 
-        if ($request->hasFile('images')) {
-            $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,bmp,svg|max:5120',
+        DB::beginTransaction();
+        try {
+            // ---------- Create Package ----------
+            $package = Package::create([
+                'name' => $validated['packageName'],
+                'subtitle' => $validated['subTitle'] ?? null,
+                'package_type_id' => $validated['packageType'],
+                'details' => $validated['details'] ?? null,
+                'display_starting_price' => $validated['displayStartingPrice'] ?? null,
+                'min_participants' => $validated['minParticipant'],
+                'max_participants' => $validated['maxParticipant'],
+                'is_active' => true,
             ]);
-            $imageService = new ImageService();
-            $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
-        }
 
-        
-        ToastMagic::success('Package created successfully!');
-        return redirect()->route('admin.add-packege-management');
+            // ---------- Upload Images ----------
+            if ($request->hasFile('images')) {
+                $imageService = new ImageService;
+                $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
+            }
+
+            if (! empty($activeDays) && ! empty($dayPrices)) {
+                $package->syncPackagePrices($activeDays, $dayPrices);
+            }
+            DB::commit();
+            ToastMagic::success('Package created successfully!');
+
+            return redirect()->route('admin.packege.list');
+
+        } catch (Throwable $e) {
+            DB::rollBack();
+            ToastMagic::error('Something went wrong while creating the package.');
+
+            return back()->withInput();
+        }
     }
 
     public function storeAtvUtv(Request $request)
     {
         // Get available vehicle types for validation
         $vehicleTypes = VehicleType::where('is_active', true)->pluck('name')->toArray();
-        $vehicleTypeValidation = 'required|in:' . implode(',', $vehicleTypes);
+        $vehicleTypeValidation = 'required|in:'.implode(',', $vehicleTypes);
 
         $validated = $request->validate([
             'vehicleType' => $vehicleTypeValidation,
@@ -165,8 +172,6 @@ class PackageController extends Controller
             'selected_weekend.in' => 'The weekend selection is invalid.',
         ]);
 
-
-
         // Determine package type - map vehicle type to package type
         $packageType = strtolower($validated['vehicleType']);
         // Map vehicle types to package types - you can customize this mapping as needed
@@ -181,7 +186,7 @@ class PackageController extends Controller
 
         // Get the vehicle type and associate it with the package
         $vehicleType = VehicleType::where('name', $validated['vehicleType'])->first();
-        if (!$vehicleType) {
+        if (! $vehicleType) {
             return back()->withErrors(['vehicleType' => 'Selected vehicle type not found.']);
         }
 
@@ -234,19 +239,24 @@ class PackageController extends Controller
         $packages = Package::with(['variants.prices', 'vehicleTypes', 'images'])->orderBy('name')->get();
         $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
         $package->load('vehicleTypes');
+
         return view('admin.add-packege-management', compact('packages', 'package', 'vehicleTypes'));
     }
 
     public function show(Package $package)
     {
-        $package->load(['variants.prices', 'vehicleTypes']);
+        $package->load([
+            'vehicleTypes.images',
+            'images',
+            'packagePrices', // ADD THIS
+        ]);
+
         return view('admin.package-show', compact('package'));
     }
 
     public function editRegular(Package $package)
     {
         $package->load(['variants.prices', 'images']);
-        // dd($package);
         return view('admin.regular-packege-management', compact('package'));
     }
 
@@ -254,6 +264,7 @@ class PackageController extends Controller
     {
         $vehicleTypes = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
         $package->load(['variants.prices', 'images']);
+
         return view('admin.atvutv-packege-management', compact('package', 'vehicleTypes'));
     }
 
@@ -327,19 +338,19 @@ class PackageController extends Controller
                     return [
                         'name' => $file->getClientOriginalName(),
                         'size' => $file->getSize(),
-                        'mime' => $this->getMimeTypeWithFallback($file)
+                        'mime' => $this->getMimeTypeWithFallback($file),
                     ];
-                }, $request->file('images'))
+                }, $request->file('images')),
             ]);
 
-            $imageService = new ImageService();
+            $imageService = new ImageService;
             $uploadedImages = $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
 
             Log::info('Images uploaded successfully:', [
                 'count' => count($uploadedImages),
                 'image_ids' => array_map(function ($image) {
                     return $image->id;
-                }, $uploadedImages)
+                }, $uploadedImages),
             ]);
         } else {
             Log::info('No images received in updateRegular');
@@ -391,7 +402,7 @@ class PackageController extends Controller
     {
         // Get available vehicle types for validation
         $vehicleTypes = VehicleType::where('is_active', true)->pluck('name')->toArray();
-        $vehicleTypeValidation = 'required|in:' . implode(',', $vehicleTypes);
+        $vehicleTypeValidation = 'required|in:'.implode(',', $vehicleTypes);
 
         $validated = $request->validate([
             'vehicleType' => $vehicleTypeValidation,
@@ -437,7 +448,7 @@ class PackageController extends Controller
 
         // Get the vehicle type and associate it with the package
         $vehicleType = VehicleType::where('name', $validated['vehicleType'])->first();
-        if (!$vehicleType) {
+        if (! $vehicleType) {
             return back()->withErrors(['vehicleType' => 'Selected vehicle type not found.']);
         }
 
@@ -497,11 +508,11 @@ class PackageController extends Controller
         if ($package->image_path) {
             Storage::disk('public_storage')->delete($package->image_path);
         }
-
+        $package->packagePrices()->delete();
+        $package->variants()->delete();
         $package->delete();
-
-        return redirect()->route('admin.packages.index')
-            ->with('success', 'Package deleted successfully.');
+        ToastMagic::success('Package deleted successfully!');
+        return redirect()->route('admin.packages.index');
     }
 
     /**
