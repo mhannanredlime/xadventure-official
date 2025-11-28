@@ -6,23 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('package_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->string('slug')->nullable();
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->string('name');
+            $table->string('slug')->unique()->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            // parent reference
+            $table->foreign('parent_id')
+                  ->references('id')->on('package_types')
+                  ->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('package_types');

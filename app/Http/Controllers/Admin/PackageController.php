@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Package;
+use App\Models\PackageType;
 use App\Models\VehicleType;
-use App\Services\ImageService;
 use Illuminate\Http\Request;
+use App\Services\ImageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreRegularPackage;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 
 
@@ -44,11 +46,7 @@ class PackageController extends Controller
         return view('admin.add-packege-management', compact('packages', 'vehicleTypes'));
     }
 
-    public function createRegular()
-    {
-        $package = null;
-        return view('admin.regular-packege-management', compact('package'));
-    }
+    
 
     public function createAtvUtv()
     {
@@ -96,59 +94,17 @@ class PackageController extends Controller
             ->with('success', 'Package created successfully.');
     }
 
+    public function createRegular()
+    {
+        $data['package'] = null;
+        $data['packageTypes'] =  PackageType::whereNotNull('parent_id')->active()->get();
+        return view('admin.regular-packege-management', $data);
+    }
+
+    // public function storeRegular(StoreRegularPackage $request)
     public function storeRegular(Request $request)
     {
         dd($request->all());
-        $validated = $request->validate([
-            'packageName' => 'required|string|max:255',
-            'subTitle' => 'nullable|string|max:255',
-            'packageType' => 'required|in:Single,Bundle,Group',
-            'details' => 'nullable|string',
-            'displayStartingPrice' => 'required|numeric|min:50',
-            'minParticipant' => 'required|integer|min:1',
-            'maxParticipant' => 'required|integer|min:1|gte:minParticipant',
-            'weekdayPrice' => 'required|numeric|min:50',
-            'weekendPrice' => 'required|numeric|min:50',
-            'selected_weekday' => 'nullable|string|in:sunday,monday,tuesday,wednesday,thursday',
-            'selected_weekend' => 'nullable|string|in:friday,saturday',
-            'images' => 'required|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp,bmp,svg|max:5120',
-        ], [
-            // Required field messages
-            'packageName.required' => 'Package name is required.',
-            'packageType.required' => 'Package type is required.',
-            'displayStartingPrice.required' => 'Display price is required.',
-            'minParticipant.required' => 'Minimum participants is required.',
-            'maxParticipant.required' => 'Maximum participants is required.',
-            'weekdayPrice.required' => 'Weekday price is required.',
-            'weekendPrice.required' => 'Weekend price is required.',
-
-            // Numeric and min validation messages
-            'displayStartingPrice.numeric' => 'Display price must be a valid number.',
-            'displayStartingPrice.min' => 'Display price must be at least 50.',
-            'minParticipant.integer' => 'Minimum participants must be a valid number.',
-            'minParticipant.min' => 'Minimum participants must be at least 1.',
-            'maxParticipant.integer' => 'Maximum participants must be a valid number.',
-            'maxParticipant.min' => 'Maximum participants must be at least 1.',
-            'maxParticipant.gte' => 'Maximum participants must be greater than or equal to minimum participants.',
-            'weekdayPrice.numeric' => 'Weekday price must be a valid number.',
-            'weekdayPrice.min' => 'Weekday price must be at least 50.',
-            'weekendPrice.numeric' => 'Weekend price must be a valid number.',
-            'weekendPrice.min' => 'Weekend price must be at least 50.',
-
-            // Enum validation messages
-            'packageType.in' => 'Invalid package type selected.',
-            'selected_weekday.in' => 'Invalid weekday selected.',
-            'selected_weekend.in' => 'Invalid weekend day selected.',
-
-            // Image validation messages
-            'images.*.image' => 'Each uploaded file must be an image.',
-            'images.*.mimes' => 'Allowed image formats: jpeg, png, jpg, webp, bmp, svg.',
-            'images.*.max' => 'Maximum image size allowed is 5MB.',
-        ]);
-
-
-        // Create package
         $package = Package::create([
             'name' => $validated['packageName'],
             'subtitle' => $validated['subTitle'],
@@ -156,38 +112,18 @@ class PackageController extends Controller
             'details' => $validated['details'],
             'display_starting_price' => $validated['displayStartingPrice'] ?? null,
             'min_participants' => $validated['minParticipant'],
-            'max_participants' => $validated['maxParticipant'],
-            'selected_weekday' => $validated['selected_weekday'] ,
-            'selected_weekend' => $validated['selected_weekend'],
-            'is_active' => true,
+            'max_participants' => $validated['maxParticipant']
         ]);
 
-        // Handle multiple image uploads with extended format support
         if ($request->hasFile('images')) {
-            // Validate image formats
             $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,bmp,svg|max:5120',
             ]);
-
             $imageService = new ImageService();
             $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
         }
 
-        // Create variant based on package type
-        $variantName = $validated['packageType'];
-        $capacity = $validated['packageType'] === 'Single' ? 1 : ($validated['packageType'] === 'Bundle' ? 2 : 4);
-
-        $variant = $package->variants()->create([
-            'variant_name' => $variantName,
-            'capacity' => $capacity,
-            'is_active' => true,
-        ]);
-
-        // Create prices
-        $variant->prices()->createMany([
-            ['price_type' => 'weekday', 'amount' => $validated['weekdayPrice']],
-            ['price_type' => 'weekend', 'amount' => $validated['weekendPrice']],
-        ]);
+        
         ToastMagic::success('Package created successfully!');
         return redirect()->route('admin.add-packege-management');
     }

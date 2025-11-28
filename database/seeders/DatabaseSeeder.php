@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             // Step 3: Seed packages and related data
             $this->call([
                 PackageSeeder::class,
-                UpdatePackageVehicleTypesSeeder::class,
+                // UpdatePackageVehicleTypesSeeder::class,
                 RegularPackageSeeder::class,
             ]);
 

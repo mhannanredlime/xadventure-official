@@ -145,7 +145,7 @@
         @endif
 
         <form id="packageForm" method="POST"
-            action="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : route('admin.regular-packege-management.store') }}"
+            action="{{ isset($package) ? route('admin.regular-packege-management.update', $package->id ?? 1) : route('admin.regular-packege-management.store') }}"
             enctype="multipart/form-data" novalidate>
             @csrf
             @if (isset($package))
@@ -158,8 +158,7 @@
                 <div class="row">
                     <div class="col-12">
                         <label class="form-label">Upload Package Images (Max 4 images)</label>
-                        <div id="multiple-image-upload"
-                            data-model-type="App\Models\Package"
+                        <div id="multiple-image-upload" data-model-type="App\Models\Package"
                             data-model-id="{{ $package->id ?? '' }}"
                             data-upload-url="{{ route('admin.regular-packege-management.store') }}"
                             data-update-url="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : '' }}"
@@ -169,10 +168,10 @@
                             data-alt-text-url="{{ url('admin/images') }}/:id/alt-text"
                             data-delete-url="{{ url('admin/images') }}/:id"
                             data-existing-images="{{ isset($package) ? $package->images->toJson() : '[]' }}"
-                            data-max-files="4"
-                            data-max-file-size="{{ 5 * 1024 * 1024 }}">
+                            data-max-files="4" data-max-file-size="{{ 5 * 1024 * 1024 }}">
                         </div>
-                        <input type="file" id="package_images_input" name="images[]" multiple accept="image/*" style="display:none;">
+                        <input type="file" id="package_images_input" name="images[]" multiple accept="image/*"
+                            style="display:none;">
                     </div>
                 </div>
             </div>
@@ -200,12 +199,13 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Package Type <span class="text-danger">*</span></label>
-                        <select class="form-select @error('packageType') is-invalid @enderror" name="packageType" required>
+
+                        <select class="form-select" name="packageType" required>
                             <option value="">Select Package Type</option>
-                            @foreach (['Single', 'Bundle', 'Group'] as $type)
-                                <option value="{{ $type }}"
-                                    {{ old('packageType', optional($package?->variants->first())->variant_name) == $type ? 'selected' : '' }}>
-                                    {{ $type }} Package</option>
+                            @foreach ($packageTypes as $type)
+                                <option value="{{ $type->id }}"
+                                    {{ old('packageType', $package->package_type_id ?? '') == $type->id ? 'selected' : '' }}>
+                                    {{ $type->name }}</option>
                             @endforeach
                         </select>
                         @error('packageType')
@@ -284,7 +284,7 @@
                 </div>
                 <input type="hidden" name="active_days" id="activeDaysInput"
                     value="{{ old('active_days', json_encode($selectedDays)) }}">
-                <input type="hidden" name="day_prices" id="dayPricesInput"
+                <input type="hidden" name="day_prices[]" id="dayPricesInput"
                     value="{{ old('day_prices', json_encode($package->day_prices ?? [])) }}">
             </div>
 
@@ -295,103 +295,176 @@
         </form>
     </main>
 @endsection
-
 @push('scripts')
-    <script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>
-    <script src="{{ asset('admin/js/gallery-manager.js') }}"></script>
-    <script>
+<script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>
+<script src="{{ asset('admin/js/gallery-manager.js') }}"></script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('multiple-image-upload');
-    const realFileInput = document.getElementById('package_images_input');
-    const galleryInput = document.getElementById('gallery_images_input');
+
+    // -------------------------------------------------
+    // Base Variables
+    // -------------------------------------------------
     const form = document.getElementById('packageForm');
     const submitBtn = document.getElementById('submitBtn');
+    const realFileInput = document.getElementById('package_images_input');
+    const galleryInput = document.getElementById('gallery_images_input');
 
-    // Initialize MultipleImageUpload instance
+    const container = document.getElementById('multiple-image-upload');
     const uploader = new MultipleImageUpload(container.id, {
         maxFiles: parseInt(container.dataset.maxFiles) || 4,
         maxFileSize: parseInt(container.dataset.maxFileSize) || 5 * 1024 * 1024
     });
+
     window.multipleImageUploadInstance = uploader;
 
-    submitBtn.addEventListener('click', function(e) {
+    // -------------------------------------------------
+    // Day-wise Pricing Variables
+    // -------------------------------------------------
+    let selectedDays = new Set({!! json_encode($selectedDays) !!});
+    let prices = {!! json_encode($package->day_prices ?? []) !!};
+    const priceContainer = $("#priceContainer");
+
+    // -------------------------------------------------
+    // Initialize prices for all selected days
+    // -------------------------------------------------
+    function initializePrices() {
+        [...selectedDays].forEach(day => {
+            // If day doesn't exist in prices or price is empty, set to null
+            if (prices[day] === undefined || prices[day] === '') {
+                prices[day] = null;
+            }
+        });
+    }
+
+    // Call initialization to ensure all selected days have prices
+    initializePrices();
+
+    // -------------------------------------------------
+    // Render Price Inputs
+    // -------------------------------------------------
+    function renderPriceInputs() {
+        priceContainer.empty();
+
+        [...selectedDays].forEach(day => {
+            let isWeekend = ['fri', 'sat'].includes(day);
+            let weekendBadge = isWeekend
+                ? '<span class="badge bg-warning text-dark ms-2">Weekend</span>'
+                : '';
+
+            let existingValue = prices[day] !== undefined && prices[day] !== null ? prices[day] : '';
+
+            priceContainer.append(`
+                <div class="col-12 col-sm-6 col-md-4 mb-3">
+                    <label class="form-label text-uppercase">
+                        ${day} Price (৳) ${weekendBadge}
+                    </label>
+                    <input 
+                        type="number" 
+                        class="form-control day-price-input"
+                        data-day="${day}"
+                        value="${existingValue}"
+                        placeholder="Enter price"
+                    >
+                </div>
+            `);
+        });
+    }
+
+    renderPriceInputs();
+
+    // -------------------------------------------------
+    // Select / Unselect Day
+    // -------------------------------------------------
+    $(".day-checkbox").on("change", function () {
+        const day = $(this).val();
+
+        if (this.checked) {
+            selectedDays.add(day);
+            // Initialize price for newly selected day
+            if (prices[day] === undefined) {
+                prices[day] = null;
+            }
+        } else {
+            selectedDays.delete(day);
+            delete prices[day];
+        }
+
+        renderPriceInputs();
+    });
+
+    // -------------------------------------------------
+    // Update Individual Day Price
+    // -------------------------------------------------
+    $(document).on("input", ".day-price-input", function () {
+        const day = $(this).data("day");
+        const val = $(this).val();
+
+        if (val !== "" && val !== null) {
+            prices[day] = Number(val);
+        } else {
+            prices[day] = null;
+        }
+    });
+
+    // -------------------------------------------------
+    // Apply One Price to All Days
+    // -------------------------------------------------
+    $("#applyAllBtn").on("click", function () {
+        const val = $("#applyAllPrice").val();
+        
+        [...selectedDays].forEach(day => {
+            if (val !== "" && val !== null) {
+                prices[day] = Number(val);
+            } else {
+                prices[day] = null;
+            }
+        });
+
+        renderPriceInputs();
+    });
+
+    // -------------------------------------------------
+    // FINAL SUBMIT HANDLER (One and Only)
+    // -------------------------------------------------
+    submitBtn.addEventListener('click', function (e) {
         e.preventDefault();
 
-        // Get all selected files from uploader
-        const selectedFiles = window.multipleImageUploadInstance?.getSelectedFiles() || [];
+        submitBtn.disabled = true;
+        submitBtn.classList.add("btn-loading");
 
-        // Separate new files vs existing gallery images
-        const newFiles = selectedFiles.filter(f => f instanceof File); // newly uploaded
-        const existingImages = selectedFiles.filter(f => f.isGalleryImage); // already uploaded
+        // Convert to array format for backend processing
+        const dayPricesArray = [];
+        [...selectedDays].forEach(day => {
+            const priceValue = prices[day] !== undefined && prices[day] !== null ? prices[day] : null;
+            dayPricesArray.push(priceValue);
+        });
 
-        // Populate real file input
+        // Send hidden day values
+        document.getElementById("activeDaysInput").value = JSON.stringify([...selectedDays]);
+        document.getElementById("dayPricesInput").value = JSON.stringify(dayPricesArray);
+
+        console.log("Submitting active_days:", [...selectedDays]);
+        console.log("Submitting day_prices (array):", dayPricesArray);
+
+        // Handle new and existing images
+        const selectedFiles = uploader.getSelectedFiles() || [];
+        const newFiles = selectedFiles.filter(f => f instanceof File);
+        const existingImages = selectedFiles.filter(f => f.isGalleryImage);
+
         const dt = new DataTransfer();
         newFiles.forEach(f => dt.items.add(f));
         realFileInput.files = dt.files;
 
-        // Populate gallery_images hidden input as JSON
-        galleryInput.value = existingImages.length
-            ? JSON.stringify(existingImages.map(g => g.galleryId || g.id).filter(Boolean))
-            : '';
+        if (galleryInput) {
+            galleryInput.value = JSON.stringify(
+                existingImages.map(g => g.galleryId || g.id).filter(Boolean)
+            );
+        }
 
-        // Submit the form
         form.submit();
     });
+
 });
 </script>
-
-    <script>
-        $(function() {
-            const priceContainer = $("#priceContainer");
-            let selectedDays = new Set({!! json_encode($selectedDays) !!});
-            let prices = {!! json_encode($package->day_prices ?? []) !!};
-
-            function renderPriceInputs() {
-                priceContainer.empty();
-                [...selectedDays].forEach(day => {
-                    let isWeekend = ['fri', 'sat'].includes(day);
-                    let bgClass = isWeekend ? 'border border-warning' : '';
-                    let weekendBadge = isWeekend ?
-                        '<span class="badge bg-warning text-dark ms-2">Weekend</span>' : '';
-                    priceContainer.append(`
-                <div class="col-12 col-sm-6 col-md-4 mb-3">
-                    <label class="form-label text-uppercase">${day} Price (৳) ${weekendBadge}</label>
-                    <input type="number" class="form-control day-price-input ${bgClass}" data-day="${day}" value="${prices[day]??''}" placeholder="Enter price">
-                </div>
-            `);
-                });
-            }
-
-            renderPriceInputs();
-
-            $(".day-checkbox").on("change", function() {
-                const day = $(this).val();
-                if (this.checked) selectedDays.add(day);
-                else {
-                    selectedDays.delete(day);
-                    delete prices[day];
-                }
-                renderPriceInputs();
-            });
-
-            $(document).on("input", ".day-price-input", function() {
-                const day = $(this).data('day');
-                prices[day] = $(this).val();
-            });
-
-            $("#applyAllBtn").on("click", function() {
-                const val = $("#applyAllPrice").val();
-                if (!val) return;
-                [...selectedDays].forEach(day => prices[day] = val);
-                renderPriceInputs();
-            });
-
-            $("#submitBtn").click(function() {
-                $(this).prop('disabled', true).addClass('btn-loading');
-                $("#activeDaysInput").val(JSON.stringify([...selectedDays]));
-                $("#dayPricesInput").val(JSON.stringify(prices));
-                $("#packageForm").submit();
-            });
-        });
-    </script>
 @endpush

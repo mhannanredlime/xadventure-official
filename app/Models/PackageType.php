@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class PackageType extends Model
 {
-    protected $fillable = ['name', 'slug', 'is_active'];
+    protected $fillable = ['name', 'slug', 'is_active', 'parent_id'];
 
     protected static function boot()
     {
@@ -26,9 +26,28 @@ class PackageType extends Model
         });
     }
 
+    /**
+     * Relationship: Parent type
+     */
+    public function parent()
+    {
+        return $this->belongsTo(PackageType::class, 'parent_id');
+    }
+
+    /**
+     * Relationship: Child types
+     */
+    public function children()
+    {
+        return $this->hasMany(PackageType::class, 'parent_id');
+    }
+
+    /**
+     * Packages for this type
+     */
     public function packages()
     {
-        return $this->hasMany(Package::class, 'type', 'id');
+        return $this->hasMany(Package::class, 'package_type_id', 'id');
     }
 
     /**
@@ -38,5 +57,4 @@ class PackageType extends Model
     {
         return $query->where('is_active', true);
     }
-
 }

@@ -7,21 +7,40 @@ use App\Models\PackageType;
 
 class PackageTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $packageTypes = [
-            'Single Package',
-            'Bundle Package',
-            'Group Package',
-        ];
+        // Main categories
+        $regular = PackageType::updateOrCreate(
+            ['slug' => 'regular'],
+            [
+                'name' => 'Regular',
+                'parent_id' => null,
+                'is_active' => true
+            ]
+        );
 
-        foreach ($packageTypes as $type) {
+        $atv = PackageType::updateOrCreate(
+            ['slug' => 'atv'],
+            [
+                'name' => 'ATV',
+                'parent_id' => null,
+                'is_active' => true
+            ]
+        );
+
+        // Regular → Subtypes
+        $subtypes = ['Single', 'Bundle', 'Group'];
+
+        foreach ($subtypes as $subtype) {
             PackageType::updateOrCreate(
-                ['name' => $type],
-                ['is_active' => true]
+                [
+                    'slug' => strtolower($subtype),
+                    'parent_id' => $regular->id,
+                ],
+                [
+                    'name' => $subtype,
+                    'is_active' => true,
+                ]
             );
         }
     }
