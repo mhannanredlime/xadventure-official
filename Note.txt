@@ -14,10 +14,14 @@ php artisan db:seed --class=PackagePriceSeeder
 
 
 
-November 27, 2025 – Task Summary
+November 28, 2025 – Task Summary
 
-* Added `selected_weekday` and `selected_weekend` columns to the `packages` table.
-* Implemented `weekday_prices` and `weekend_prices` in the package form with proper input validation.
-* Updated home page UI and footer design.
-* Attended a meeting with Monir Bhai and documented the business plan.
-* Updated Package Management model to support `weekday_prices` and `weekend_prices`.
+
+1.  Fetch Day Prices:  Load existing day-wise prices from `package_prices` to pre-fill the form.
+2.  Render Inputs:  Show price fields for each selected day in the Blade form, with weekend badges.
+3.  JS Day Selection:  Update price inputs dynamically when days are checked/unchecked.
+4.  Apply All Price:  Let one price apply to all selected days via the “Apply” button.
+5.  Sync Prices:  Save/update day-wise prices in the database using `syncPackagePrices()`.
+6.  Hidden Inputs:  Populate hidden inputs with active days and prices before form submit.
+7.  Test Workflow:  Check that creating/editing packages correctly saves and displays day-wise prices.
+8. Showing all pacakge in the admin panel and apply search and filter by type 

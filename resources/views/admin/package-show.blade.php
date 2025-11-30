@@ -85,12 +85,12 @@
                                 <div class="mt-auto pt-3 border-top d-flex flex-wrap gap-2">
                                     @can('packages.manage')
                                         @if ($package->type === 'regular')
-                                            <a href="{{ route('admin.regular-packege-management.edit', $package) }}"
+                                            <a href="{{ route('admin.packages.edit', $package->id) }}"
                                                 class="btn btn-primary btn-sm">
                                                 <i class="bi bi-pencil me-1"></i> Edit Package
                                             </a>
                                         @else
-                                            <a href="{{ route('admin.atvutv-packege-management.edit', $package) }}"
+                                            <a href="{{ route('admin.atvutv-packege-management.edit', $package->id) }}"
                                                 class="btn btn-primary btn-sm">
                                                 <i class="bi bi-pencil me-1"></i> Edit Package
                                             </a>

@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreRegularPackageRequest;
+use App\Http\Requests\RegularPackageStoreUpdateRequest;
 use App\Models\Package;
+use App\Models\PackagePrice;
 use App\Models\PackageType;
 use App\Models\VehicleType;
 use App\Services\ImageService;
@@ -12,9 +13,7 @@ use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
 
 class PackageController extends Controller
 {
@@ -105,15 +104,23 @@ class PackageController extends Controller
         return view('admin.regular-packege-management', $data);
     }
 
-    public function storeRegular(StoreRegularPackageRequest $request)
+    public function storeRegular(RegularPackageStoreUpdateRequest $request)
     {
         $validated = $request->validated();
-        $activeDays = json_decode($request->input('active_days', '[]'), true) ?: [];
-        $dayPrices = json_decode($request->input('day_prices', '[]'), true) ?: [];
+
+        $activeDays = $validated['active_days'] ?? [];
+        $dayPrices = $validated['day_prices'] ?? [];
+
+        // Validate array lengths match
+        if (count($activeDays) !== count($dayPrices)) {
+            ToastMagic::error('Active days and day prices count mismatch.');
+
+            return back()->withInput();
+        }
 
         DB::beginTransaction();
         try {
-            // ---------- Create Package ----------
+            // Create Package
             $package = Package::create([
                 'name' => $validated['packageName'],
                 'subtitle' => $validated['subTitle'] ?? null,
@@ -125,26 +132,152 @@ class PackageController extends Controller
                 'is_active' => true,
             ]);
 
-            // ---------- Upload Images ----------
+            // Upload Images
             if ($request->hasFile('images')) {
                 $imageService = new ImageService;
                 $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
             }
 
+            // Create Prices
             if (! empty($activeDays) && ! empty($dayPrices)) {
-                $package->syncPackagePrices($activeDays, $dayPrices);
+                $this->createPackagePrices($package, $activeDays, $dayPrices);
             }
+
             DB::commit();
             ToastMagic::success('Package created successfully!');
 
             return redirect()->route('admin.packege.list');
 
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
+            \Log::error('Package creation failed: '.$e->getMessage());
             ToastMagic::error('Something went wrong while creating the package.');
 
             return back()->withInput();
         }
+    }
+
+    public function updateRegular(RegularPackageStoreUpdateRequest $request, Package $package)
+    {
+        $validated = $request->validated();
+
+        $activeDays = $validated['active_days'] ?? [];
+        $dayPrices = $validated['day_prices'] ?? [];
+
+        // Validate array lengths match
+        if (count($activeDays) !== count($dayPrices)) {
+            ToastMagic::error('Active days and day prices count mismatch.');
+
+            return back()->withInput();
+        }
+        // dd($activeDays, $dayPrices, $request->all());
+        DB::beginTransaction();
+        try {
+            // Update Package
+            $package->update([
+                'name' => $validated['packageName'],
+                'subtitle' => $validated['subTitle'] ?? null,
+                'package_type_id' => $validated['packageType'],
+                'details' => $validated['details'] ?? null,
+                'display_starting_price' => $validated['displayStartingPrice'] ?? null,
+                'min_participants' => $validated['minParticipant'],
+                'max_participants' => $validated['maxParticipant'],
+                'is_active' => $validated['is_active'] ?? $package->is_active,
+            ]);
+
+            // Handle Images - Upload new ones
+            if ($request->hasFile('images')) {
+                $imageService = new ImageService;
+                $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
+            }
+
+            // Handle deletion of images if requested
+            if ($request->has('delete_images')) {
+                $imageService = new ImageService;
+                $imageService->deleteSpecificImages($package, $request->delete_images);
+            }
+
+            // Sync Prices
+            $this->syncPackagePrices($package, $activeDays, $dayPrices);
+
+            DB::commit();
+            ToastMagic::success('Regular package updated successfully!');
+
+            return redirect()->route('admin.packege.list');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Package update failed: '.$e->getMessage());
+            ToastMagic::error('Something went wrong while updating the package.');
+
+            return back()->withInput();
+        }
+    }
+
+    /**
+     * Create package prices - for store operation
+     */
+    private function createPackagePrices(Package $package, array $activeDays, array $dayPrices): void
+    {
+        $pricesToCreate = $this->preparePriceData($package->id, $activeDays, $dayPrices);
+
+        if (! empty($pricesToCreate)) {
+            PackagePrice::insert($pricesToCreate);
+        }
+    }
+
+    private function syncPackagePrices(Package $package, array $activeDays, array $dayPrices): void
+    {
+        $pricesToCreate = $this->preparePriceData($package->id, $activeDays, $dayPrices);
+        PackagePrice::where('package_id', $package->id)
+            ->whereNotIn('day', $activeDays)
+            ->delete();
+        foreach ($pricesToCreate as $priceData) {
+            PackagePrice::updateOrCreate(
+                [
+                    'package_id' => $package->id,
+                    'day' => $priceData['day'],
+                ],
+                [
+                    'type' => $priceData['type'],
+                    'price' => $priceData['price'],
+                    'is_active' => $priceData['is_active'],
+                ]
+            );
+        }
+    }
+
+    private function preparePriceData(int $packageId, array $activeDays, array $dayPrices): array
+    {
+        $pricesToCreate = [];
+
+        foreach ($activeDays as $key => $day) {
+            $day = strtolower($day);
+
+            $price = $dayPrices[$key] ?? $dayPrices[$day] ?? 0;
+
+            $pricesToCreate[] = [
+                'package_id' => $packageId,
+                'type' => $this->getDayType($day),
+                'day' => $day,
+                'price' => $price,
+                'is_active' => $price > 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        return $pricesToCreate;
+    }
+
+    /**
+     * Determine day type (weekend/weekday)
+     */
+    private function getDayType(string $day): string
+    {
+        $weekendDays = ['fri', 'sat', 'sun']; // Consider making this configurable
+
+        return in_array($day, $weekendDays) ? 'weekend' : 'weekday';
     }
 
     public function storeAtvUtv(Request $request)
@@ -348,102 +481,6 @@ class PackageController extends Controller
 
         return redirect()->route('admin.packages.index')
             ->with('success', 'Package updated successfully.');
-    }
-
-    public function updateRegular(Request $request, Package $package)
-    {
-        // Debug: Log the incoming request data
-        Log::info('updateRegular request data:', $request->all());
-
-        $validated = $request->validate([
-            'packageName' => 'required|string|max:255',
-            'subTitle' => 'nullable|string|max:255',
-            'packageType' => 'required|in:Single,Bundle,Group',
-            'details' => 'nullable|string',
-            'displayStartingPrice' => 'nullable|numeric|min:0',
-            'minParticipant' => 'required|integer|min:1',
-            'maxParticipant' => 'required|integer|min:1|gte:minParticipant',
-            'weekdayPrice' => 'required|numeric|min:0',
-            'weekendPrice' => 'required|numeric|min:0',
-            'selected_weekday' => 'nullable|string|in:sunday,monday,tuesday,wednesday,thursday',
-            'selected_weekend' => 'nullable|string|in:friday,saturday',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120',
-        ]);
-
-        // Debug: Log the validated data
-        Log::info('updateRegular validated data:', $validated);
-
-        // Handle multiple image uploads with extended format support
-        if ($request->hasFile('images')) {
-            // Validate image formats
-            $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
-            ]);
-
-            Log::info('Images received in updateRegular:', [
-                'count' => count($request->file('images')),
-                'files' => array_map(function ($file) {
-                    return [
-                        'name' => $file->getClientOriginalName(),
-                        'size' => $file->getSize(),
-                        'mime' => $this->getMimeTypeWithFallback($file),
-                    ];
-                }, $request->file('images')),
-            ]);
-
-            $imageService = new ImageService;
-            $uploadedImages = $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
-
-            Log::info('Images uploaded successfully:', [
-                'count' => count($uploadedImages),
-                'image_ids' => array_map(function ($image) {
-                    return $image->id;
-                }, $uploadedImages),
-            ]);
-        } else {
-            Log::info('No images received in updateRegular');
-        }
-
-        // Update package
-        $package->update([
-            'name' => $validated['packageName'],
-            'subtitle' => $validated['subTitle'],
-            'details' => $validated['details'],
-            'display_starting_price' => $validated['displayStartingPrice'] ?? null,
-            'min_participants' => $validated['minParticipant'],
-            'max_participants' => $validated['maxParticipant'],
-            'selected_weekday' => $validated['selected_weekday'] ?? 'monday',
-            'selected_weekend' => $validated['selected_weekend'] ?? 'friday',
-            'image_path' => $validated['image_path'] ?? $package->image_path,
-        ]);
-
-        // Update or create variant
-        $variantName = $validated['packageType'];
-        $capacity = $validated['packageType'] === 'Single' ? 1 : ($validated['packageType'] === 'Bundle' ? 2 : 4);
-
-        $variant = $package->variants()->first();
-        if ($variant) {
-            $variant->update([
-                'variant_name' => $variantName,
-                'capacity' => $capacity,
-            ]);
-        } else {
-            $variant = $package->variants()->create([
-                'variant_name' => $variantName,
-                'capacity' => $capacity,
-                'is_active' => true,
-            ]);
-        }
-
-        // Update prices
-        $variant->prices()->delete();
-        $variant->prices()->createMany([
-            ['price_type' => 'weekday', 'amount' => $validated['weekdayPrice']],
-            ['price_type' => 'weekend', 'amount' => $validated['weekendPrice']],
-        ]);
-
-        return redirect()->route('admin.regular-packege-management.edit', $package)
-            ->with('success', 'Regular package updated successfully.');
     }
 
     public function updateAtvUtv(Request $request, Package $package)

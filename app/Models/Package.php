@@ -260,20 +260,22 @@ class Package extends Model
         });
     }
 
-    public function syncPackagePrices($activeDays = null, $dayPrices = null)
+    public function syncPackagePrices($activeDays = [], $dayPrices = [])
     {
-        $activeDays = $activeDays ?? json_decode($this->active_days ?? '[]', true) ?: [];
-        $dayPrices = $dayPrices ?? json_decode($this->day_prices ?? '[]', true) ?: [];
-
+        // Delete existing prices
         $this->packagePrices()->delete();
+        // Create new prices
+        foreach ($activeDays as $day) {
+            $day = strtolower($day);
+            $price = $dayPrices[$day] ?? 0;
 
-        if (! empty($activeDays) && is_array($activeDays)) {
-            foreach ($activeDays as $index => $day) {
+            // Only create if price is valid
+            if ($price > 0) {
                 PackagePrice::create([
                     'package_id' => $this->id,
-                    'type' => in_array(strtolower($day), ['fri', 'sat']) ? 'weekend' : 'weekday',
-                    'day' => strtolower($day),
-                    'price' => $dayPrices[$index] ?? 0,
+                    'type' => in_array($day, ['fri', 'sat']) ? 'weekend' : 'weekday',
+                    'day' => $day,
+                    'price' => $price,
                     'is_active' => true,
                 ]);
             }
