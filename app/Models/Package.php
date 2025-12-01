@@ -223,12 +223,6 @@ class Package extends Model
 
     protected static function booted()
     {
-        static::saving(function ($package) {
-            if ($package->max_participants <= $package->min_participants) {
-                throw new \Exception('Maximum participants must be greater than minimum participants.');
-            }
-        });
-
         static::deleting(function ($package) {
 
             // Delete variant prices first (because they depend on variants)
@@ -260,25 +254,14 @@ class Package extends Model
         });
     }
 
-    public function syncPackagePrices($activeDays = [], $dayPrices = [])
+    public function getAtvUtvPrice(string $dayType, int $riderCount): ?float
     {
-        // Delete existing prices
-        $this->packagePrices()->delete();
-        // Create new prices
-        foreach ($activeDays as $day) {
-            $day = strtolower($day);
-            $price = $dayPrices[$day] ?? 0;
+        $price = $this->packagePrices()
+            ->where('day', $dayType)
+            ->where('rider_count', $riderCount)
+            ->where('is_active', true)
+            ->first();
 
-            // Only create if price is valid
-            if ($price > 0) {
-                PackagePrice::create([
-                    'package_id' => $this->id,
-                    'type' => in_array($day, ['fri', 'sat']) ? 'weekend' : 'weekday',
-                    'day' => $day,
-                    'price' => $price,
-                    'is_active' => true,
-                ]);
-            }
-        }
+        return $price ? $price->price : null;
     }
 }

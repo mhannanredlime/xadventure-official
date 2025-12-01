@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AtvUtvPackageRequest;
 use App\Http\Requests\RegularPackageStoreUpdateRequest;
 use App\Models\Package;
 use App\Models\PackagePrice;
@@ -45,14 +46,6 @@ class PackageController extends Controller
         $vehicleTypes = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
 
         return view('admin.add-packege-management', compact('packages', 'vehicleTypes'));
-    }
-
-    public function createAtvUtv()
-    {
-        $vehicleTypes = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
-        $package = null;
-
-        return view('admin.atvutv-packege-management', compact('vehicleTypes', 'package'));
     }
 
     public function store(Request $request)
@@ -149,6 +142,7 @@ class PackageController extends Controller
             return redirect()->route('admin.packege.list');
 
         } catch (\Throwable $e) {
+            dd($e->getMessage());
             DB::rollBack();
             \Log::error('Package creation failed: '.$e->getMessage());
             ToastMagic::error('Something went wrong while creating the package.');
@@ -217,18 +211,18 @@ class PackageController extends Controller
     /**
      * Create package prices - for store operation
      */
-    private function createPackagePrices(Package $package, array $activeDays, array $dayPrices): void
+    private function createPackagePrices(Package $package, array $activeDays, array $dayPrices, $RIDER_QTY = 0): void
     {
-        $pricesToCreate = $this->preparePriceData($package->id, $activeDays, $dayPrices);
+        $pricesToCreate = $this->preparePriceData($package->id, $activeDays, $dayPrices, $RIDER_QTY);
 
         if (! empty($pricesToCreate)) {
             PackagePrice::insert($pricesToCreate);
         }
     }
 
-    private function syncPackagePrices(Package $package, array $activeDays, array $dayPrices): void
+    private function syncPackagePrices(Package $package, array $activeDays, array $dayPrices, $RIDER_QTY = null): void
     {
-        $pricesToCreate = $this->preparePriceData($package->id, $activeDays, $dayPrices);
+        $pricesToCreate = $this->preparePriceData($package->id, $activeDays, $dayPrices, $RIDER_QTY);
         PackagePrice::where('package_id', $package->id)
             ->whereNotIn('day', $activeDays)
             ->delete();
@@ -239,7 +233,7 @@ class PackageController extends Controller
                     'day' => $priceData['day'],
                 ],
                 [
-                    'type' => $priceData['type'],
+                    'day_type' => $priceData['type'],
                     'price' => $priceData['price'],
                     'is_active' => $priceData['is_active'],
                 ]
@@ -247,7 +241,7 @@ class PackageController extends Controller
         }
     }
 
-    private function preparePriceData(int $packageId, array $activeDays, array $dayPrices): array
+    private function preparePriceData(int $packageId, array $activeDays, array $dayPrices, $RIDER_QTY = null): array
     {
         $pricesToCreate = [];
 
@@ -258,10 +252,11 @@ class PackageController extends Controller
 
             $pricesToCreate[] = [
                 'package_id' => $packageId,
-                'type' => $this->getDayType($day),
+                'day_type' => $this->getDayType($day),
                 'day' => $day,
                 'price' => $price,
                 'is_active' => $price > 0,
+                'rider_count' => $RIDER_QTY,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -275,108 +270,70 @@ class PackageController extends Controller
      */
     private function getDayType(string $day): string
     {
-        $weekendDays = ['fri', 'sat', 'sun']; // Consider making this configurable
+        $weekendDays = ['fri', 'sat', 'sun'];
 
         return in_array($day, $weekendDays) ? 'weekend' : 'weekday';
     }
 
-    public function storeAtvUtv(Request $request)
+    public function createAtvUtv()
     {
-        // Get available vehicle types for validation
-        $vehicleTypes = VehicleType::where('is_active', true)->pluck('name')->toArray();
-        $vehicleTypeValidation = 'required|in:'.implode(',', $vehicleTypes);
+        $data['vehicleTypes'] = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+        $data['package'] = null;
+        $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
+        $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
-        $validated = $request->validate([
-            'vehicleType' => $vehicleTypeValidation,
-            'packageName' => 'required|string|max:255',
-            'subTitle' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
+        return view('admin.atv-utv-package-create', $data);
+    }
 
-            'weekdaySingle' => 'required|numeric|min:0',
-            'weekdayDouble' => 'required|numeric|min:0',
-            'weekendSingle' => 'required|numeric|min:0',
-            'weekendDouble' => 'required|numeric|min:0',
-            'selected_weekday' => 'nullable|string|in:sunday,monday,tuesday,wednesday,thursday',
-            'selected_weekend' => 'nullable|string|in:friday,saturday',
-        ], [
-            'vehicleType.required' => 'Vehicle type is required.',
-            'packageName.required' => 'Package name is required.',
-            'weekdaySingle.required' => 'Weekday single rider price is required.',
-            'weekdayDouble.required' => 'Weekday double rider price is required.',
-            'weekendSingle.required' => 'Weekend single rider price is required.',
-            'weekendDouble.required' => 'Weekend double rider price is required.',
-            'weekdaySingle.numeric' => 'Weekday single rider price must be a valid number.',
-            'weekdayDouble.numeric' => 'Weekday double rider price must be a valid number.',
-            'weekendSingle.numeric' => 'Weekend single rider price must be a valid number.',
-            'weekendDouble.numeric' => 'Weekend double rider price must be a valid number.',
-            'weekdaySingle.min' => 'Weekday single rider price must be greater than or equal to 0.',
-            'weekdayDouble.min' => 'Weekday double rider price must be greater than or equal to 0.',
-            'weekendSingle.min' => 'Weekend single rider price must be greater than or equal to 0.',
-            'weekendDouble.min' => 'Weekend double rider price must be greater than or equal to 0.',
-            'selected_weekday.in' => 'The weekday selection is invalid.',
-            'selected_weekend.in' => 'The weekend selection is invalid.',
-        ]);
-
-        // Determine package type - map vehicle type to package type
-        $packageType = strtolower($validated['vehicleType']);
-        // Map vehicle types to package types - you can customize this mapping as needed
-        $vehicleTypeMapping = [
-            'dirt bike' => 'atv',
-            'atv' => 'atv',
-            'utv' => 'utv',
-            // Add more mappings as needed
-        ];
-
-        $packageType = $vehicleTypeMapping[$packageType] ?? $packageType;
-
-        // Get the vehicle type and associate it with the package
-        $vehicleType = VehicleType::where('name', $validated['vehicleType'])->first();
-        if (! $vehicleType) {
-            return back()->withErrors(['vehicleType' => 'Selected vehicle type not found.']);
-        }
-
-        // Create package
-        $package = Package::create([
-            'name' => $validated['packageName'],
-            'subtitle' => $validated['subTitle'],
-            'type' => $packageType,
-            'notes' => $validated['notes'],
-
-            'selected_weekday' => $validated['selected_weekday'] ?? 'monday',
-            'selected_weekend' => $validated['selected_weekend'] ?? 'friday',
-            'min_participants' => 1,
-            'max_participants' => 4,
-            'is_active' => true,
-        ]);
-
-        // Associate vehicle type with package (this will automatically use vehicle type images)
-        $package->vehicleTypes()->attach([$vehicleType->id]);
-
-        // Create variants
-        $variants = [
-            ['variant_name' => 'Single Rider', 'capacity' => 1],
-            ['variant_name' => 'Double Rider', 'capacity' => 2],
-        ];
-
-        foreach ($variants as $variantData) {
-            $variant = $package->variants()->create([
-                'variant_name' => $variantData['variant_name'],
-                'capacity' => $variantData['capacity'],
+    public function storeAtvUtv(AtvUtvPackageRequest $request)
+    {
+        $validated = $request->validated();
+        DB::beginTransaction();
+        try {
+            // Create Package
+            $package = Package::create([
+                'name' => $validated['packageName'],
+                'package_type_id' => 2,
+                'vehicle_type_id' => $validated['vehicleType'],
+                'type' => 'atv',
+                'subtitle' => $validated['subTitle'] ?? null,
+                'details' => $validated['details'] ?? null,
                 'is_active' => true,
             ]);
 
-            // Create prices for this variant
-            $weekdayPrice = $variantData['variant_name'] === 'Single Rider' ? $validated['weekdaySingle'] : $validated['weekdayDouble'];
-            $weekendPrice = $variantData['variant_name'] === 'Single Rider' ? $validated['weekendSingle'] : $validated['weekendDouble'];
+            // Handle package prices
+            $dayPrices = json_decode($request->day_prices, true);
 
-            $variant->prices()->createMany([
-                ['price_type' => 'weekday', 'amount' => $weekdayPrice],
-                ['price_type' => 'weekend', 'amount' => $weekendPrice],
-            ]);
+            if ($dayPrices) {
+                foreach ($dayPrices as $price) {
+                    // dd($price['type']);
+                    $package->packagePrices()->updateOrCreate(
+                        [
+                            'package_id' => $package->id,
+                            'day' => $price['day'],
+                            'rider_count' => $price['rider_count'],
+                        ],
+                        [
+                            'price' => $price['price'],
+                            'day_type' => $price['type'],
+                            'is_active' => true,
+                        ]
+                    );
+                }
+            }
+
+            DB::commit();
+
+            ToastMagic::success('ATV/UTV package created successfully!');
+
+            return redirect()->route('admin.packege.list');
+
+        } catch (Throwable $e) {
+            DB::rollBack();
+            ToastMagic::error('Failed to create package: '.$e->getMessage());
+
+            return back()->withInput();
         }
-
-        return redirect()->route('admin.add-packege-management')
-            ->with('success', 'ATV/UTV package created successfully.');
     }
 
     public function edit(Package $package)

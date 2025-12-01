@@ -15,7 +15,7 @@ class PackageTypeSeeder extends Seeder
             [
                 'name' => 'Regular',
                 'parent_id' => null,
-                'is_active' => true
+                'is_active' => true // no riser wise price for this type package 
             ]
         );
 
@@ -24,7 +24,16 @@ class PackageTypeSeeder extends Seeder
             [
                 'name' => 'ATV',
                 'parent_id' => null,
-                'is_active' => true
+                'is_active' => true // it has rider wise price for weekend and weekday this type package because this package has vehicle or 1 rider or two rider can seat  
+            ]
+        );
+
+        $utv = PackageType::updateOrCreate(
+            ['slug' => 'utv'],
+            [
+                'name' => 'UTV',
+                'parent_id' => null,
+                'is_active' => true // it has rider wise price for weekend and weekday 
             ]
         );
 

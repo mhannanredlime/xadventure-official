@@ -46,7 +46,7 @@ class RegularPackageStoreUpdateRequest extends FormRequest
             'day_prices.*' => 'required|numeric|min:1',
 
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ];
     }
 }

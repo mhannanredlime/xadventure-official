@@ -110,7 +110,7 @@
     <main class="mt-4">
         <header class="d-flex justify-content-between align-items-center page-header mb-4">
             <div>
-                <h3>{{ isset($package) ? 'Edit Regular Package' : 'Add Regular Package' }}</h3>
+                <h3>{{ isset($package) ? 'Edit ATV UTV Package' : 'Add ATV UTV Package' }}</h3>
                 <p class="breadcrumb-custom"><i class="bi bi-home me-1"></i> Package Management >
                     {{ isset($package) ? 'Edit' : 'Add' }} Package</p>
             </div>
@@ -145,41 +145,33 @@
         @endif
 
         <form id="packageForm" method="POST"
-            action="{{ isset($package) ? route('admin.regular-packege-management.update', $package->id ?? 1) : route('admin.regular-packege-management.store') }}"
+            action="{{ isset($package) ? route('admin.atvutv-packege-management.update', $package->id) : route('admin.atvutv-packege-management.store') }}"
             enctype="multipart/form-data" novalidate>
             @csrf
             @if (isset($package))
                 @method('PUT')
             @endif
 
-            {{-- ---------- Image Upload Section ---------- --}}
-            <div class="card p-4">
-                <h5 class="card-title"><i class="bi bi-images me-2"></i>Package Images</h5>
-                <div class="row">
-                    <div class="col-12">
-                        <label class="form-label">Upload Package Images (Max 4 images)</label>
-                        <div id="multiple-image-upload" data-model-type="App\Models\Package"
-                            data-model-id="{{ $package->id ?? '' }}"
-                            data-upload-url="{{ route('admin.regular-packege-management.store') }}"
-                            data-update-url="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : '' }}"
-                            data-images-url="{{ route('admin.images.get') }}"
-                            data-primary-url="{{ url('admin/images') }}/:id/primary"
-                            data-reorder-url="{{ route('admin.images.reorder') }}"
-                            data-alt-text-url="{{ url('admin/images') }}/:id/alt-text"
-                            data-delete-url="{{ url('admin/images') }}/:id"
-                            data-existing-images="{{ isset($package) ? $package->images->toJson() : '[]' }}"
-                            data-max-files="4" data-max-file-size="{{ 5 * 1024 * 1024 }}">
-                        </div>
-                        <input type="file" id="package_images_input" name="images[]" multiple accept="image/*"
-                            style="display:none;">
-                    </div>
-                </div>
-            </div>
-
             {{-- ---------- Package Details ---------- --}}
             <div class="card p-4">
                 <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>Package Details</h5>
                 <div class="row g-4">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Vehicle Type <span class="text-danger">*</span></label>
+                        <select class="form-select" name="vehicleType" required>
+                            <option value="">Select Vehicle Type</option>
+                            @foreach ($vehicleTypes as $type)
+                                <option value="{{ $type->id }}"
+                                    {{ old('vehicleType', $package->package_type_id ?? '') == $type->id ? 'selected' : '' }}>
+                                    {{ $type->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('packageType')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Package Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('packageName') is-invalid @enderror"
@@ -197,21 +189,9 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Package Type <span class="text-danger">*</span></label>
 
-                        <select class="form-select" name="packageType" required>
-                            <option value="">Select Package Type</option>
-                            @foreach ($packageTypes as $type)
-                                <option value="{{ $type->id }}"
-                                    {{ old('packageType', $package->package_type_id ?? '') == $type->id ? 'selected' : '' }}>
-                                    {{ $type->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('packageType')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+
+
                     <div class="col-12">
                         <label class="form-label">Package Details</label>
                         <textarea class="form-control @error('details') is-invalid @enderror" name="details" rows="5"
@@ -220,35 +200,13 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
                     <div class="col-md-4">
-                        <label class="form-label">Display Base Price (৳) <span class="text-danger">*</span> </label>
-                        <div class="input-group">
-                            <span class="input-group-text">৳</span>
-                            <input type="number" step="0.01"
-                                class="form-control @error('displayStartingPrice') is-invalid @enderror"
-                                name="displayStartingPrice"
-                                value="{{ old('displayStartingPrice', $package->display_starting_price ?? '') }}"
-                                placeholder="0.00" min="50">
-                        </div>
-                        @error('displayStartingPrice')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Minimum Participants <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('minParticipant') is-invalid @enderror"
-                            name="minParticipant" value="{{ old('minParticipant', $package->min_participants ?? '') }}"
-                            min="1" required>
-                        @error('minParticipant')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Maximum Participants <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('maxParticipant') is-invalid @enderror"
-                            name="maxParticipant" value="{{ old('maxParticipant', $package->max_participants ?? '') }}"
-                            min="1" required>
-                        @error('maxParticipant')
+                        <label class="form-label">Rider Quantity <span class="text-danger">*</span></label>
+                        <input type="number" min="1"
+                            class="form-control @error('rider_quantity') is-invalid @enderror" name="rider_quantity"
+                            value="{{ old('rider_quantity', $package->min_participants ?? '') }}" min="1" required>
+                        @error('rider_quantity')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -256,9 +214,17 @@
             </div>
 
             @php
-                // Ensure $selectedDays is always an array
+                // পরিষ্কার array তৈরি করুন
                 $selectedDays = isset($selectedDays) ? (array) json_decode(json_encode($selectedDays), true) : [];
-                $dayPrices = isset($package->day_prices) ? (array) json_decode($package->day_prices, true) : [];
+
+                // দিন অনুসারে price array তৈরি করুন
+                $dayPriceArray = [];
+                if (isset($package->day_prices)) {
+                    $prices = json_decode($package->day_prices, true);
+                    foreach ($selectedDays as $index => $day) {
+                        $dayPriceArray[$day] = $prices[$day] ?? null;
+                    }
+                }
             @endphp
 
             {{-- ---------- Package Pricing (Day-wise) ---------- --}}
@@ -279,18 +245,16 @@
                     </div>
                 </div>
                 <div id="priceContainer" class="row"></div>
-                <div class="mt-3">
+                <div class="mt-4">
                     <label class="fw-semibold">Apply Same Price to Days</label>
                     <input type="number" class="form-control" id="applyAllPrice" placeholder="e.g. 1200">
-                    <button type="button" class="btn btn-sm btn-dark mt-2" id="applyAllBtn">Apply</button>
+                    <button type="button" class="btn btn-sm btn-dark mt-2" id="applyAllBtn">Apply to all days</button>
                 </div>
                 <input type="hidden" name="active_days" id="activeDaysInput"
                     value="{{ old('active_days', json_encode($selectedDays)) }}">
                 <input type="hidden" name="day_prices" id="dayPricesInput"
-                    value="{{ old('day_prices', json_encode($dayPrices)) }}">
+                    value="{{ old('day_prices', json_encode($dayPriceArray)) }}">
             </div>
-
-
             <div class="d-flex justify-content-end mt-4">
                 <button type="button" class="btn btn-save" id="submitBtn"><i
                         class="bi bi-save me-2"></i>{{ isset($package) ? 'Update Package' : 'Save Package' }}</button>
@@ -298,8 +262,9 @@
         </form>
     </main>
 @endsection
+
+
 @push('scripts')
-    <script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -310,6 +275,7 @@
             const form = document.getElementById('packageForm');
             const submitBtn = document.getElementById('submitBtn');
             const realFileInput = document.getElementById('package_images_input');
+            const galleryInput = document.getElementById('gallery_images_input');
 
             const container = document.getElementById('multiple-image-upload');
             const uploader = new MultipleImageUpload(container.id, {
@@ -447,9 +413,6 @@
                 document.getElementById("activeDaysInput").value = JSON.stringify([...selectedDays]);
                 document.getElementById("dayPricesInput").value = JSON.stringify(dayPricesArray);
 
-                console.log("Submitting active_days:", [...selectedDays]);
-                console.log("Submitting day_prices (array):", dayPricesArray);
-
                 // Handle new and existing images
                 const selectedFiles = uploader.getSelectedFiles() || [];
                 const newFiles = selectedFiles.filter(f => f instanceof File);
@@ -464,7 +427,9 @@
                         existingImages.map(g => g.galleryId || g.id).filter(Boolean)
                     );
                 }
-
+                console.log("Getting active_days:", [...selectedDays]);
+                console.log("Getting day_prices (array):", dayPricesArray);
+                // return;
                 form.submit();
             });
 
