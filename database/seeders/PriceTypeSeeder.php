@@ -13,16 +13,14 @@ class PriceTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['name' => 'Single Rider', 'rider_count' => 1, 'is_active' => true],
-            ['name' => 'Double Rider', 'rider_count' => 2, 'is_active' => true],
-            ['name' => 'Quad Rider',   'rider_count' => 4, 'is_active' => true],
-            ['name' => 'Six Rider',    'rider_count' => 6, 'is_active' => false],
+            ['name' => 'Week Day', 'slug' => 'weekday'],
+            ['name' => 'Weekend Day', 'slug' => 'weekend'],
         ];
 
         foreach ($types as $type) {
             PriceType::updateOrCreate(
-                ['rider_count' => $type['rider_count']], // unique key
-                $type
+                ['slug' => $type['slug']], // unique key
+                $type // values to insert/update
             );
         }
     }

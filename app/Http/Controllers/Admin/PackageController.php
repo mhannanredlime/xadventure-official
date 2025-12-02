@@ -8,12 +8,15 @@ use App\Http\Requests\RegularPackageStoreUpdateRequest;
 use App\Models\Package;
 use App\Models\PackagePrice;
 use App\Models\PackageType;
+use App\Models\PriceType;
+use App\Models\RiderType;
 use App\Models\VehicleType;
 use App\Services\ImageService;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class PackageController extends Controller
@@ -277,10 +280,20 @@ class PackageController extends Controller
 
     public function createAtvUtv()
     {
-        $data['vehicleTypes'] = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+
+        $data['vehicleTypes'] = VehicleType::with('images')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
         $data['package'] = null;
-        $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
+
+        // Only child packages (ATV/UTV)
+        $data['packageTypes'] = PackageType::whereNotNull('parent_id')
+            ->active()
+            ->get();
         $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        $data['riderTypes'] = RiderType::get();
 
         return view('admin.atv-utv-package-create', $data);
     }
@@ -288,47 +301,58 @@ class PackageController extends Controller
     public function storeAtvUtv(AtvUtvPackageRequest $request)
     {
         $validated = $request->validated();
+        Log::info('Validated data:', $validated);
+
         DB::beginTransaction();
         try {
-            // Create Package
+            // Step 1: Create Package
             $package = Package::create([
                 'name' => $validated['packageName'],
-                'package_type_id' => 2,
+                'package_type_id' => 2, // ATV/UTV type
                 'vehicle_type_id' => $validated['vehicleType'],
                 'type' => 'atv',
                 'subtitle' => $validated['subTitle'] ?? null,
                 'details' => $validated['details'] ?? null,
                 'is_active' => true,
             ]);
+            Log::info('Package created', ['package_id' => $package->id]);
 
-            // Handle package prices
-            $dayPrices = json_decode($request->day_prices, true);
+            // Step 2: Handle package prices
+            $dayPrices = collect(json_decode($request->day_prices, true) ?? []);
+            // dd($request->all());
 
-            if ($dayPrices) {
-                foreach ($dayPrices as $price) {
-                    // dd($price['type']);
-                    $package->packagePrices()->updateOrCreate(
+            if ($dayPrices->isNotEmpty()) {
+                foreach ($dayPrices as $dayPrice) {
+                    $priceType = PriceType::where('slug', $dayPrice['type'])->first();
+                    if (! $priceType) {
+                        continue;
+                    }
+
+                    PackagePrice::updateOrCreate(
                         [
                             'package_id' => $package->id,
-                            'day' => $price['day'],
-                            'rider_count' => $price['rider_count'],
+                            'price_type_id' => $priceType->id,
+                            'day' => $dayPrice['day'],
+                            'rider_type_id' => $dayPrice['rider_type_id'],
                         ],
                         [
-                            'price' => $price['price'],
-                            'day_type' => $price['type'],
+                            'price' => $dayPrice['price'],
                             'is_active' => true,
+                            'package_type_id' => $package->package_type_id,
                         ]
                     );
                 }
             }
 
             DB::commit();
+            Log::info('Transaction committed successfully for package_id: '.$package->id);
 
             ToastMagic::success('ATV/UTV package created successfully!');
 
             return redirect()->route('admin.packege.list');
 
         } catch (Throwable $e) {
+            dd($e->getMessage());
             DB::rollBack();
             ToastMagic::error('Failed to create package: '.$e->getMessage());
 
@@ -385,7 +409,8 @@ class PackageController extends Controller
         $package->load([
             'vehicleTypes.images',
             'images',
-            'packagePrices', // ADD THIS
+            'packagePrices.riderType',
+            'packagePrices.priceType',
         ]);
 
         return view('admin.package-show', compact('package'));

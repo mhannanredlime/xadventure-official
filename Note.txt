@@ -9,6 +9,7 @@ cd /home/xadventurebandarban/htdocs/xadventurebandarban.com
 php artisan db:seed --class=PackageTypeSeeder
 php artisan db:seed --class=PriceTypeSeeder
 php artisan db:seed --class=RiderTypeSeeder
+php artisan db:seed --class=PackagePriceSeeder
 
 
 

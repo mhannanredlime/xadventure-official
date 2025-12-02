@@ -17,7 +17,7 @@
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-1"></i> {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
 
@@ -47,13 +47,15 @@
                                 <div class="row mb-4">
                                     <div class="col-md-6 mb-2">
                                         <p class="mb-1"><strong><i
-                                                    class="bi bi-tag me-2 text-secondary"></i>Type:</strong> <span
-                                                class="badge bg-primary">{{ ucfirst($package->type) }}</span></p>
+                                                    class="bi bi-tag me-2 text-secondary"></i>Type:</strong>
+                                            <span class="badge bg-primary">{{ ucfirst($package->type) }}</span>
+                                        </p>
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <p class="mb-1"><strong><i
                                                     class="bi bi-people me-2 text-secondary"></i>Participants:</strong>
-                                            {{ $package->min_participants }} - {{ $package->max_participants }}</p>
+                                            {{ $package->min_participants ?? '-' }} -
+                                            {{ $package->max_participants ?? '-' }}</p>
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <p class="mb-1"><strong><i
@@ -71,14 +73,15 @@
                                     <div class="col-12">
                                         <p class="mb-0"><strong><i
                                                     class="bi bi-calendar-check me-2 text-secondary"></i>Last
-                                                Updated:</strong> {{ $package->updated_at->format('M j, Y') }}</p>
+                                                Updated:</strong>
+                                            {{ $package->updated_at->format('M j, Y') }}</p>
                                     </div>
                                 </div>
 
-                                {{-- Description (if available) --}}
-                                @if (!empty($package->description))
-                                    <h5 class="mb-2 text-info"><i class="bi bi-file-text me-2"></i>Description</h5>
-                                    <p class="text-muted small mb-4">{{ $package->description }}</p>
+                                {{-- Description --}}
+                                @if (!empty($package->details))
+                                    <h5 class="mb-2 text-info"><i class="bi bi-file-text me-2"></i>Details</h5>
+                                    <p class="text-muted small mb-4">{{ $package->details }}</p>
                                 @endif
 
                                 {{-- Actions --}}
@@ -96,7 +99,7 @@
                                             </a>
                                         @endif
                                         <form action="{{ route('admin.packages.destroy', $package) }}" method="POST"
-                                            onsubmit="return confirm('Are you sure you want to delete this package? This action cannot be undone.')">
+                                            onsubmit="return confirm('Are you sure you want to delete this package?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm">
@@ -111,28 +114,30 @@
                 </div>
             </div>
 
-            {{-- Variants & Pricing --}}
+            {{-- Day & Rider-wise Pricing --}}
             @if ($package->packagePrices->isNotEmpty())
                 <div class="card shadow-sm mb-4">
                     <div class="card-body p-4">
-                        <h5 class="mb-3"><i class="bi bi-currency-dollar me-2"></i>Day-wise Pricing</h5>
+                        <h5 class="mb-3"><i class="bi bi-currency-dollar me-2"></i>Day & Rider-wise Pricing</h5>
                         <div class="table-responsive">
                             <table class="table table-hover table-striped align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
                                         <th>SL</th>
                                         <th>Day</th>
-                                        <th>Type</th>
+                                        <th>Rider Type</th>
+                                        <th>Price Type</th>
                                         <th>Price (৳)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($package->packagePrices as $key => $price)
                                         <tr>
-                                            <td>{{ ++$key }}</td>
-                                            <td>{{ strtoupper($price->day) }}</td>
-                                            <td>{{ ucfirst($price->type) }}</td>
-                                            <td>৳ {{ number_format($price->price) }}</td>
+                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{ strtoupper($price->day ?? '-') }}</td>
+                                            <td>{{ $price->riderType->name ?? '-' }}</td>
+                                            <td>{{ $price->priceType->name ?? '-' }}</td>
+                                            <td>৳ {{ number_format($price->price, 2) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

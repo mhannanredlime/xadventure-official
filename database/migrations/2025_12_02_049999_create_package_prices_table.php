@@ -10,14 +10,24 @@ return new class extends Migration
     {
         Schema::create('package_prices', function (Blueprint $table) {
             $table->id();
+
+            // Foreign keys
             $table->foreignId('package_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('price_type_id')->nullable()->constrained();  // regular / weekend / holiday/ date range
-            $table->foreignId('rider_type_id')->nullable()->constrained(); // single / double / 4 riders
+            $table->foreignId('price_type_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('package_type_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('rider_type_id')->nullable()->constrained()->nullOnDelete();
+
             $table->decimal('price', 10, 2);
             $table->boolean('is_active')->default(true);
+            $table->enum('day', ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'])->nullable();
+
             $table->timestamps();
 
-            $table->unique(['package_id', 'price_type_id', 'rider_type_id']);
+            // Unique constraint including 'day'
+            $table->unique(
+                ['package_id', 'price_type_id', 'package_type_id', 'rider_type_id', 'day'],
+                'package_price_unique_idx'
+            );
         });
     }
 

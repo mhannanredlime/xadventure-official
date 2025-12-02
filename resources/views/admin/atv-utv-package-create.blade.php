@@ -3,7 +3,6 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('admin/css/multiple-image-upload.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
     <style>
         .card {
             border: none;
@@ -145,7 +144,8 @@
                             @foreach ($vehicleTypes as $type)
                                 <option value="{{ $type->id }}"
                                     {{ old('vehicleType', $package->vehicle_type_id ?? '') == $type->id ? 'selected' : '' }}>
-                                    {{ $type->name }}</option>
+                                    {{ $type->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -167,9 +167,9 @@
             </div>
 
             @php
-                $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-                $maxRiders = 2; // শুধুমাত্র 1 এবং 2 rider
-                $maxParticipants = $package->max_participants ?? 2;
+                $weekendDays = $package
+                    ? \App\Models\PackageWeekendDay::where('package_id', $package->id)->pluck('day')->toArray()
+                    : ['fri', 'sat'];
             @endphp
 
             {{-- Package Pricing --}}
@@ -180,12 +180,16 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Day</th>
-                                @for ($r = 1; $r <= $maxRiders; $r++)
-                                    <th>{{ $r }} Rider
+                                @foreach ($riderTypes as $rider)
+                                    @php
+                                        // Use rider_type_id instead of rider_count if that's what you have
+                                        $riderId = $rider->id; // or $rider->rider_type_id if different
+                                    @endphp
+                                    <th>{{ $rider->name }}
                                         <input type="number" class="form-control apply-all-rider mt-1"
-                                            data-rider="{{ $r }}" placeholder="Apply all">
+                                            data-rider="{{ $riderId }}" placeholder="Apply all">
                                     </th>
-                                @endfor
+                                @endforeach
                             </tr>
                         </thead>
                         <tbody id="priceContainer"></tbody>
@@ -195,15 +199,6 @@
                 <input type="hidden" name="day_prices" id="dayPricesInput"
                     value="{{ old('day_prices', json_encode($package->day_prices ?? [])) }}">
                 <input type="hidden" name="active_days" id="activeDaysInput" value="{{ json_encode($days) }}">
-            </div>
-
-            {{-- Image Upload --}}
-            <div class="card p-4">
-                <h5 class="card-title"><i class="bi bi-images me-2"></i>Package Images (Optional)</h5>
-                <div id="multiple-image-upload" data-model-id="{{ $package->id ?? '' }}" data-max-files="4"
-                    data-max-file-size="{{ 5 * 1024 * 1024 }}"></div>
-                <input type="file" id="package_images_input" name="images[]" multiple accept="image/*"
-                    style="display:none;">
             </div>
 
             <div class="d-flex justify-content-end mt-4">
@@ -220,77 +215,119 @@
         $(function() {
             const $priceContainer = $('#priceContainer');
             const allDays = {!! json_encode($days) !!};
-            const maxRiders = 2; // only 1 & 2 rider
-            let prices = {!! json_encode($package->day_prices ?? []) !!} || {};
+            const riderTypes = {!! $riderTypes->toJson() !!};
+            let prices = {!! json_encode($package->day_prices ?? []) !!} || [];
+            const weekendDays = {!! json_encode($weekendDays) !!};
 
             function getDayType(day) {
-                return ['fri', 'sat'].includes(day) ? 'weekend' : 'weekday';
+                return weekendDays.includes(day) ? 'weekend' : 'weekday';
             }
 
             function renderTable() {
                 $priceContainer.empty();
                 allDays.forEach(day => {
-                    const isWeekend = ['fri', 'sat'].includes(day);
+                    const isWeekend = weekendDays.includes(day);
                     const $tr = $('<tr>').addClass(isWeekend ? 'table-warning' : '');
-                    $tr.append(`<td>${day.charAt(0).toUpperCase() + day.slice(1)}</td>`);
-                    for (let r = 1; r <= maxRiders; r++) {
-                        const val = prices[day]?.[r] ?? '';
+                    $tr.append(`<td>${day.charAt(0).toUpperCase()+day.slice(1)}</td>`);
+
+                    riderTypes.forEach(rider => {
+                        // Use rider ID instead of rider_count
+                        const riderId = rider.id;
+
+                        // Check if price exists for this day and rider
+                        let val = '';
+                        if (prices[day]) {
+                            // Look for the price in the array format
+                            const priceObj = prices[day].find(p => p.rider_type_id == riderId);
+                            val = priceObj ? priceObj.price : '';
+                        }
+
                         $tr.append(
-                            `<td><input type="number" class="form-control day-rider-price" data-day="${day}" data-rider="${r}" value="${val}" min="0"></td>`
+                            `<td><input type="number" class="form-control day-rider-price" 
+                            data-day="${day}" 
+                            data-rider="${riderId}" 
+                            value="${val}" 
+                            min="0"></td>`
                         );
-                    }
+                    });
                     $priceContainer.append($tr);
                 });
                 $('#activeDaysInput').val(JSON.stringify(allDays));
             }
 
+            // Apply All functionality - Fixed
+            $(document).on('input', '.apply-all-rider', function() {
+                const riderId = $(this).data('rider');
+                const val = $(this).val();
+
+                // Update all inputs with matching rider ID
+                $(`.day-rider-price[data-rider="${riderId}"]`).each(function() {
+                    $(this).val(val);
+
+                    // Update the prices object
+                    const day = $(this).data('day');
+                    updatePriceInObject(day, riderId, val);
+                });
+            });
+
+            // Update individual price inputs
             $(document).on('input', '.day-rider-price', function() {
                 const day = $(this).data('day');
-                const rider = $(this).data('rider');
+                const riderId = $(this).data('rider');
                 const val = $(this).val() === '' ? null : Number($(this).val());
-                if (!prices[day]) prices[day] = {};
-                prices[day][rider] = val;
+                updatePriceInObject(day, riderId, val);
             });
 
-            $(document).on('input', '.apply-all-rider', function() {
-                const rider = $(this).data('rider');
-                const val = $(this).val() === '' ? null : Number($(this).val());
-                allDays.forEach(day => {
-                    if (!prices[day]) prices[day] = {};
-                    prices[day][rider] = val;
-                });
-                renderTable();
-            });
+            function updatePriceInObject(day, riderId, val) {
+                if (!prices[day]) {
+                    prices[day] = [];
+                }
 
-            function collectPrices() {
-                $('.day-rider-price').each(function() {
-                    const day = $(this).data('day');
-                    const rider = $(this).data('rider');
-                    const val = $(this).val() === '' ? null : Number($(this).val());
-                    if (!prices[day]) prices[day] = {};
-                    prices[day][rider] = val;
-                });
+                // Find if price already exists for this rider
+                const existingIndex = prices[day].findIndex(p => p.rider_type_id == riderId);
+
+                if (val === null || val === '') {
+                    // Remove if empty
+                    if (existingIndex !== -1) {
+                        prices[day].splice(existingIndex, 1);
+                    }
+                } else {
+                    // Update or add
+                    if (existingIndex !== -1) {
+                        prices[day][existingIndex].price = val;
+                    } else {
+                        prices[day].push({
+                            rider_type_id: riderId,
+                            price: val
+                        });
+                    }
+                }
             }
 
             $('#submitBtn').on('click', function(e) {
                 e.preventDefault();
-                collectPrices();
 
+                // Format prices for submission
                 const dayPricesArray = [];
+
                 allDays.forEach(day => {
-                    for (let r = 1; r <= maxRiders; r++) {
-                        if (prices[day]?.[r] != null) {
+                    if (prices[day]) {
+                        prices[day].forEach(priceObj => {
                             dayPricesArray.push({
                                 day: day,
-                                rider_count: r,
-                                price: prices[day][r],
+                                rider_type_id: priceObj.rider_type_id,
+                                price: priceObj.price,
                                 type: getDayType(day)
                             });
-                        }
+                        });
                     }
                 });
 
                 $('#dayPricesInput').val(JSON.stringify(dayPricesArray));
+
+                // For debugging - remove in production
+                console.log('Submitting prices:', dayPricesArray);
+
                 $(this).prop('disabled', true).addClass('btn-loading');
                 $('#packageForm')[0].submit();
             });

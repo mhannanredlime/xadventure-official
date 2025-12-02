@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\PackagePrice;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -13,14 +14,9 @@ class RiderType extends Model
 
     protected $fillable = [
         'name',
-        'rider_count',
-        'is_active',
+        'slug'
     ];
 
-    protected $casts = [
-        'rider_count' => 'integer',
-        'is_active' => 'boolean',
-    ];
 
     /**
      * Relationship: A rider type has many package prices.
@@ -30,20 +26,4 @@ class RiderType extends Model
         return $this->hasMany(PackagePrice::class);
     }
 
-    /**
-     * Scope: Only active rider types
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    /**
-     * Accessor: formatted label for UI dropdowns
-     * Example: "Double Rider (2)"
-     */
-    public function getLabelAttribute()
-    {
-        return "{$this->name} ({$this->rider_count})";
-    }
 }

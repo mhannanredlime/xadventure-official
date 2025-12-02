@@ -2,19 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class PackagePrice extends Model
 {
     use HasFactory;
+
+    protected $table = 'package_prices';
 
     protected $fillable = [
         'package_id',
         'price_type_id',   // regular / weekend
         'rider_type_id',   // single / double / 4 riders etc.
         'price',
+        'day',
         'is_active',
+        'package_type_id',
     ];
 
     protected $casts = [
