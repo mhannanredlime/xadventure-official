@@ -13,12 +13,6 @@ class RegularPackageStoreUpdateRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        if ($this->has('active_days') && is_string($this->active_days)) {
-            $this->merge([
-                'active_days' => json_decode($this->active_days, true) ?? [],
-            ]);
-        }
-
         if ($this->has('day_prices') && is_string($this->day_prices)) {
             $this->merge([
                 'day_prices' => json_decode($this->day_prices, true) ?? [],
@@ -39,13 +33,11 @@ class RegularPackageStoreUpdateRequest extends FormRequest
             'minParticipant' => 'required|integer|min:1',
             'maxParticipant' => 'required|integer|gte:minParticipant',
 
-            'active_days' => 'required|array',
-            'active_days.*' => 'in:mon,tue,wed,thu,fri,sat,sun',
 
-            'day_prices' => 'required|array',
-            'day_prices.*' => 'required|numeric|min:1',
+            'day_prices' => 'required',
+            'day_prices.*' => 'required|min:1',
 
-            'images' => 'nullable|array',
+            'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ];
     }

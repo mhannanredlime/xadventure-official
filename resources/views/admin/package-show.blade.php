@@ -125,8 +125,8 @@
                                     <tr>
                                         <th>SL</th>
                                         <th>Day</th>
-                                        <th>Rider Type</th>
-                                        <th>Price Type</th>
+                                        <th>Riders</th>
+                                        <th>Pricing Type</th>
                                         <th>Price (৳)</th>
                                     </tr>
                                 </thead>

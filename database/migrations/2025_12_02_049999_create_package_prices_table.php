@@ -23,7 +23,6 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // Unique constraint including 'day'
             $table->unique(
                 ['package_id', 'price_type_id', 'package_type_id', 'rider_type_id', 'day'],
                 'package_price_unique_idx'

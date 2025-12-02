@@ -264,4 +264,14 @@ class Package extends Model
 
         return $price ? $price->price : null;
     }
+
+    /**
+     * Get the PackageType that owns the Package
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function packageType(): BelongsTo
+    {
+        return $this->belongsTo(PackageType::class, 'package_type_id', 'id');
+    }
 }
