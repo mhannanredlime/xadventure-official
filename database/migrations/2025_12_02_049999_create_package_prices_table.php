@@ -11,19 +11,14 @@ return new class extends Migration
         Schema::create('package_prices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('package_id')->constrained()->cascadeOnDelete();
-            $table->enum('day', ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']);
-            $table->integer('rider_count')->nullable(); 
+            $table->foreignId('price_type_id')->nullable()->constrained();  // regular / weekend / holiday/ date range
+            $table->foreignId('rider_type_id')->nullable()->constrained(); // single / double / 4 riders
             $table->decimal('price', 10, 2);
-            $table->string('day_type')->default('weekday');
-            $table->string('package_type')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->unique(['package_id', 'day', 'rider_count']);
 
+            $table->unique(['package_id', 'price_type_id', 'rider_type_id']);
         });
-
     }
 
     public function down(): void

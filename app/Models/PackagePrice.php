@@ -11,63 +11,62 @@ class PackagePrice extends Model
 
     protected $fillable = [
         'package_id',
-        'day',
-        'rider_count',
+        'price_type_id',   // regular / weekend
+        'rider_type_id',   // single / double / 4 riders etc.
         'price',
-        'day_type',
-        'start_date',
-        'end_date',
         'is_active',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'is_active' => 'boolean',
         'price' => 'decimal:2',
-        'rider_count' => 'integer',
+        'is_active' => 'boolean',
     ];
 
-    /**
-     * Relationship with Package
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    // A price belongs to a package
     public function package()
     {
         return $this->belongsTo(Package::class);
     }
 
-    /**
-     * Scope: Active Prices
-     */
+    // Price type: regular / weekend / special
+    public function priceType()
+    {
+        return $this->belongsTo(PriceType::class);
+    }
+
+    // Rider type: 1 rider / 2 riders / family etc.
+    public function riderType()
+    {
+        return $this->belongsTo(RiderType::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    // Only active prices
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope: For a specific day
-     */
-    public function scopeForDay($query, $day)
+    // Filter by price type (regular/weekend)
+    public function scopeForPriceType($query, $priceTypeId)
     {
-        return $query->where('day', $day);
+        return $query->where('price_type_id', $priceTypeId);
     }
 
-    /**
-     * Scope: For a specific rider count
-     */
-    public function scopeForRider($query, $riderCount)
+    // Filter by rider type
+    public function scopeForRider($query, $riderTypeId)
     {
-        return $query->where('rider_count', $riderCount);
-    }
-
-    /**
-     * Check if the price is valid today
-     */
-    public function isValidToday(): bool
-    {
-        $today = now()->toDateString();
-        if ($this->start_date && $today < $this->start_date) return false;
-        if ($this->end_date && $today > $this->end_date) return false;
-        return true;
+        return $query->where('rider_type_id', $riderTypeId);
     }
 }
