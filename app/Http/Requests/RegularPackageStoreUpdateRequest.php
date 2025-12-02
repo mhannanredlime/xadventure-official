@@ -11,7 +11,7 @@ class RegularPackageStoreUpdateRequest extends FormRequest
         return true;
     }
 
-   protected function prepareForValidation()
+    protected function prepareForValidation()
     {
         if ($this->has('day_prices') && is_string($this->day_prices)) {
             $decoded = json_decode($this->day_prices, true);
@@ -23,7 +23,6 @@ class RegularPackageStoreUpdateRequest extends FormRequest
             }
         }
     }
-
 
     public function rules(): array
     {
@@ -38,9 +37,21 @@ class RegularPackageStoreUpdateRequest extends FormRequest
             'minParticipant' => 'required|integer|min:1',
             'maxParticipant' => 'required|integer|gte:minParticipant',
 
-            'day_prices' => 'required|min:1',
+            'day_prices' => ['required', 'array', function ($attribute, $value, $fail) {
+                // কমপক্ষে 1 day_price price থাকলে pass
+                $hasPrice = false;
+                foreach ($value as $dayPrice) {
+                    if (isset($dayPrice['price']) && $dayPrice['price'] !== null && $dayPrice['price'] !== '') {
+                        $hasPrice = true;
+                        break;
+                    }
+                }
+                if (! $hasPrice) {
+                    $fail('At least one day price must be provided.');
+                }
+            }],
             'day_prices.*.day' => 'required|string|in:sun,mon,tue,wed,thu,fri,sat',
-            'day_prices.*.price' => 'required|numeric|min:0',
+            'day_prices.*.price' => 'nullable|numeric|min:0', // nullable, মান দিতে হবে না
 
             // Images
             'images' => $this->isMethod('post') ? 'required|array' : 'nullable|array',

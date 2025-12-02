@@ -103,12 +103,10 @@ class PackageController extends Controller
         $data['package'] = null;
         $data['page_title'] = 'Add Regular Package';
         $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
-        $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        $data['days'] = weekDays();
 
         return view('admin.package.regular-create', $data);
     }
-
-    
 
     public function edit(Package $package)
     {
@@ -117,7 +115,7 @@ class PackageController extends Controller
         $data['page_desc'] = 'Update Package Details';
 
         $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
-        $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        $data['days'] = weekDays();
 
         // Build array of existing prices
         $existingPrices = [];
@@ -203,11 +201,9 @@ class PackageController extends Controller
         } catch (Throwable $e) {
             \Log::error($e->getMessage());
             ToastMagic::error('Something went wrong while updating the package.');
-
             return back()->withInput();
         }
     }
-
 
     /**
      * Determine day type (weekend/weekday)
