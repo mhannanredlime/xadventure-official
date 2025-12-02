@@ -12,6 +12,7 @@ use App\Models\PriceType;
 use App\Models\RiderType;
 use App\Models\VehicleType;
 use App\Services\ImageService;
+use App\Services\XPackageService;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -21,6 +22,13 @@ use Throwable;
 
 class PackageController extends Controller
 {
+    protected XPackageService $packageService;
+
+    public function __construct(XPackageService $packageService)
+    {
+        $this->packageService = $packageService;
+    }
+
     public function index(Request $request)
     {
         $data['items'] = Package::with(['packagePrices', 'vehicleTypes.images', 'images'])
@@ -34,7 +42,7 @@ class PackageController extends Controller
                         ->orWhere('subtitle', 'like', '%'.$search.'%');
                 });
             })
-            ->orderBy('name')
+            ->orderBy('id', 'desc')
             ->paginate(10);
         $data['page_title'] = 'Packages';
         $data['page_desc'] = null;
@@ -100,70 +108,45 @@ class PackageController extends Controller
         return view('admin.package.regular-create', $data);
     }
 
+    
 
     public function edit(Package $package)
     {
-        $data['package'] = $package; // Pass the package object
+        $data['package'] = $package;
         $data['page_title'] = 'Edit Regular Package';
         $data['page_desc'] = 'Update Package Details';
-        
+
         $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
         $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-        
-        // Prepare existing prices for JavaScript
+
+        // Build array of existing prices
         $existingPrices = [];
-        if ($package->packagePrices) {
-            foreach ($package->packagePrices as $price) {
-                $existingPrices[$price->day] = $price->price;
+        foreach ($package->packagePrices as $price) {
+            $existingPrices[$price->day] = $price->price;
+        }
+
+        // Ensure all days have at least null values
+        foreach ($data['days'] as $day) {
+            if (! isset($existingPrices[$day])) {
+                $existingPrices[$day] = null;
             }
         }
-        
-        // Convert to JSON for JavaScript
-        $data['dayPrices'] = json_encode($existingPrices);
-        
+
+        $data['dayPrices'] = $existingPrices; // Pass as array
+
         return view('admin.package.regular-edit', $data);
     }
 
-
-
     public function storeRegular(RegularPackageStoreUpdateRequest $request)
     {
-        $validated = $request->validated();
-        $dayPrices = $validated['day_prices'] ?? [];
-
-        DB::beginTransaction();
+        // dd($request->all());
         try {
-            // Create Package
-            $package = Package::create([
-                'name' => $validated['packageName'],
-                'subtitle' => $validated['subTitle'] ?? null,
-                'package_type_id' => $validated['packageType'],
-                'details' => $validated['details'] ?? null,
-                'display_starting_price' => $validated['displayStartingPrice'] ?? null,
-                'min_participants' => $validated['minParticipant'],
-                'max_participants' => $validated['maxParticipant'],
-                'is_active' => true,
-            ]);
-
-            // Upload Images
-            if ($request->hasFile('images')) {
-                $imageService = new ImageService;
-                $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
-            }
-
-            // Create Prices without rider type (null by default)
-            if (! empty($dayPrices)) {
-                $this->regularPackagePriceCreate($package, $dayPrices);
-            }
-
-            DB::commit();
+            $this->packageService->saveRegularPackage($request->validated());
             ToastMagic::success('Package created successfully!');
 
             return redirect()->route('admin.packege.list');
-
         } catch (\Throwable $e) {
-            dd($e->getMessage());
-            DB::rollBack();
+            \Log::error($e->getMessage());
             ToastMagic::error('Something went wrong while creating the package.');
 
             return back()->withInput();
@@ -212,83 +195,19 @@ class PackageController extends Controller
 
     public function updateRegular(RegularPackageStoreUpdateRequest $request, Package $package)
     {
-        $validated = $request->validated();
-        $dayPrices = $validated['day_prices'] ?? [];
-
-        DB::beginTransaction();
         try {
-            // --- Update Package ---
-            $package->update([
-                'name' => $validated['packageName'],
-                'subtitle' => $validated['subTitle'] ?? null,
-                'package_type_id' => $validated['packageType'],
-                'details' => $validated['details'] ?? null,
-                'display_starting_price' => $validated['displayStartingPrice'] ?? null,
-                'min_participants' => $validated['minParticipant'],
-                'max_participants' => $validated['maxParticipant'],
-                'is_active' => $validated['is_active'] ?? $package->is_active,
-            ]);
-
-            // --- Handle Images ---
-            $imageService = new ImageService;
-
-            // Upload new images if any
-            if ($request->hasFile('images')) {
-                $imageService->uploadMultipleImages($package, $request->file('images'), 'packages');
-            }
-
-            // Delete images if requested
-            if ($request->has('delete_images')) {
-                $imageService->deleteSpecificImages($package, $request->delete_images);
-            }
-
-            // --- Sync Day Prices ---
-            if (! empty($dayPrices)) {
-                // Delete existing prices for this package
-                PackagePrice::where('package_id', $package->id)->delete();
-
-                // Recreate prices just like storeRegular
-                $this->regularPackagePriceCreate($package, $dayPrices);
-            }
-
-            DB::commit();
+            $this->packageService->saveRegularPackage($request->validated(), $package);
             ToastMagic::success('Regular package updated successfully!');
 
             return redirect()->route('admin.packege.list');
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            \Log::error('Package update failed: '.$e->getMessage());
+        } catch (Throwable $e) {
+            \Log::error($e->getMessage());
             ToastMagic::error('Something went wrong while updating the package.');
 
             return back()->withInput();
         }
     }
 
-
-    private function preparePriceData(int $packageId, array $activeDays, array $dayPrices, $RIDER_QTY = null): array
-    {
-        $pricesToCreate = [];
-
-        foreach ($activeDays as $key => $day) {
-            $day = strtolower($day);
-
-            $price = $dayPrices[$key] ?? $dayPrices[$day] ?? 0;
-
-            $pricesToCreate[] = [
-                'package_id' => $packageId,
-                'day_type' => $this->getDayType($day),
-                'day' => $day,
-                'price' => $price,
-                'is_active' => $price > 0,
-                'rider_count' => $RIDER_QTY,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        return $pricesToCreate;
-    }
 
     /**
      * Determine day type (weekend/weekday)
@@ -375,8 +294,6 @@ class PackageController extends Controller
             return back()->withInput();
         }
     }
-
-    
 
     public function show(Package $package)
     {

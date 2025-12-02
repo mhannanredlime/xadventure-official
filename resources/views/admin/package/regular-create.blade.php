@@ -4,97 +4,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('admin/css/multiple-image-upload.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
-    <style>
-        .card {
-            border: none;
-            box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, .1);
-            border-radius: .75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-title {
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #2c3e50;
-            font-size: 1.25rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: .5rem;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: .5rem;
-            border: 1px solid #dee2e6;
-            padding: .75rem 1rem;
-            transition: all .2s;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #F76B19;
-            box-shadow: 0 0 0 .2rem rgba(247, 107, 25, .25);
-        }
-
-        .btn-save {
-            background: linear-gradient(135deg, #F76B19 0%, #e55e14 100%);
-            color: #fff;
-            font-weight: 600;
-            font-size: 1rem;
-            border-radius: .75rem;
-            padding: 1rem 2.5rem;
-            border: none;
-            box-shadow: 0 6px 20px rgba(247, 107, 25, .3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-save.btn-loading {
-            pointer-events: none;
-            color: transparent;
-        }
-
-        .btn-save.btn-loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid transparent;
-            border-top: 2px solid #fff;
-            border-radius: 50%;
-            animation: button-spinner .8s linear infinite;
-        }
-
-        @keyframes button-spinner {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .day-pill {
-            margin: 0.25rem;
-        }
-
-        .table-warning {
-            background-color: #fff3cd;
-        }
-
-        .weekend-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('admin/css/regular-package.css') }}">
 @endpush
 
 @section('content')
@@ -148,7 +58,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('packageForm');
             const submitBtn = document.getElementById('submitBtn');
-            const priceContainer = document.getElementById('priceContainer');
+            // const priceContainer = document.getElementById('priceContainer');
             const applyAllInput = document.getElementById('applyAllPrice');
             const dayPricesInput = document.getElementById('dayPricesInput');
             const fileInput = document.getElementById('package_images_input');
@@ -158,36 +68,6 @@
 
             // Initialize prices
             let prices = {};
-
-            // Render price table
-            function renderPriceInputs() {
-                priceContainer.innerHTML = '';
-                allDays.forEach(day => {
-                    const isWeekend = ['fri', 'sat'].includes(day);
-                    const weekendBadge = isWeekend ?
-                        '<span class="badge bg-warning text-dark ms-2">Weekend</span>' : '';
-                    const existingValue = prices[day] !== undefined ? prices[day] : '';
-
-                    priceContainer.insertAdjacentHTML('beforeend', `
-                    <tr class="${isWeekend ? 'table-warning' : ''}">
-                        <td class="fw-bold text-uppercase">
-                            ${day.charAt(0).toUpperCase() + day.slice(1)} ${weekendBadge}
-                        </td>
-                        <td>
-                            <input type="number" 
-                                   class="form-control day-price-input text-center" 
-                                   data-day="${day}" 
-                                   value="${existingValue}" 
-                                   placeholder="Enter price" 
-                                   min="0" 
-                                   step="0.01">
-                        </td>
-                    </tr>
-                `);
-                });
-            }
-
-            renderPriceInputs();
 
             // Individual price input changes
             document.addEventListener('input', function(e) {

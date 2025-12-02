@@ -9,11 +9,8 @@
     <div class="row">
         <div class="col-12">
             <label class="form-label">Upload Package Images (Max 4 images)</label>
-
-            {{-- Hidden file input for new images --}}
             <input type="file" id="package_images_input" name="images[]" multiple accept="image/*" style="display:none;">
 
-            {{-- Custom Upload Component --}}
             <div id="multiple-image-upload" data-model-type="Package" data-model-id="{{ $package->id ?? '' }}"
                 data-upload-url="{{ route('admin.regular-packege-management.store') }}"
                 data-update-url="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : '' }}"
@@ -26,7 +23,6 @@
                 data-max-file-size="{{ 5 * 1024 * 1024 }}">
             </div>
 
-            {{-- Show existing images count --}}
             @if (isset($package) && $package->images->count() > 0)
                 <div class="mt-3">
                     <p class="text-success mb-2">
@@ -35,8 +31,10 @@
                     </p>
                     <div class="image-preview-container">
                         @foreach ($package->images as $image)
+                            {{-- @dd($image); --}}
                             <div class="existing-image">
-                                <img src="{{ Storage::url($image->path) }}" alt="Package Image {{ $loop->iteration }}"
+                                <img src="{{ asset('storage/' . $image->image_path) }}"
+                                    alt="Package Image {{ $loop->iteration }}"
                                     title="{{ $image->alt_text ?? 'Package Image' }}">
                                 <span class="image-number">{{ $loop->iteration }}</span>
                             </div>
@@ -53,10 +51,11 @@
     </div>
 </div>
 
-{{-- Package Type --}}
+{{-- Package Details --}}
 <div class="card p-4 mb-4">
-    <div class="row">
-        <div class="col-md-6">
+    <h5 class="card-title">Package Details</h5>
+    <div class="row g-4">
+        <div class="col-md-4">
             <label class="form-label">Package Type <span class="text-danger">*</span></label>
             <select class="form-select @error('packageType') is-invalid @enderror" name="packageType" required>
                 <option value="">Select Package Type</option>
@@ -71,14 +70,8 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
-    </div>
-</div>
 
-{{-- Package Details --}}
-<div class="card p-4 mb-4">
-    <h5 class="card-title">Package Details</h5>
-    <div class="row g-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label class="form-label">Package Name <span class="text-danger">*</span></label>
             <input type="text" class="form-control @error('packageName') is-invalid @enderror" name="packageName"
                 value="{{ old('packageName', @$package->name) }}" placeholder="Enter package name" required>
@@ -86,7 +79,8 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
-        <div class="col-md-6">
+
+        <div class="col-md-4">
             <label class="form-label">Sub Title</label>
             <input type="text" class="form-control @error('subTitle') is-invalid @enderror" name="subTitle"
                 value="{{ old('subTitle', @$package->subtitle) }}" placeholder="Enter subtitle">
@@ -94,6 +88,9 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+
+
+
         <div class="col-12">
             <label class="form-label">Package Details</label>
             <textarea class="form-control @error('details') is-invalid @enderror" name="details" rows="5"
@@ -102,6 +99,7 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+
         <div class="col-md-4">
             <label class="form-label">Display Base Price (৳) <span class="text-danger">*</span></label>
             <input type="number" step="0.01"
@@ -112,6 +110,7 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+
         <div class="col-md-4">
             <label class="form-label">Minimum Participants <span class="text-danger">*</span></label>
             <input type="number" class="form-control @error('minParticipant') is-invalid @enderror"
@@ -121,6 +120,7 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+
         <div class="col-md-4">
             <label class="form-label">Maximum Participants <span class="text-danger">*</span></label>
             <input type="number" class="form-control @error('maxParticipant') is-invalid @enderror"
@@ -133,9 +133,24 @@
     </div>
 </div>
 
-{{-- Package Pricing --}}
+{{-- Package Pricing use direct html form  --}}
 <div class="card p-4 mb-4">
     <h5 class="card-title"><i class="bi bi-tag me-2"></i>Package Pricing (Day-wise)</h5>
+
+    {{-- PHP logic to prepare existing prices --}}
+    @php
+        $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        $existingPrices = [];
+        if (isset($package) && $package->packagePrices) {
+            foreach ($package->packagePrices as $price) {
+                $existingPrices[$price->day] = $price->price;
+            }
+        }
+        $existingDayPrices = [];
+        foreach ($days as $d) {
+            $existingDayPrices[] = ['day' => $d, 'price' => $existingPrices[$d] ?? null];
+        }
+    @endphp
 
     <div class="mb-4">
         <label class="form-label">Apply Same Price to All Days:</label>
@@ -143,7 +158,6 @@
             <span class="input-group-text">৳</span>
             <input type="number" id="applyAllPrice" class="form-control" placeholder="Enter price for all days"
                 min="0" step="0.01">
-            <button type="button" id="applyAllBtn" class="btn btn-outline-primary">Apply</button>
         </div>
     </div>
 
@@ -156,30 +170,22 @@
                 </tr>
             </thead>
             <tbody id="priceContainer">
-                @php
-                    $days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-                    $existingPrices = [];
-                    if (isset($package) && $package->packagePrices) {
-                        foreach ($package->packagePrices as $price) {
-                            $existingPrices[$price->day] = $price->price;
-                        }
-                    }
-                @endphp
+                {{-- Dynamic HTML generation for price inputs --}}
                 @foreach ($days as $day)
                     @php
                         $isWeekend = in_array($day, ['fri', 'sat']);
-                        $priceValue = $existingPrices[$day] ?? old('price_' . $day, '');
+                        $weekendBadge = $isWeekend
+                            ? '<span class="badge bg-warning text-dark ms-2 weekend-badge">Weekend</span>'
+                            : '';
+                        $val = $existingPrices[$day] ?? '';
                     @endphp
                     <tr class="{{ $isWeekend ? 'table-warning' : '' }}">
                         <td class="fw-bold text-uppercase">
-                            {{ ucfirst($day) }}
-                            @if ($isWeekend)
-                                <span class="badge bg-warning text-dark weekend-badge ms-2">Weekend</span>
-                            @endif
+                            {{ ucfirst($day) }} {!! $weekendBadge !!}
                         </td>
                         <td>
                             <input type="number" class="form-control day-price-input text-center"
-                                data-day="{{ $day }}" value="{{ $priceValue }}" placeholder="0.00"
+                                data-day="{{ $day }}" value="{{ $val }}" placeholder="0.00"
                                 min="0" step="0.01">
                         </td>
                     </tr>
@@ -189,7 +195,7 @@
     </div>
 
     <input type="hidden" name="day_prices" id="dayPricesInput"
-        value="{{ old('day_prices', isset($package) ? json_encode($existingPrices) : '[]') }}">
+        value="{{ old('day_prices', json_encode($existingDayPrices)) }}">
 </div>
 
 <div class="d-flex justify-content-end mt-4">
@@ -197,22 +203,3 @@
         {{ isset($package) ? 'Update Package' : 'Save Package' }}
     </button>
 </div>
-
-<script>
-    // Add Apply All button functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const applyAllBtn = document.getElementById('applyAllBtn');
-        const applyAllInput = document.getElementById('applyAllPrice');
-
-        if (applyAllBtn) {
-            applyAllBtn.addEventListener('click', function() {
-                const val = applyAllInput.value;
-                if (val && val > 0) {
-                    document.querySelectorAll('.day-price-input').forEach(input => {
-                        input.value = val;
-                    });
-                }
-            });
-        }
-    });
-</script>
