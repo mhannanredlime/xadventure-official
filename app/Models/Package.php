@@ -15,6 +15,7 @@ class Package extends Model
     protected $fillable = [
         'name',
         'package_type_id',
+        'vehicle_type_id',
         'subtitle',
         'type',
         'min_participants',

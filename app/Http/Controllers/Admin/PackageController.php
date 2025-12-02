@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\AtvUtvPackageRequest;
-use App\Http\Requests\RegularPackageStoreUpdateRequest;
+use Throwable;
 use App\Models\Package;
-use App\Models\PackagePrice;
-use App\Models\PackageType;
 use App\Models\PriceType;
 use App\Models\RiderType;
+use App\Models\PackageType;
 use App\Models\VehicleType;
-use App\Services\ImageService;
-use App\Services\XPackageService;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
+use App\Models\PackagePrice;
 use Illuminate\Http\Request;
+use App\Services\ImageService;
+use App\Models\PackageWeekendDay;
+use App\Services\XPackageService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
+use App\Http\Requests\AtvUtvPackageRequest;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+use App\Http\Requests\RegularPackageStoreUpdateRequest;
 
 class PackageController extends Controller
 {
@@ -105,7 +106,7 @@ class PackageController extends Controller
         $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
         $data['days'] = weekDays();
 
-        return view('admin.package.regular-create', $data);
+        return view('admin.package.regular.regular-create', $data);
     }
 
     public function edit(Package $package)
@@ -132,7 +133,7 @@ class PackageController extends Controller
 
         $data['dayPrices'] = $existingPrices; // Pass as array
 
-        return view('admin.package.regular-edit', $data);
+        return view('admin.package.regular.regular-edit', $data);
     }
 
     public function storeRegular(RegularPackageStoreUpdateRequest $request)
@@ -201,6 +202,7 @@ class PackageController extends Controller
         } catch (Throwable $e) {
             \Log::error($e->getMessage());
             ToastMagic::error('Something went wrong while updating the package.');
+
             return back()->withInput();
         }
     }
@@ -217,6 +219,8 @@ class PackageController extends Controller
 
     public function createAtvUtv()
     {
+        $data['page_title'] = 'Create ATV/UTV Package';
+        $data['page_desc'] = 'Create ATV/UTV Package';
 
         $data['vehicleTypes'] = VehicleType::with('images')
             ->where('is_active', true)
@@ -225,18 +229,54 @@ class PackageController extends Controller
 
         $data['package'] = null;
 
-        // Only child packages (ATV/UTV)
         $data['packageTypes'] = PackageType::whereNotNull('parent_id')
             ->active()
             ->get();
-        $data['days'] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        $data['days'] = weekDays();
         $data['riderTypes'] = RiderType::get();
 
-        return view('admin.atv-utv-package-create', $data);
+        return view('admin.package.atv.create', $data);
+    }
+
+    public function editAtvUtv(Package $package)
+    {
+        $data['page_title'] = 'Edit ATV/UTV Package';
+        $data['page_desc'] = 'Edit ATV/UTV Package';
+
+        $data['vehicleTypes'] = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+        $package->load(['packagePrices', 'images']);
+
+        $data['package'] = $package;
+
+        $data['packageTypes'] = PackageType::whereNotNull('parent_id')
+            ->active()
+            ->get();
+        $data['days'] = weekDays();
+        $data['riderTypes'] = RiderType::get();
+
+        // Prepare dayPrices for Blade
+        $dayPrices = [];
+        foreach ($package->packagePrices as $price) {
+            $day = $price->day;
+            if (! isset($dayPrices[$day])) {
+                $dayPrices[$day] = [];
+            }
+            $dayPrices[$day][] = [
+                'rider_type_id' => $price->rider_type_id,
+                'price' => $price->price,
+            ];
+        }
+        $data['dayPrices'] = $dayPrices;
+
+        $data['weekendDays'] = PackageWeekendDay::where('package_id', $package->id)->pluck('day')->toArray();
+        // dd($data['weekendDays']);
+
+        return view('admin.package.atv.edit', $data);
     }
 
     public function storeAtvUtv(AtvUtvPackageRequest $request)
     {
+        // dd($request->all());
         $validated = $request->validated();
 
         DB::beginTransaction();
@@ -308,14 +348,6 @@ class PackageController extends Controller
         $package->load(['variants.prices', 'images']);
 
         return view('admin.regular-packege-management', compact('package'));
-    }
-
-    public function editAtvUtv(Package $package)
-    {
-        $vehicleTypes = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
-        $package->load(['variants.prices', 'images']);
-
-        return view('admin.atvutv-packege-management', compact('package', 'vehicleTypes'));
     }
 
     public function update(Request $request, Package $package)

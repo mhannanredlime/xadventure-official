@@ -45,7 +45,7 @@
         <form id="packageForm" method="POST"
             action="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : route('admin.regular-packege-management.store') }}"
             enctype="multipart/form-data">
-            @include('admin.package.regular_form')
+            @include('admin.package.regular.regular_form')
         </form>
     </main>
 @endsection

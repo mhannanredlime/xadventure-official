@@ -99,10 +99,17 @@
                                             class="rounded-pill badge {{ $package->is_active ? 'bg-success' : 'bg-danger' }}">{{ $package->is_active ? 'Active' : 'Inactive' }}</span>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.packages.edit', $package->id) }}" class="btn btn-link p-0"
-                                            title="Edit">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
+                                        @if ($package->type == 'regular')
+                                            <a href="{{ route('admin.packages.edit', $package->id) }}"
+                                                class="btn btn-link p-0" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        @elseif ($package->type == 'atv')
+                                            <a href="{{ route('admin.atvutv-packege-management.edit', $package->id) }}"
+                                                class="btn btn-link p-0" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        @endif
 
                                         <a href="{{ route('admin.packages.show', $package->id) }}" class="btn btn-link p-0"
                                             title="View">
