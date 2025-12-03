@@ -135,15 +135,15 @@
         .btn-close {
             background-size: 1.2em;
         }
+        .default-page-marign-top{
+            margin-top: 170px !important;
+        }
     </style>
 
     @stack('styles')
 </head>
 
 <body>
-
-
-
     <!-- Package Selection Modal -->
     <div class="modal fade" id="packageSelectionModal" tabindex="-1" aria-labelledby="packageSelectionModalLabel"
         aria-hidden="true">
