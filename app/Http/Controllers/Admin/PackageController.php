@@ -270,7 +270,6 @@ class PackageController extends Controller
 
         $data['weekendDays'] = PackageWeekendDay::where('package_id', $package->id)->pluck('day')->toArray();
         // dd($data['weekendDays']);
-
         return view('admin.package.atv.edit', $data);
     }
 

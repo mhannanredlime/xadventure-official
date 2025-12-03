@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Package;
+
 /**
  * Global Helper Functions
  * 
@@ -46,5 +48,16 @@ if (!function_exists('weekDays')) {
     function weekDays()
     {
         return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    }
+}
+if (!function_exists('atvPackageAvgPrice')) {
+    function atvPackageAvgPrice(Package $package)
+    {
+        if (!$package->packagePrices || $package->packagePrices->isEmpty()) {
+            return 0;
+        }
+
+        // Calculate average price
+        return round($package->packagePrices->avg('price'));
     }
 }

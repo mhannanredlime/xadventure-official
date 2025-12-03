@@ -94,7 +94,14 @@
                                         {{ $package->name }} <br>
                                         <small>{{ $package->subtitle }}</small>
                                     </td>
-                                    <td>৳ {{ $package->display_starting_price }}</td>
+                                    <td>
+                                        @if ($package->type == 'regular')
+                                            <span class="badge bg-success">৳ {{ $package->display_starting_price }}</span>
+                                        @else
+                                            <span class="badge bg-primary">Avg: ৳ {{ atvPackageAvgPrice($package) }}</span>
+                                        @endif
+                                    </td>
+
                                     <td><span
                                             class="rounded-pill badge {{ $package->is_active ? 'bg-success' : 'bg-danger' }}">{{ $package->is_active ? 'Active' : 'Inactive' }}</span>
                                     </td>
