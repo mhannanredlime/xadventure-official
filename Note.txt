@@ -13,10 +13,14 @@ php artisan db:seed --class=PackagePriceSeeder
 
 
 
-December 2, 2025 – Task Summary
+December 3, 2025 – Task Summary
 
-1. Fix image upload validation so the form correctly detects uploaded images and does not show the alert when images are present.
-2. Rewrite the full package form JavaScript to handle day-wise pricing, apply-all pricing, and image uploads with working gallery_images_input.
-3. Refactor the Blade file to provide a complete working Add Package form with updated JS for images, day-wise pricing, and submit validation.
-4. Update the updateRegular controller method to match storeRegular functionality, syncing day-wise prices and handling images properly on update.
-5. Ensure day-wise pricing inputs render correctly with weekend badges, apply-all functionality works, and prices are saved and handle riser wise UTV/ATV price 
+
+1. Fix `editAtvUtv` controller to prepare `$dayPrices` in a flat array for proper Blade JS rendering.
+2. Refactor ATV/UTV create and edit Blade JS into a single reusable Blade partial.
+3. Ensure `day_prices` validation in `AtvUtvPackageRequest` handles null or empty prices correctly.
+4. Update `edit.blade.php` to use `$dayPrices[$day]` safely and prevent undefined array key errors.
+5. Test form submission for both create and edit to confirm correct JSON structure is sent for day-wise pricing.
+
+
+

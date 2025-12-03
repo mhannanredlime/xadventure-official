@@ -55,6 +55,11 @@
     <script src="{{ asset('admin/js/gallery-manager.js') }}"></script>
 
     <script>
+        $(document).ready(function() {
+            $('#priceContainer').on('click', '.remove-day-row', function() {
+                $(this).closest('tr').remove();
+            });
+        });
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('packageForm');
             const submitBtn = document.getElementById('submitBtn');
@@ -233,9 +238,8 @@
                     // Check if there are any files already in the input
                     if (fileInput.files.length === 0) {
                         console.warn('No image files attached to form!');
-                        // You might want to ask user to select images or make it optional
-                        // alert('Please select at least one image for the package');
-                        // return;
+                        alert('Please select at least one image for the package');
+                        return;
                     }
                 }
 

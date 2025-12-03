@@ -167,6 +167,7 @@
                 <tr>
                     <th>Day</th>
                     <th>Price (৳)</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="priceContainer">
@@ -185,10 +186,16 @@
                         </td>
                         <td>
                             <input type="number" class="form-control day-price-input text-center"
-                                data-day="{{ $day }}" value="{{ $val }}" placeholder="0.00"
+                                data-day="{{ $day }}" value="{{ $val }}" placeholder="100" maxlength="8"
                                 min="0" step="0.01">
                         </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger remove-day-row" data-day="{{ $day }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
+                   
                 @endforeach
             </tbody>
         </table>

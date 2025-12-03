@@ -75,37 +75,45 @@
                 </li>
             @endcan
             {{-- Package Management --}}
-            @can('packages.view')
-                <li class="nav-item">
-                    <a href="#sampleSubmenu"
-                        class="nav-link d-flex justify-content-between align-items-center   {{ request()->is('admin/packages*') ? 'active' : '' }}"
-                        data-bs-toggle="collapse" aria-expanded="false">
-                        <div>
-                            <i class="bi bi-menu-button-wide me-2"></i>
-                            <span>Package Management</span>
-                        </div>
-                        <i class="bi bi-chevron-down"></i>
-                    </a>
-                    <ul class="collapse list-unstyled ps-3" id="sampleSubmenu">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.packege.list') }}">
-                                <i class="bi bi-circle me-2"></i>All Packages
-                            </a>
-                        </li>
+           @can('packages.view')
+    <li class="nav-item">
+        <a href="#sampleSubmenu"
+            class="nav-link d-flex justify-content-between align-items-center 
+            {{ request()->is('admin/packege/list') || request()->is('admin/regular-packege-management') || request()->is('admin/atvutv-packege-management') ? 'active' : '' }}"
+            data-bs-toggle="collapse"
+            aria-expanded="{{ request()->is('admin/packege/list') || request()->is('admin/regular-packege-management') || request()->is('admin/atvutv-packege-management') ? 'true' : 'false' }}">
+            <div>
+                <i class="bi bi-menu-button-wide me-2"></i>
+                <span>Package Management</span>
+            </div>
+            <i class="bi bi-chevron-down"></i>
+        </a>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url('/admin/regular-packege-management') }}">
-                                <i class="bi bi-circle me-2"></i>Regular Package
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url('admin/atvutv-packege-management') }}">
-                                <i class="bi bi-circle me-2"></i>Add ATV/UTV Package
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            @endcan
+        <ul class="collapse list-unstyled ps-3 
+            {{ request()->is('admin/packege/list') || request()->is('admin/regular-packege-management') || request()->is('admin/atvutv-packege-management') ? 'show' : '' }}"
+            id="sampleSubmenu">
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin.packege.list') }}">
+                    <i class="bi bi-circle me-2"></i>All Packages
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url('/admin/regular-packege-management') }}">
+                    <i class="bi bi-circle me-2"></i>Regular Package
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url('admin/atvutv-packege-management') }}">
+                    <i class="bi bi-circle me-2"></i>Add ATV/UTV Package
+                </a>
+            </li>
+        </ul>
+    </li>
+@endcan
+
 
             {{-- Vehicle Management --}}
             @can('vehicle-types.view')
