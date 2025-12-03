@@ -1,4 +1,3 @@
-{{-- resources/views/admin/package/atv/create.blade.php --}}
 @extends('layouts.admin')
 @section('title', isset($package) ? 'Edit ATV/UTV Package' : 'Add ATV/UTV Package')
 
@@ -9,14 +8,16 @@
 
 @section('content')
     <main class="mt-4">
+        {{-- Header --}}
         <header class="d-flex justify-content-between align-items-center page-header mb-4">
             <div>
                 <h3>{{ isset($package) ? 'Edit ATV/UTV Package' : 'Add ATV/UTV Package' }}</h3>
                 <p class="breadcrumb-custom"><i class="bi bi-home me-1"></i> Package Management &gt;
                     {{ isset($package) ? 'Edit' : 'Add' }} Package</p>
             </div>
-            <a href="{{ url('admin/add-packege-management') }}" class="btn btn-outline-secondary"><i
-                    class="bi bi-arrow-left me-2"></i>Back to Packages</a>
+            <a href="{{ url('admin/add-packege-management') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Packages
+            </a>
         </header>
 
         {{-- Alerts --}}
@@ -35,7 +36,8 @@
 
         @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show">
-                <i class="bi bi-exclamation-triangle me-2"></i><strong>Please correct the following errors:</strong>
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Please correct the following errors:</strong>
                 <ul class="mb-0 mt-2 ps-3">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -45,127 +47,135 @@
             </div>
         @endif
 
+        {{-- Form --}}
         <form id="packageForm" method="POST"
             action="{{ isset($package) ? route('admin.atvutv-packege-management.update', $package->id) : route('admin.atvutv-packege-management.store') }}"
             enctype="multipart/form-data">
-            @include('admin.package.atv.atv_form')
+            @csrf
+
+            @php
+                $isEdit = isset($package);
+                $weekendDays = $weekendDays ?? ['fri', 'sat'];
+                $dayPrices = $dayPrices ?? [];
+            @endphp
+
+            {{-- Package Details --}}
+            <div class="card p-4 mb-4">
+                <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>Package Details</h5>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Vehicle Type <span class="text-danger">*</span></label>
+                        <select class="form-select" name="vehicleType" required>
+                            <option value="">Select Vehicle Type</option>
+                            @foreach ($vehicleTypes as $type)
+                                <option value="{{ $type->id }}"
+                                    {{ old('vehicleType', $package->vehicle_type_id ?? '') == $type->id ? 'selected' : '' }}>
+                                    {{ $type->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Package Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="packageName"
+                            value="{{ old('packageName', $package->name ?? '') }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Sub Title</label>
+                        <input type="text" class="form-control" name="subTitle"
+                            value="{{ old('subTitle', $package->subtitle ?? '') }}">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Package Details</label>
+                        <textarea class="form-control" name="details" rows="5">{{ old('details', $package->details ?? '') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Package Pricing --}}
+            <div class="card p-4 mb-4">
+                <h5 class="card-title"><i class="bi bi-tag me-2"></i>Package Pricing (Day & Rider-wise)</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Day</th>
+                                @foreach ($riderTypes as $rider)
+                                    <th>
+                                        {{ $rider->name }}
+                                        <input type="number" class="form-control apply-all-rider mt-1"
+                                            data-rider="{{ $rider->id }}" placeholder="Apply all">
+                                    </th>
+                                @endforeach
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($days as $day)
+                                @php
+                                    $isWeekend = in_array($day, $weekendDays);
+                                    $dayName = ucfirst($day);
+                                @endphp
+                                <tr class="{{ $isWeekend ? 'table-warning' : '' }}" data-day-row="{{ $day }}">
+                                    <td>
+                                        {{ $dayName }}
+                                        @if ($isWeekend)
+                                            <span class="badge bg-warning text-dark ms-2">Weekend</span>
+                                        @endif
+                                    </td>
+
+                                    @foreach ($riderTypes as $rider)
+                                        @php
+                                            $val = '';
+                                            if (isset($dayPrices[$day])) {
+                                                $priceObj = collect($dayPrices[$day])->firstWhere(
+                                                    'rider_type_id',
+                                                    $rider->id,
+                                                );
+                                                $val = $priceObj['price'] ?? '';
+                                            }
+                                        @endphp
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control day-rider-price"
+                                                    data-day="{{ $day }}" data-rider="{{ $rider->id }}"
+                                                    value="{{ old('day_prices.' . $day . '.' . $rider->id, $val) }}"
+                                                    min="0" placeholder="Price">
+                                                <button type="button" class="btn btn-outline-danger clear-price-btn"
+                                                    title="Clear Price">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    @endforeach
+
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm remove-day-row"
+                                            data-day="{{ $day }}" title="Remove Day">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <input type="hidden" name="day_prices" id="dayPricesInput" value="[]">
+                    <input type="hidden" name="active_days" id="activeDaysInput" value="{{ json_encode($days) }}">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button type="button" class="btn btn-save" id="submitBtn">
+                    {{ $isEdit ? 'Update Package' : 'Save Package' }}
+                </button>
+            </div>
         </form>
     </main>
 @endsection
 
-@push('scripts')
-    <script>
-        $(function() {
-            const $priceContainer = $('#priceContainer');
-
-            // Safely pass PHP variables to JS
-            const allDays = {!! json_encode($days ?? ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']) !!};
-            const riderTypes = {!! isset($riderTypes) ? $riderTypes->toJson() : '[]' !!};
-            const weekendDays = {!! isset($weekendDays) ? json_encode($weekendDays) : '["fri","sat"]' !!};
-
-            // Prices object: day => [{rider_type_id, price}]
-            let prices = {!! isset($package->day_prices) ? json_encode($package->day_prices) : '{}' !!} || {};
-
-            function getDayType(day) {
-                return weekendDays.includes(day) ? 'weekend' : 'weekday';
-            }
-
-            function renderTable() {
-                $priceContainer.empty();
-                allDays.forEach(day => {
-                    const isWeekend = weekendDays.includes(day);
-                    const dayName = day.charAt(0).toUpperCase() + day.slice(1);
-
-                    const weekendBadge = isWeekend ?
-                        ' <span class="badge bg-warning text-dark ms-2">Weekend</span>' :
-                        '';
-
-                    const $tr = $('<tr>').addClass(isWeekend ? 'table-warning' : '');
-                    $tr.append(`<td>${dayName}${weekendBadge}</td>`);
-
-                    riderTypes.forEach(rider => {
-                        const riderId = rider.id;
-
-                        // Look for existing price
-                        let val = '';
-                        if (prices[day] && Array.isArray(prices[day])) {
-                            const priceObj = prices[day].find(p => p.rider_type_id == riderId);
-                            val = priceObj ? priceObj.price : '';
-                        }
-
-                        $tr.append(
-                            `<td><input type="number" class="form-control day-rider-price" 
-                        data-day="${day}" 
-                        data-rider="${riderId}" 
-                        value="${val}" 
-                        min="0"></td>`
-                        );
-                    });
-
-                    $priceContainer.append($tr);
-                });
-
-                $('#activeDaysInput').val(JSON.stringify(allDays));
-            }
-
-            // Apply All functionality
-            $(document).on('input', '.apply-all-rider', function() {
-                const riderId = $(this).data('rider');
-                const val = $(this).val();
-
-                $(`.day-rider-price[data-rider="${riderId}"]`).each(function() {
-                    $(this).val(val);
-                    const day = $(this).data('day');
-                    updatePriceInObject(day, riderId, val);
-                });
-            });
-
-            // Update individual inputs
-            $(document).on('input', '.day-rider-price', function() {
-                const day = $(this).data('day');
-                const riderId = $(this).data('rider');
-                const val = $(this).val() === '' ? null : Number($(this).val());
-                updatePriceInObject(day, riderId, val);
-            });
-
-            function updatePriceInObject(day, riderId, val) {
-                if (!prices[day]) prices[day] = [];
-                const idx = prices[day].findIndex(p => p.rider_type_id == riderId);
-
-                if (val === null || val === '') {
-                    if (idx !== -1) prices[day].splice(idx, 1);
-                } else {
-                    if (idx !== -1) prices[day][idx].price = val;
-                    else prices[day].push({
-                        rider_type_id: riderId,
-                        price: val
-                    });
-                }
-            }
-
-            $('#submitBtn').on('click', function(e) {
-                e.preventDefault();
-
-                const dayPricesArray = [];
-                allDays.forEach(day => {
-                    if (prices[day] && Array.isArray(prices[day])) {
-                        prices[day].forEach(p => {
-                            dayPricesArray.push({
-                                day: day,
-                                rider_type_id: p.rider_type_id,
-                                price: p.price,
-                                type: getDayType(day)
-                            });
-                        });
-                    }
-                });
-
-                $('#dayPricesInput').val(JSON.stringify(dayPricesArray));
-                $(this).prop('disabled', true).addClass('btn-loading');
-                $('#packageForm')[0].submit();
-            });
-
-            renderTable();
-        });
-    </script>
-@endpush
+@include('admin.package.atv.atv_form_js')

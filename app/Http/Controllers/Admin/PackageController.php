@@ -2,32 +2,35 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Throwable;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\AtvUtvPackageRequest;
+use App\Http\Requests\RegularPackageStoreUpdateRequest;
 use App\Models\Package;
+use App\Models\PackagePrice;
+use App\Models\PackageType;
 use App\Models\PriceType;
 use App\Models\RiderType;
-use App\Models\PackageType;
 use App\Models\VehicleType;
-use App\Models\PackagePrice;
-use Illuminate\Http\Request;
+use App\Services\AtvUtvPackageService;
 use App\Services\ImageService;
-use App\Models\PackageWeekendDay;
 use App\Services\XPackageService;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\AtvUtvPackageRequest;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
-use App\Http\Requests\RegularPackageStoreUpdateRequest;
+use Throwable;
 
 class PackageController extends Controller
 {
     protected XPackageService $packageService;
 
-    public function __construct(XPackageService $packageService)
+    protected AtvUtvPackageService $atvUtvPackageService;
+
+    public function __construct(XPackageService $packageService, AtvUtvPackageService $atvUtvPackageService)
     {
         $this->packageService = $packageService;
+        $this->atvUtvPackageService = $atvUtvPackageService;
     }
 
     public function index(Request $request)
@@ -80,11 +83,9 @@ class PackageController extends Controller
 
         $package = Package::create($validated);
 
-        // Handle multiple image uploads with extended format support
         if ($request->hasFile('images')) {
-            // Validate image formats
             $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120',
             ]);
 
             $imageService = new ImageService;
@@ -228,12 +229,15 @@ class PackageController extends Controller
             ->get();
 
         $data['package'] = null;
-
         $data['packageTypes'] = PackageType::whereNotNull('parent_id')
             ->active()
             ->get();
         $data['days'] = weekDays();
         $data['riderTypes'] = RiderType::get();
+
+        // Add empty dayPrices for create
+        $data['dayPrices'] = [];
+        $data['weekendDays'] = ['fri', 'sat'];
 
         return view('admin.package.atv.create', $data);
     }
@@ -244,87 +248,91 @@ class PackageController extends Controller
         $data['page_desc'] = 'Edit ATV/UTV Package';
 
         $data['vehicleTypes'] = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+
+        // ✅ Correct relationship name (based on your model)
         $package->load(['packagePrices', 'images']);
 
         $data['package'] = $package;
-
-        $data['packageTypes'] = PackageType::whereNotNull('parent_id')
-            ->active()
-            ->get();
-        $data['days'] = weekDays();
+        $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
+        $data['days'] = weekDays(); // ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
         $data['riderTypes'] = RiderType::get();
 
-        // Prepare dayPrices for Blade
-        $dayPrices = [];
-        foreach ($package->packagePrices as $price) {
-            $day = $price->day;
-            if (! isset($dayPrices[$day])) {
-                $dayPrices[$day] = [];
-            }
-            $dayPrices[$day][] = [
+        $data['dayPrices'] = $package->packagePrices->map(function ($price) {
+            return [
+                'day' => $price->day,
                 'rider_type_id' => $price->rider_type_id,
                 'price' => $price->price,
             ];
-        }
-        $data['dayPrices'] = $dayPrices;
+        })->toArray();
 
-        $data['weekendDays'] = PackageWeekendDay::where('package_id', $package->id)->pluck('day')->toArray();
-        // dd($data['weekendDays']);
+        $data['weekendDays'] = ['fri', 'sat'];
+
         return view('admin.package.atv.edit', $data);
     }
 
     public function storeAtvUtv(AtvUtvPackageRequest $request)
     {
-        // dd($request->all());
         $validated = $request->validated();
-
+        // dd($validated);
         DB::beginTransaction();
         try {
-            // Step 1: Create Package
             $package = Package::create([
                 'name' => $validated['packageName'],
                 'type' => 'atv',
-                'package_type_id' => 2, // atv type
+                'package_type_id' => 2, // ATV/UTV package type
                 'vehicle_type_id' => $validated['vehicleType'],
                 'subtitle' => $validated['subTitle'] ?? null,
                 'details' => $validated['details'] ?? null,
                 'is_active' => true,
             ]);
 
-            // Step 2: Handle package prices
-            $dayPrices = collect(json_decode($request->day_prices, true) ?? []);
-
-            if ($dayPrices->isNotEmpty()) {
-                foreach ($dayPrices as $dayPrice) {
-                    $priceType = PriceType::where('slug', $dayPrice['type'])->first();
-                    if (! $priceType) {
-                        continue;
-                    }
-                    PackagePrice::updateOrCreate(
-                        [
-                            'package_id' => $package->id,
-                            'price_type_id' => $priceType->id,
-                            'day' => $dayPrice['day'],
-                            'rider_type_id' => $dayPrice['rider_type_id'],
-                        ],
-                        [
-                            'price' => $dayPrice['price'],
-                            'is_active' => true,
-                            'package_type_id' => $package->package_type_id,
-                        ]
-                    );
-                }
-            }
+            // ✅ Call service method
+            $this->atvUtvPackageService->savePackagePrices($package, $validated['day_prices']);
 
             DB::commit();
-
             ToastMagic::success('ATV/UTV package created successfully!');
 
             return redirect()->route('admin.packege.list');
 
         } catch (Throwable $e) {
             DB::rollBack();
-            ToastMagic::error('Failed to create package: '.$e->getMessage());
+            ToastMagic::error($e->getMessage());
+
+            return back()->withInput();
+        }
+    }
+
+    public function updateAtvUtv(AtvUtvPackageRequest $request, Package $package)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+
+        DB::beginTransaction();
+        try {
+            $package->update([
+                'name' => $validated['packageName'],
+                'vehicle_type_id' => $validated['vehicleType'],
+                'subtitle' => $validated['subTitle'] ?? null,
+                'details' => $validated['details'] ?? null,
+            ]);
+
+            // ✅ Call service method
+            $this->atvUtvPackageService->savePackagePrices($package, $validated['day_prices']);
+
+            DB::commit();
+            ToastMagic::success('ATV/UTV package updated successfully!');
+
+            return redirect()->route('admin.packege.list');
+
+        } catch (Throwable $e) {
+
+            \Log::info('Day Prices from form: Error', [
+                'raw' => $e->getMessage(),
+                'decoded' => json_decode($e->getMessage(), true),
+            ]);
+
+            DB::rollBack();
+            ToastMagic::error($e->getMessage());
 
             return back()->withInput();
         }
@@ -381,111 +389,6 @@ class PackageController extends Controller
 
         return redirect()->route('admin.packages.index')
             ->with('success', 'Package updated successfully.');
-    }
-
-    public function updateAtvUtv(Request $request, Package $package)
-    {
-        // Get available vehicle types for validation
-        $vehicleTypes = VehicleType::where('is_active', true)->pluck('name')->toArray();
-        $vehicleTypeValidation = 'required|in:'.implode(',', $vehicleTypes);
-
-        $validated = $request->validate([
-            'vehicleType' => $vehicleTypeValidation,
-            'packageName' => 'required|string|max:255',
-            'subTitle' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'weekdaySingle' => 'required|numeric|min:0',
-            'weekdayDouble' => 'required|numeric|min:0',
-            'weekendSingle' => 'required|numeric|min:0',
-            'weekendDouble' => 'required|numeric|min:0',
-            'selected_weekday' => 'nullable|string|in:sunday,monday,tuesday,wednesday,thursday',
-            'selected_weekend' => 'nullable|string|in:friday,saturday',
-        ], [
-            'vehicleType.required' => 'Vehicle type is required.',
-            'packageName.required' => 'Package name is required.',
-            'weekdaySingle.required' => 'Weekday single rider price is required.',
-            'weekdayDouble.required' => 'Weekday double rider price is required.',
-            'weekendSingle.required' => 'Weekend single rider price is required.',
-            'weekendDouble.required' => 'Weekend double rider price is required.',
-            'weekdaySingle.numeric' => 'Weekday single rider price must be a valid number.',
-            'weekdayDouble.numeric' => 'Weekday double rider price must be a valid number.',
-            'weekendSingle.numeric' => 'Weekend single rider price must be a valid number.',
-            'weekendDouble.numeric' => 'Weekend double rider price must be a valid number.',
-            'weekdaySingle.min' => 'Weekday single rider price must be greater than or equal to 0.',
-            'weekdayDouble.min' => 'Weekday double rider price must be greater than or equal to 0.',
-            'weekendSingle.min' => 'Weekend single rider price must be greater than or equal to 0.',
-            'weekendDouble.min' => 'Weekend double rider price must be greater than or equal to 0.',
-            'selected_weekday.in' => 'The weekday selection is invalid.',
-            'selected_weekend.in' => 'The weekend selection is invalid.',
-        ]);
-
-        // Determine package type - map vehicle type to package type
-        $packageType = strtolower($validated['vehicleType']);
-        // Map vehicle types to package types - you can customize this mapping as needed
-        $vehicleTypeMapping = [
-            'dirt bike' => 'atv',
-            'atv' => 'atv',
-            'utv' => 'utv',
-            // Add more mappings as needed
-        ];
-
-        $packageType = $vehicleTypeMapping[$packageType] ?? $packageType;
-
-        // Get the vehicle type and associate it with the package
-        $vehicleType = VehicleType::where('name', $validated['vehicleType'])->first();
-        if (! $vehicleType) {
-            return back()->withErrors(['vehicleType' => 'Selected vehicle type not found.']);
-        }
-
-        // Update package
-        $package->update([
-            'name' => $validated['packageName'],
-            'subtitle' => $validated['subTitle'],
-            'type' => $packageType,
-            'notes' => $validated['notes'],
-
-            'selected_weekday' => $validated['selected_weekday'] ?? 'monday',
-            'selected_weekend' => $validated['selected_weekend'] ?? 'friday',
-        ]);
-
-        // Sync vehicle type relationship (this will automatically use vehicle type images)
-        $package->vehicleTypes()->sync([$vehicleType->id]);
-
-        // Update variants and prices
-        $variants = $package->variants;
-        $variantData = [
-            ['variant_name' => 'Single Rider', 'capacity' => 1],
-            ['variant_name' => 'Double Rider', 'capacity' => 2],
-        ];
-
-        foreach ($variantData as $index => $data) {
-            $variant = $variants->get($index);
-            if ($variant) {
-                $variant->update([
-                    'variant_name' => $data['variant_name'],
-                    'capacity' => $data['capacity'],
-                ]);
-            } else {
-                $variant = $package->variants()->create([
-                    'variant_name' => $data['variant_name'],
-                    'capacity' => $data['capacity'],
-                    'is_active' => true,
-                ]);
-            }
-
-            // Update prices for this variant
-            $weekdayPrice = $data['variant_name'] === 'Single Rider' ? $validated['weekdaySingle'] : $validated['weekdayDouble'];
-            $weekendPrice = $data['variant_name'] === 'Single Rider' ? $validated['weekendSingle'] : $validated['weekendDouble'];
-
-            $variant->prices()->delete();
-            $variant->prices()->createMany([
-                ['price_type' => 'weekday', 'amount' => $weekdayPrice],
-                ['price_type' => 'weekend', 'amount' => $weekendPrice],
-            ]);
-        }
-
-        return redirect()->route('admin.atvutv-packege-management.edit', $package)
-            ->with('success', 'ATV/UTV package updated successfully.');
     }
 
     public function destroy(Package $package)

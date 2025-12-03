@@ -48,87 +48,9 @@
         <form id="packageForm" method="POST"
             action="{{ isset($package) ? route('admin.atvutv-packege-management.update', $package->id) : route('admin.atvutv-packege-management.store') }}"
             enctype="multipart/form-data">
+            @method('PUT')
             @include('admin.package.atv.atv_form')
         </form>
     </main>
 @endsection
-
-@push('scripts')
-    <script>
-        $(function() {
-            // const $priceContainer = $('#priceContainer');
-            // Safely pass PHP variables to JS
-            const allDays = {!! json_encode($days ?? ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']) !!};
-            const riderTypes = {!! isset($riderTypes) ? $riderTypes->toJson() : '[]' !!};
-            const weekendDays = {!! isset($weekendDays) ? json_encode($weekendDays) : '["fri","sat"]' !!};
-
-            // Prices object: day => [{rider_type_id, price}]
-            let prices = {!! isset($package->day_prices) ? json_encode($package->day_prices) : '{}' !!} || {};
-
-            function getDayType(day) {
-                return weekendDays.includes(day) ? 'weekend' : 'weekday';
-            }
-
-
-
-            // Apply All functionality
-            $(document).on('input', '.apply-all-rider', function() {
-                const riderId = $(this).data('rider');
-                const val = $(this).val();
-
-                $(`.day-rider-price[data-rider="${riderId}"]`).each(function() {
-                    $(this).val(val);
-                    const day = $(this).data('day');
-                    updatePriceInObject(day, riderId, val);
-                });
-            });
-
-            // Update individual inputs
-            $(document).on('input', '.day-rider-price', function() {
-                const day = $(this).data('day');
-                const riderId = $(this).data('rider');
-                const val = $(this).val() === '' ? null : Number($(this).val());
-                updatePriceInObject(day, riderId, val);
-            });
-
-            function updatePriceInObject(day, riderId, val) {
-                if (!prices[day]) prices[day] = [];
-                const idx = prices[day].findIndex(p => p.rider_type_id == riderId);
-
-                if (val === null || val === '') {
-                    if (idx !== -1) prices[day].splice(idx, 1);
-                } else {
-                    if (idx !== -1) prices[day][idx].price = val;
-                    else prices[day].push({
-                        rider_type_id: riderId,
-                        price: val
-                    });
-                }
-            }
-
-            $('#submitBtn').on('click', function(e) {
-                e.preventDefault();
-
-                const dayPricesArray = [];
-                allDays.forEach(day => {
-                    if (prices[day] && Array.isArray(prices[day])) {
-                        prices[day].forEach(p => {
-                            dayPricesArray.push({
-                                day: day,
-                                rider_type_id: p.rider_type_id,
-                                price: p.price,
-                                type: getDayType(day)
-                            });
-                        });
-                    }
-                });
-
-                $('#dayPricesInput').val(JSON.stringify(dayPricesArray));
-                $(this).prop('disabled', true).addClass('btn-loading');
-                $('#packageForm')[0].submit();
-            });
-
-            renderTable();
-        });
-    </script>
-@endpush
+@include('admin.package.atv.atv_form_js')

@@ -180,7 +180,7 @@
 
         <form id="packageForm" method="POST" action="{{ route('admin.regular-packege-management.update', $package) }}"
             enctype="multipart/form-data">
-            @include('admin.package.regular_form')
+            @include('admin.package.regular.regular_form')
         </form>
     </main>
 @endsection

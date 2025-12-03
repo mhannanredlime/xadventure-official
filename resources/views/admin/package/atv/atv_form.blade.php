@@ -4,7 +4,7 @@
     $weekendDays = $weekendDays ?? ['fri', 'sat'];
     $dayPrices = $dayPrices ?? [];
 @endphp
-
+@csrf
 {{-- Package Details --}}
 <div class="card p-4 mb-4">
     <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>Package Details</h5>
@@ -42,8 +42,9 @@
 </div>
 
 {{-- Package Pricing --}}
-<div class="card p-4">
+<div class="card p-4 mb-4">
     <h5 class="card-title"><i class="bi bi-tag me-2"></i>Package Pricing (Day & Rider-wise)</h5>
+
     <div class="table-responsive">
         <table class="table table-bordered text-center align-middle">
             <thead class="table-light">
@@ -56,6 +57,7 @@
                                 data-rider="{{ $rider->id }}" placeholder="Apply all">
                         </th>
                     @endforeach
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,9 +65,8 @@
                     @php
                         $isWeekend = in_array($day, $weekendDays);
                         $dayName = ucfirst($day);
-                        // dd($day,$weekendDays, $dayName);
                     @endphp
-                    <tr class="{{ $isWeekend ? 'table-warning' : '' }}">
+                    <tr class="{{ $isWeekend ? 'table-warning' : '' }}" data-day-row="{{ $day }}">
                         <td>
                             {{ $dayName }}
                             @if ($isWeekend)
@@ -74,31 +75,46 @@
                         </td>
 
                         @foreach ($riderTypes as $rider)
+                         {{-- getting day wise price and rider wise price properly --}}
                             @php
                                 $val = '';
-                                if (isset($dayPrices[$day]) && is_array($dayPrices[$day])) {
-                                    $priceObj = collect($dayPrices[$day])->firstWhere('rider_type_id', $rider->id);
-                                    $val = $priceObj['price'] ?? '';
-                                }
-                                // @dd($val); getting properly
+                                $priceObj = collect($dayPrices)->firstWhere(function ($item) use ($day, $rider) {
+                                    return $item['day'] == $day && $item['rider_type_id'] == $rider->id;
+                                });
+                                $val = $priceObj['price'] ?? '';
                             @endphp
-                            <td>
-                                <input type="number" class="form-control day-rider-price"
-                                    name="day_prices[{{ $day }}][{{ $rider->id }}]"
-                                    data-day="{{ $day }}" data-rider="{{ $rider->id }}"
-                                    value="{{ old('day_prices.' . $day . '.' . $rider->id, $val) }}" min="0">
 
+                            <td>
+                                <div class="input-group">
+                                    <input type="number" class="form-control day-rider-price"
+                                        data-day="{{ $day }}" data-rider="{{ $rider->id }}"
+                                        value="{{ old('day_prices.' . $day . '.' . $rider->id, $val) }}" min="0"
+                                        placeholder="Price">
+
+                                    <button type="button" class="btn btn-outline-danger clear-price-btn"
+                                        title="Clear Price">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
                             </td>
                         @endforeach
+
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm remove-day-row"
+                                data-day="{{ $day }}" title="Remove Day">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-    </div>
 
-    <input type="hidden" name="day_prices" id="dayPricesInput" value="{{ json_encode($dayPrices) }}">
-    <input type="hidden" name="active_days" id="activeDaysInput" value="{{ json_encode($days) }}">
+        <input type="hidden" name="day_prices" id="dayPricesInput" value="[]">
+        <input type="hidden" name="active_days" id="activeDaysInput" value="{{ json_encode($days) }}">
+    </div>
 </div>
+
 
 <div class="d-flex justify-content-end mt-4">
     <button type="button" class="btn btn-save" id="submitBtn">
@@ -106,66 +122,12 @@
     </button>
 </div>
 
+
 @push('scripts')
     <script>
-        $(function() {
-            const weekendDays = {!! json_encode($weekendDays) !!};
-            const allDays = {!! json_encode($days) !!};
-            let prices = {!! json_encode($dayPrices) !!};
-
-            function getDayType(day) {
-                return weekendDays.includes(day) ? 'weekend' : 'weekday';
-            }
-
-            function updatePrice(day, riderId, val) {
-                if (!prices[day]) prices[day] = [];
-                const idx = prices[day].findIndex(p => p.rider_type_id == riderId);
-                if (val === null || val === '' || val === undefined) {
-                    if (idx !== -1) prices[day].splice(idx, 1);
-                } else {
-                    if (idx !== -1) prices[day][idx].price = val;
-                    else prices[day].push({
-                        rider_type_id: riderId,
-                        price: val
-                    });
-                }
-            }
-
-            // Apply-All functionality
-            $(document).on('input', '.apply-all-rider', function() {
-                const riderId = $(this).data('rider');
-                const val = $(this).val();
-                $(`.day-rider-price[data-rider="${riderId}"]`).each(function() {
-                    $(this).val(val);
-                    updatePrice($(this).data('day'), riderId, val);
-                });
-            });
-
-            // Individual input update
-            $(document).on('input', '.day-rider-price', function() {
-                const day = $(this).data('day');
-                const riderId = $(this).data('rider');
-                const val = $(this).val() === '' ? null : Number($(this).val());
-                updatePrice(day, riderId, val);
-            });
-
-            // Form submission
-            $('#submitBtn').on('click', function(e) {
-                e.preventDefault();
-                const dayPricesArray = [];
-                Object.keys(prices).forEach(day => {
-                    prices[day].forEach(p => {
-                        dayPricesArray.push({
-                            day: day,
-                            rider_type_id: p.rider_type_id,
-                            price: p.price,
-                            type: getDayType(day)
-                        });
-                    });
-                });
-                $('#dayPricesInput').val(JSON.stringify(dayPricesArray));
-                $(this).prop('disabled', true).addClass('btn-loading');
-                $('#packageForm')[0].submit();
+        $(document).ready(function() {
+            $(document).on('click', '.clear-price-btn', function() {
+                $(this).prev('.day-rider-price').val('');
             });
         });
     </script>
