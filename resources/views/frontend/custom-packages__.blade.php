@@ -251,6 +251,7 @@
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
                 @foreach ($bundlePackages as $package)
+               
                     @php
                         $variants = $bundleVariantsByPackage[$package->id] ?? collect();
                         $firstVariant = $variants->first();
@@ -305,7 +306,34 @@
                     $firstVariant = $variants->first();
                     $img = $package->display_image_url;
                 @endphp
-                
+                <div class="col">
+                    <div class="custom-card">
+                        <img src="" class="card-img-top" alt="{{ $package->name }}">
+                        <div class="card-body">
+                            <h5 class="card-title"></h5>
+                            <p class="card-text">30 (min) Guided Tour<br><span class="price-text"
+                                    data-price-for-variant="{{ $firstVariant->id ?? '' }}"
+                                    data-display-price="{{ $package->display_starting_price ?? '' }}">Starting from TK
+                                    {{ $package->display_starting_price ? number_format($package->display_starting_price) : '0' }}</span>
+                            </p>
+                            <center>
+                                <div class="add-to-cart-container">
+                                    <a href="#" class="btn jatio-bg-color w-100 btn-add-regular">
+                                        <i class="fa-solid fa-cart-shopping me-2"></i> Add to Cart
+                                    </a>
+                                    <div class="quantity-controls" style="display: none;">
+                                        <div class="quantity-selector jatio-bg-color w-100">
+                                            <button class="quantity-btn quantity-btn-minus" type="button">-</button>
+                                            <span class="quantity-text">{{ $package->min_participants }}
+                                                Package{{ $package->min_participants > 1 ? 's' : '' }}</span>
+                                            <button class="quantity-btn quantity-btn-plus" type="button">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-lg-4 col-md-6 col-12" data-package-id="{{ $package->id }}"
                     @if ($firstVariant) data-variant-id="{{ $firstVariant->id }}" @endif
                     data-min-participants="{{ $package->min_participants }}"

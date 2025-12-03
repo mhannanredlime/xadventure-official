@@ -7,7 +7,6 @@ use App\Models\Package;
 use App\Models\PackageVariant;
 use App\Models\ScheduleSlot;
 use App\Services\CartService;
-use Illuminate\Http\Request;
 
 class CustomPackageController extends Controller
 {
@@ -23,76 +22,58 @@ class CustomPackageController extends Controller
      */
     public function index()
     {
-        // Get active bundle packages (packages with Bundle variant)
-        $bundlePackages = Package::with(['variants.prices', 'vehicleTypes', 'images'])
+        // Load all active packages with required relations
+        $allPackages = Package::with([
+            'variants' => function ($q) {
+                $q->where('is_active', true)->with('prices');
+            },
+            'packagePrices',
+            'vehicleTypes',
+            'images',
+        ])
             ->where('is_active', true)
-            ->whereHas('variants', function($q) {
-                $q->where('variant_name', 'Bundle')->where('is_active', true);
-            })
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Get active packages of type 'regular' with their relationships (excluding bundle packages)
-        $packages = Package::with(['variants.prices', 'vehicleTypes', 'images'])
+        // Split into bundle + regular packages
+        $bundlePackages = $allPackages->filter(function ($p) {
+            return $p->variants->where('variant_name', 'Bundle')->isNotEmpty();
+        })->values();
+
+        $packages = $allPackages->filter(function ($p) {
+            return $p->type === 'regular' &&
+                   $p->variants->where('variant_name', 'Bundle')->isEmpty();
+        })->values();
+
+        // Load all active variants once
+        $allVariants = PackageVariant::with(['package', 'prices'])
             ->where('is_active', true)
-            ->where('type', 'regular')
-            ->whereDoesntHave('variants', function($q) {
-                $q->where('variant_name', 'Bundle');
-            })
-            ->orderBy('created_at', 'desc')
             ->get();
 
-        // Get active package variants that belong to 'regular' packages (excluding bundle variants)
-        $packageVariants = PackageVariant::with(['package', 'prices'])
-            ->whereHas('package', function($q) {
-                $q->where('type', 'regular')->where('is_active', true);
-            })
-            ->where('is_active', true)
+        // Group variants by package
+        $variantsByPackage = $allVariants
             ->where('variant_name', '!=', 'Bundle')
-            ->get();
+            ->groupBy('package_id');
 
-        // Get bundle package variants
-        $bundleVariants = PackageVariant::with(['package', 'prices'])
-            ->whereHas('package', function($q) {
-                $q->where('is_active', true);
-            })
-            ->where('is_active', true)
+        $bundleVariantsByPackage = $allVariants
             ->where('variant_name', 'Bundle')
-            ->get();
+            ->groupBy('package_id');
 
-        // Organize package variants by their respective packages
-        $variantsByPackage = [];
-        foreach ($packages as $package) {
-            $variantsByPackage[$package->id] = $packageVariants->filter(function($variant) use ($package) {
-                return $variant->package_id == $package->id;
-            })->values();
-        }
-
-        // Organize bundle variants by their respective packages
-        $bundleVariantsByPackage = [];
-        foreach ($bundlePackages as $package) {
-            $bundleVariantsByPackage[$package->id] = $bundleVariants->filter(function($variant) use ($package) {
-                return $variant->package_id == $package->id;
-            })->values();
-        }
-
-        // Get active schedule slots ordered by sort_order and start_time
+        // Schedule slots
         $scheduleSlots = ScheduleSlot::where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('start_time')
             ->get();
 
-        // Get cart count
+        // Cart count
         $cartCount = $this->cartService->getCartTotalItems();
 
         return view('frontend.custom-packages', compact(
-            'packages', 
-            'packageVariants', 
-            'variantsByPackage', 
+            'packages',
+            'variantsByPackage',
             'bundlePackages',
-            'bundleVariants',
             'bundleVariantsByPackage',
-            'scheduleSlots', 
+            'scheduleSlots',
             'cartCount'
         ));
     }
