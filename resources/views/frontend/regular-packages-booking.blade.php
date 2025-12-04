@@ -14,6 +14,7 @@
                             <table class="table table-borderless align-middle">
                                 <thead class="border-bottom">
                                     <tr>
+                                        <th>SL</th>
                                         <th width="40%">Package</th>
                                         <th>Price</th>
                                         <th>Quantity</th>
@@ -22,15 +23,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php
-                                        $subtotal = 0;
-                                    @endphp
-                                    @foreach ($guestCartItems as $item)
+                                    @php $subtotal = 0; @endphp
+                                    @foreach ($guestCartItems as $key => $item)
                                         @php
                                             $itemTotal = $item->cart_amount * $item->quantity;
                                             $subtotal += $itemTotal;
                                         @endphp
                                         <tr class="border-bottom">
+                                            <td>{{ ++$key }}</td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-3">
                                                     <div class="rounded overflow-hidden" style="width: 80px; height: 60px;">
@@ -61,9 +61,7 @@
                                                             <i class="fas fa-minus"></i>
                                                         </button>
                                                     </form>
-
                                                     <span class="mx-3 fw-bold">{{ $item->quantity }}</span>
-
                                                     <form action="{{ route('frontend.cart.update') }}" method="POST"
                                                         class="d-inline">
                                                         @csrf
@@ -78,8 +76,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="fw-bold ">TK
-                                                    {{ number_format($itemTotal, 2) }}</span>
+                                                <span class="fw-bold">TK {{ number_format($itemTotal, 2) }}</span>
                                             </td>
                                             <td>
                                                 <form action="{{ route('frontend.cart.remove', $item->cart_uuid) }}"
@@ -104,38 +101,56 @@
                 <div class="col-lg-12">
                     <div class="card shadow-sm sticky-top" style="top: 20px;">
                         <div class="card-body">
-                            <!-- Custom Calendar Date Selection -->
-                            <div class="date-selection mb-4">
-                                <h6 class="fw-medium mb-3">
-                                    <i class="fas fa-calendar-alt me-2"></i>Choose Date
-                                </h6>
-                                <div class="calendar-container border rounded p-3">
-                                    <div class="calendar">
-                                        <div class="calendar-header d-flex justify-content-between align-items-center mb-3">
-                                            <button class="calendar-nav btn btn-outline-secondary btn-sm"
-                                                onclick="previousMonth()">
-                                                <i class="fas fa-chevron-left"></i>
-                                            </button>
-                                            <span class="calendar-title fw-bold" id="currentMonth">December 2025</span>
-                                            <button class="calendar-nav btn btn-outline-secondary btn-sm"
-                                                onclick="nextMonth()">
-                                                <i class="fas fa-chevron-right"></i>
-                                            </button>
-                                        </div>
-                                        <div class="calendar-grid" id="calendarGrid">
-                                            <!-- Calendar headers -->
-                                            <div class="calendar-day-header text-center text-muted small py-2">Su</div>
-                                            <div class="calendar-day-header text-center text-muted small py-2">Mo</div>
-                                            <div class="calendar-day-header text-center text-muted small py-2">Tu</div>
-                                            <div class="calendar-day-header text-center text-muted small py-2">We</div>
-                                            <div class="calendar-day-header text-center text-muted small py-2">Th</div>
-                                            <div class="calendar-day-header text-center text-muted small py-2">Fr</div>
-                                            <div class="calendar-day-header text-center text-muted small py-2">Sa</div>
 
-                                            <!-- Calendar days will be generated by JavaScript -->
+                            <!-- ----------------- Calendar Section ----------------- -->
+                            <div class="date-selection mb-4">
+                                <h6 class="fw-medium mb-3"><i class="fas fa-calendar-alt me-2"></i>Choose Date</h6>
+                                <div class="calendar-container border rounded p-3 d-flex gap-4 flex-wrap">
+                                    <!-- Current Month -->
+                                    <div class="calendar flex-grow-1">
+                                        <div class="calendar-header d-flex justify-content-between align-items-center mb-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                onclick="changeMonth(-1)">
+                                                &lt;
+                                            </button>
+                                            <span class="calendar-title fw-bold" id="currentMonth"></span>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                onclick="changeMonth(1)">
+                                                &gt;
+                                            </button>
                                         </div>
+                                        <div class="calendar-weekdays d-grid"
+                                            style="grid-template-columns: repeat(7, 1fr); text-align:center; font-weight:bold; margin-bottom:4px;">
+                                            <div>Sun</div>
+                                            <div>Mon</div>
+                                            <div>Tue</div>
+                                            <div>Wed</div>
+                                            <div>Thu</div>
+                                            <div>Fri</div>
+                                            <div>Sat</div>
+                                        </div>
+                                        <div class="calendar-grid" id="calendarGridCurrent"></div>
+                                    </div>
+
+                                    <!-- Next Month -->
+                                    <div class="calendar flex-grow-1">
+                                        <div class="calendar-header d-flex justify-content-between align-items-center mb-2">
+                                            <span class="calendar-title fw-bold" id="nextMonth"></span>
+                                        </div>
+                                        <div class="calendar-weekdays d-grid"
+                                            style="grid-template-columns: repeat(7, 1fr); text-align:center; font-weight:bold; margin-bottom:4px;">
+                                            <div>Sun</div>
+                                            <div>Mon</div>
+                                            <div>Tue</div>
+                                            <div>Wed</div>
+                                            <div>Thu</div>
+                                            <div>Fri</div>
+                                            <div>Sat</div>
+                                        </div>
+                                        <div class="calendar-grid" id="calendarGridNext"></div>
                                     </div>
                                 </div>
+
                                 <input type="hidden" id="selectedDate" name="selected_date">
                                 <div id="selectedDateDisplay" class="mt-3 p-2 bg-light rounded text-center d-none">
                                     <span class="text-primary-color fw-medium">
@@ -145,15 +160,11 @@
                                 </div>
                             </div>
 
-                            <!-- Time Slot Selection (Initially Hidden) -->
+                            <!-- ----------------- Time Slots Section ----------------- -->
                             <div class="time-selection mb-4 d-none" id="timeSelectionContainer">
-                                <h6 class="fw-medium mb-3">
-                                    <i class="fas fa-clock me-2"></i>Choose Preferred Slot
-                                </h6>
+                                <h6 class="fw-medium mb-3"><i class="fas fa-clock me-2"></i>Choose Preferred Slot</h6>
                                 <div class="time-slots-container">
-                                    <div class="time-slots" id="timeSlots">
-                                        <!-- Time slots will be populated by JavaScript -->
-                                    </div>
+                                    <div class="time-slots" id="timeSlots"></div>
                                     <div id="selectedSlotDisplay" class="mt-3 p-2 bg-light rounded text-center d-none">
                                         <span class="text-primary-color fw-medium">
                                             <i class="fas fa-check-circle me-2"></i>
@@ -162,46 +173,41 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Price Summary -->
+
+                            <!-- ----------------- Price Summary ----------------- -->
                             <div class="border-top pt-3">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Subtotal</span>
                                     <span class="fw-medium">TK {{ number_format($subtotal, 2) }}</span>
                                 </div>
 
-                                @php
-                                    $total = $subtotal;
-                                @endphp
+                                @php $total = $subtotal; @endphp
 
                                 <div class="d-flex justify-content-between mt-3 pt-3 border-top">
                                     <span class="fw-bold">Total Amount</span>
                                     <span class="fw-bold fs-5">TK {{ number_format($total, 2) }}</span>
                                 </div>
                             </div>
+
+                            <!-- ----------------- Buttons ----------------- -->
+                            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+                                <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn">
+                                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                                </a>
+
+                                <button type="submit" class="checkout-btn">
+                                    Proceed to Checkout
+                                </button>
+                            </div>
+
                         </div>
-
                     </div>
-                </div>
-                <!-- Buttons Section -->
-                <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-                    <!-- Left side - Continue Shopping -->
-                    <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn">
-                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
-                    </a>
-
-                    <!-- Right side - Checkout Button -->
-                    <button type="submit" class="checkout-btn">
-                        Proceed to Checkout
-                    </button>
                 </div>
 
             </div>
         @else
-            <!-- Empty Cart State -->
             <div class="text-center py-5">
-                <div class="mb-4">
-                    <i class="fas fa-shopping-cart fa-4x text-muted"></i>
-                </div>
+                <div class="mb-4"><i class="fas fa-shopping-cart fa-4x text-muted"></i></div>
                 <h3 class="mb-3">Your cart is empty</h3>
                 <p class="text-muted mb-4">Looks like you haven't added any packages to your cart yet.</p>
                 <a href="{{ route('frontend.packages.index') }}" class="btn btn-primary btn-lg">
@@ -215,50 +221,28 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Calendar functionality
-            let currentDate = new Date();
-            let currentMonth = currentDate.getMonth();
-            let currentYear = currentDate.getFullYear();
-            let selectedDate = null;
-            let selectedTimeSlot = null;
-
-            // Get time slots from backend
-            const backendTimeSlots = @json($time_slots);
-
-            // Format time slots for frontend use
+            const backendTimeSlots = @json($time_slots ?? []);
             const timeSlots = backendTimeSlots.map(slot => ({
                 id: slot.id,
-                time: formatTimeSlot(slot.start_time, slot.end_time),
+                time: `${slot.start_time} - ${slot.end_time}`,
                 start_time: slot.start_time,
                 end_time: slot.end_time,
-                name: slot.name || null
+                name: slot.name ?? null
             }));
 
-            // Helper function to format time slot - show hours only in bold
-            function formatTimeSlot(startTime, endTime) {
-                const formatTime = (timeStr) => {
-                    if (!timeStr) return '';
-                    const [hours, minutes] = timeStr.split(':').map(Number);
-                    // Just return the hours in bold without AM/PM
-                    const displayHours = hours % 12 || 12;
-                    return `<strong>${displayHours}</strong>${minutes ? ':' + String(minutes).padStart(2, '0') : ''}`;
-                };
+            let today = new Date();
+            let currentMonth = today.getMonth();
+            let currentYear = today.getFullYear();
+            let selectedDate = null;
+            let selectedTimeSlot = null;
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
+                "September", "October", "November", "December"
+            ];
 
-                const start = formatTime(startTime);
-                const end = formatTime(endTime);
-
-                return start && end ? `${start} - ${end}` : 'Time Slot';
-            }
-
-            // Format date as YYYY-MM-DD
             function formatDate(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
+                return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
             }
 
-            // Format date for display
             function formatDateDisplay(date) {
                 return date.toLocaleDateString('en-US', {
                     weekday: 'long',
@@ -268,237 +252,115 @@
                 });
             }
 
-            // Generate calendar
-            function generateCalendar(month, year) {
-                const calendarGrid = document.getElementById('calendarGrid');
-                const currentMonthElement = document.getElementById('currentMonth');
-
-                // Clear existing days (keep headers)
-                const headers = calendarGrid.querySelectorAll('.calendar-day-header');
-                const daysToRemove = calendarGrid.querySelectorAll('.calendar-day');
-                daysToRemove.forEach(day => day.remove());
-
-                // Update month title
-                const monthNames = ["January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
-                ];
-                currentMonthElement.textContent = `${monthNames[month]} ${year}`;
-
-                // Get first day of month
+            function renderCalendarMonth(gridId, month, year) {
+                const container = document.getElementById(gridId);
+                container.innerHTML = '';
                 const firstDay = new Date(year, month, 1);
-                const startingDay = firstDay.getDay(); // 0 = Sunday
-
-                // Get number of days in month
+                const startingDay = firstDay.getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-                // Get number of days in previous month
-                const prevMonthDays = new Date(year, month, 0).getDate();
-
-                // Add previous month's trailing days
                 for (let i = 0; i < startingDay; i++) {
-                    const day = document.createElement('div');
-                    day.className = 'calendar-day disabled text-center py-2 text-muted';
-                    day.textContent = prevMonthDays - startingDay + i + 1;
-                    calendarGrid.appendChild(day);
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'calendar-day disabled';
+                    container.appendChild(emptyCell);
                 }
-
-                // Add current month's days
-                const today = new Date();
-                const todayFormatted = formatDate(today);
 
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const dayElement = document.createElement('div');
                     const date = new Date(year, month, day);
-                    const dateFormatted = formatDate(date);
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'calendar-day';
+                    dayEl.textContent = day;
 
-                    dayElement.className = 'calendar-day text-center py-2';
+                    if (date < new Date(today.getFullYear(), today.getMonth(), today.getDate())) dayEl.classList
+                        .add('disabled');
+                    if (date.toDateString() === today.toDateString()) dayEl.classList.add('today');
+                    if (selectedDate && date.toDateString() === selectedDate.toDateString()) dayEl.classList.add(
+                        'selected');
 
-                    // Disable past dates
-                    if (date < today.setHours(0, 0, 0, 0)) {
-                        dayElement.classList.add('disabled');
-                        dayElement.classList.add('text-muted');
-                    }
-
-                    // Highlight today
-                    if (dateFormatted === todayFormatted) {
-                        dayElement.classList.add('today');
-                    }
-
-                    // Highlight selected date
-                    if (selectedDate && formatDate(selectedDate) === dateFormatted) {
-                        dayElement.classList.add('selected');
-                    }
-
-                    dayElement.textContent = day;
-                    dayElement.dataset.date = dateFormatted;
-
-                    // Add click event
-                    dayElement.addEventListener('click', function() {
-                        if (this.classList.contains('disabled')) return;
-
-                        // Remove previous selection
-                        document.querySelectorAll('.calendar-day.selected').forEach(el => {
-                            el.classList.remove('selected');
-                        });
-
-                        // Add current selection
-                        this.classList.add('selected');
-
-                        // Update selected date
-                        selectedDate = date;
-                        const dateFormatted = formatDate(date);
-                        document.getElementById('selectedDate').value = dateFormatted;
-
-                        // Show selected date display
-                        const displayDiv = document.getElementById('selectedDateDisplay');
-                        const displaySpan = document.getElementById('displayDate');
-                        displaySpan.textContent = formatDateDisplay(date);
-                        displayDiv.classList.remove('d-none');
-
-                        // Show time selection
-                        showTimeSelection();
-                    });
-
-                    calendarGrid.appendChild(dayElement);
-                }
-
-                // Calculate how many next month days to show (to fill 42 slots)
-                const totalCells = 42; // 6 rows * 7 days
-                const cellsUsed = startingDay + daysInMonth;
-                const remainingCells = totalCells - cellsUsed;
-
-                // Add next month's leading days
-                for (let i = 1; i <= remainingCells; i++) {
-                    const day = document.createElement('div');
-                    day.className = 'calendar-day disabled text-center py-2 text-muted';
-                    day.textContent = i;
-                    calendarGrid.appendChild(day);
+                    dayEl.addEventListener('click', () => selectDate(date, dayEl));
+                    container.appendChild(dayEl);
                 }
             }
 
-            // Show time selection
+            function renderTwoMonths() {
+                renderCalendarMonth('calendarGridCurrent', currentMonth, currentYear);
+                document.getElementById('currentMonth').textContent = monthNames[currentMonth] + ' ' + currentYear;
+
+                let nextMonth = currentMonth + 1,
+                    nextYear = currentYear;
+                if (nextMonth > 11) {
+                    nextMonth = 0;
+                    nextYear++;
+                }
+                renderCalendarMonth('calendarGridNext', nextMonth, nextYear);
+                document.getElementById('nextMonth').textContent = monthNames[nextMonth] + ' ' + nextYear;
+            }
+
+            function changeMonth(offset) {
+                currentMonth += offset;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderTwoMonths();
+            }
+
+            function selectDate(date, el) {
+                document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
+                el.classList.add('selected');
+                selectedDate = date;
+                document.getElementById('selectedDate').value = formatDate(date);
+                document.getElementById('displayDate').textContent = formatDateDisplay(date);
+                document.getElementById('selectedDateDisplay').classList.remove('d-none');
+                showTimeSelection();
+            }
+
             function showTimeSelection() {
-                const timeSelectionContainer = document.getElementById('timeSelectionContainer');
-                timeSelectionContainer.classList.remove('d-none');
-
-                // Populate time slots
+                const container = document.getElementById('timeSelectionContainer');
+                container.classList.remove('d-none');
                 populateTimeSlots();
-
-                // Scroll to time selection
-                timeSelectionContainer.scrollIntoView({
+                container.scrollIntoView({
                     behavior: 'smooth',
                     block: 'nearest'
                 });
             }
 
-            // Populate time slots
             function populateTimeSlots() {
-                const timeSlotsContainer = document.getElementById('timeSlots');
-                timeSlotsContainer.innerHTML = '';
-
+                const container = document.getElementById('timeSlots');
+                container.innerHTML = '';
                 timeSlots.forEach(slot => {
-                    const slotElement = document.createElement('div');
-                    slotElement.className = 'time-slot';
-                    if (selectedTimeSlot && selectedTimeSlot.id === slot.id) {
-                        slotElement.classList.add('selected');
-                    }
-                    slotElement.dataset.slotId = slot.id;
+                    const el = document.createElement('div');
+                    el.className = 'time-slot';
+                    if (selectedTimeSlot && selectedTimeSlot.id === slot.id) el.classList.add('selected');
+                    el.dataset.slotId = slot.id;
+                    el.innerHTML =
+                        `<div class="time-slot-content">${slot.name ? `<strong class="text-muted d-block mt-1">${slot.name}</strong>` : ''}</div>`;
 
-                    // Time slot content with hours in bold
-                    slotElement.innerHTML = `
-                    <div class="time-slot-content">
-                        <div>${slot.time}</div>
-                        ${slot.name ? `<small class="text-muted d-block mt-1">${slot.name}</small>` : ''}
-                    </div>
-                `;
-
-                    // Add click event
-                    slotElement.addEventListener('click', function() {
-                        // Remove previous selection
-                        document.querySelectorAll('.time-slot.selected').forEach(el => {
-                            el.classList.remove('selected');
-                        });
-
-                        // Add current selection
+                    el.addEventListener('click', function() {
+                        document.querySelectorAll('.time-slot.selected').forEach(s => s.classList
+                            .remove('selected'));
                         this.classList.add('selected');
-
-                        // Update selected time slot
                         selectedTimeSlot = slot;
 
-                        // Show selected slot display
-                        const displayDiv = document.getElementById('selectedSlotDisplay');
-                        const displaySpan = document.getElementById('displaySlot');
-                        displaySpan.textContent = slot.time.replace(/<[^>]*>/g,
-                            ''); // Remove HTML tags for display
-                        displayDiv.classList.remove('d-none');
+                        document.getElementById('displaySlot').textContent = slot.name;
+                        document.getElementById('selectedSlotDisplay').classList.remove('d-none');
 
-                        // Update hidden inputs
                         document.getElementById('checkout_time_slot_id').value = slot.id;
-                        document.getElementById('checkout_time_slot_text').value = slot.time
-                            .replace(/<[^>]*>/g, '');
+                        document.getElementById('checkout_time_slot_text').value = slot.time;
                     });
 
-                    timeSlotsContainer.appendChild(slotElement);
+                    container.appendChild(el);
                 });
             }
 
-            // Navigation functions
-            window.previousMonth = function() {
-                currentMonth--;
-                if (currentMonth < 0) {
-                    currentMonth = 11;
-                    currentYear--;
-                }
-                generateCalendar(currentMonth, currentYear);
-            }
-
-            window.nextMonth = function() {
-                currentMonth++;
-                if (currentMonth > 11) {
-                    currentMonth = 0;
-                    currentYear++;
-                }
-                generateCalendar(currentMonth, currentYear);
-            }
-
-            // Initialize calendar
-            generateCalendar(currentDate.getMonth(), currentDate.getFullYear());
-
-            // Form submission validation
-            const checkoutForm = document.getElementById('checkoutForm');
-            if (checkoutForm) {
-                checkoutForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-
-                    const deliveryDate = document.getElementById('selectedDate').value;
-                    const timeSlotId = document.getElementById('checkout_time_slot_id').value;
-
-                    if (!deliveryDate) {
-                        alert('Please select a delivery date');
-                        return;
-                    }
-
-                    if (!timeSlotId) {
-                        alert('Please select a time slot');
-                        return;
-                    }
-
-                    // Set hidden form values
-                    document.getElementById('checkout_date').value = deliveryDate;
-                    document.getElementById('checkout_instructions').value =
-                        document.getElementById('special_instructions').value;
-
-                    // Submit the form
-                    this.submit();
-                });
-            }
-
-            // Auto-select today's date
+            renderTwoMonths();
             setTimeout(() => {
-                const todayElement = document.querySelector('.calendar-day.today');
-                if (todayElement && !todayElement.classList.contains('disabled')) {
-                    todayElement.click();
-                }
+                const todayEl = document.querySelector('.calendar-day.today:not(.disabled)');
+                if (todayEl) todayEl.click();
             }, 100);
         });
     </script>
@@ -506,9 +368,7 @@
 
 @push('styles')
     <style>
-        /* ================================
-                           General Utilities
-                        ================================= */
+        /* Calendar & Time Slots CSS */
         .object-fit-cover {
             object-fit: cover;
         }
@@ -522,28 +382,28 @@
             background-color: rgba(0, 0, 0, 0.02);
         }
 
-        /* ================================
-                           Calendar Styles
-                        ================================= */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
         }
 
+        .date-selection {
+            max-height: 419px;
+            overflow-y: scroll;
+        }
+
         .calendar-day {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            padding: 0;
-            /* ensures circle is perfect */
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease, transform 0.2s ease;
-            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
         .calendar-day:hover:not(.disabled) {
@@ -553,16 +413,15 @@
 
         .calendar-day.today {
             background-color: #FC692A;
-            color: white !important;
+            color: white;
             font-weight: bold;
         }
 
         .calendar-day.selected {
-            color: #fff !important;
+            color: #fff;
             background-color: #FC692A;
             font-weight: bold;
             border: 2px solid #FC692A;
-            box-sizing: border-box;
             transform: scale(1.1);
         }
 
@@ -571,32 +430,6 @@
             cursor: not-allowed;
         }
 
-        .calendar-day-header {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .calendar-header {
-            min-height: 40px;
-        }
-
-        .calendar-title {
-            font-size: 1rem;
-        }
-
-        .calendar-nav {
-            padding: 4px 12px;
-            border-radius: 4px;
-        }
-
-        .text-primary-color {
-            color: #FC692A;
-        }
-
-        /* ================================
-                           Time Slot Styles
-                        ================================= */
         .time-slots {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -608,9 +441,8 @@
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-align: center;
-            background-color: white;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -618,8 +450,7 @@
 
         .time-slot:hover {
             border-color: #FC692A;
-            background-color: #f8f9fa;
-            transform: translateY(-2px);
+            background-color: #FFEAE1;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -638,13 +469,8 @@
             gap: 4px;
         }
 
-        /* ================================
-                           Buttons
-                        ================================= */
-        /* Checkout Button */
         .checkout-btn {
             display: flex;
-            flex-direction: row;
             justify-content: center;
             align-items: center;
             padding: 12px 16px;
@@ -656,7 +482,7 @@
             border-radius: 12px;
             border: none;
             cursor: pointer;
-            transition: 0.3s ease;
+            transition: 0.3s;
         }
 
         .checkout-btn:hover {
@@ -665,13 +491,6 @@
             box-shadow: 0 4px 12px rgba(252, 105, 42, 0.3);
         }
 
-        .checkout-btn-text {
-            font-size: 24px;
-            color: #FFFFFF;
-            text-align: center;
-        }
-
-        /* Continue Shopping Button */
         .continue-shopping-btn {
             display: flex;
             align-items: center;
@@ -683,7 +502,7 @@
             color: #FC692A;
             background-color: #fff;
             text-decoration: none;
-            transition: 0.3s ease;
+            transition: 0.3s;
         }
 
         .continue-shopping-btn:hover {
@@ -692,10 +511,7 @@
             transform: translateY(-2px);
         }
 
-        /* ================================
-                           Responsive Media Queries
-                        ================================= */
-        @media (max-width: 1200px) {
+        @media(max-width:1200px) {
             .time-slots {
                 grid-template-columns: repeat(4, 1fr);
             }
@@ -703,13 +519,9 @@
             .checkout-btn {
                 width: 300px;
             }
-
-            .checkout-btn-text {
-                font-size: 22px;
-            }
         }
 
-        @media (max-width: 992px) {
+        @media(max-width:992px) {
             .time-slots {
                 grid-template-columns: repeat(3, 1fr);
             }
@@ -718,14 +530,9 @@
                 width: 280px;
                 height: 54px;
             }
-
-            .checkout-btn-text {
-                font-size: 20px;
-                line-height: 30px;
-            }
         }
 
-        @media (max-width: 768px) {
+        @media(max-width:768px) {
             .time-slots {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -745,7 +552,7 @@
             }
         }
 
-        @media (max-width: 576px) {
+        @media(max-width:576px) {
             .time-slots {
                 grid-template-columns: 1fr;
             }
@@ -753,11 +560,6 @@
             .checkout-btn {
                 width: 100%;
                 height: 50px;
-            }
-
-            .checkout-btn-text {
-                font-size: 18px;
-                line-height: 28px;
             }
         }
     </style>
