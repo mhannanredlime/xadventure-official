@@ -63,6 +63,12 @@
                     @endforeach
                 </tbody>
             </table>
+            {{-- Here add a chose date and time slot --}}
+
+
+            <div class="mt-3">
+                <p>Total Amount: TK {{ number_format($guestCartItems->sum('cart_amount') * $guestCartItems->sum('quantity'), 2) }}</p>
+            </div>
 
             <div class="text-end mt-3">
                 <form action="#" method="GET">
