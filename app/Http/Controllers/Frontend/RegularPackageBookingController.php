@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Models\Cart;
+use App\Models\ScheduleSlot;
 use App\Services\CartService;
 use App\Http\Controllers\Controller;
 
@@ -22,6 +23,8 @@ class RegularPackageBookingController extends Controller
             ->where('session_id', session()->getId())
             ->where('created_at', '>=', now()->subMinutes(env('SESSION_LIFETIME')))
             ->get();
+        $data['time_slots'] = ScheduleSlot::where('is_active', true)->get();   
+        // dd($data['time_slots']); 
         return view('frontend.regular-packages-booking', $data);
     }
 
