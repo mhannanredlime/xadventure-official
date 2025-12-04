@@ -159,8 +159,8 @@
 @endpush
 
 @section('content')
-    <div class="container mt-4" style="margin-top: 20% !important;">
-        <h1>Payment Options</h1>
+    <div class="container mt-4 default-page-marign-top">
+        <h2>Payment Options</h2>
 
         @if (session('error'))
             <div class="error-message">
@@ -356,81 +356,24 @@
             <!-- Order Summary Sidebar -->
             <div class="col-lg-4">
                 <div class="order-summary">
-                    <h4 class="mb-3">Order Summary</h4>
-
-                    @foreach ($packages as $packageData)
-                        @php
-                            $variant = $packageData['variant'];
-                            $quantity = $packageData['quantity'];
-                            $date = $packageData['date'];
-                            $slot = $packageData['slot'];
-
-                            // Use the price and subtotal already calculated by the controller
-                            $unitPrice = $packageData['price'];
-                            $itemTotal = $packageData['subtotal'];
-
-                            // Only calculate additional pricing info for display
-                            $priceService = app(\App\Services\PriceCalculationService::class);
-                            $defaultPrice = $priceService->getDefaultPriceForDate($variant, $date);
-                            $priceTag = $priceService->getPriceTagForDate($variant, $date);
-                        @endphp
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <div>
-                                <div class="fw-bold">{{ $variant->package->name }}</div>
-                                <div class="text-muted small">{{ $variant->variant_name }}</div>
-                                <div class="text-muted small">
-                                    {{ date('F j, Y', strtotime($date)) }} - {{ $slot ? $slot->name : 'N/A' }}
-                                </div>
-                                <div class="text-muted small">Qty: {{ $quantity }}</div>
-                                @if ($priceTag)
-                                    <span class="price-tag {{ $priceTag }}">{{ ucfirst($priceTag) }}</span>
-                                @endif
-                                @if ($defaultPrice > $unitPrice)
-                                    <span class="original-price">TK {{ number_format($defaultPrice, 2) }}</span>
-                                @endif
-                                <span class="fw-bold">TK {{ number_format($unitPrice, 2) }}</span>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold">TK {{ number_format($itemTotal, 2) }}</div>
-                            </div>
+                    <h2>Order Summary</h2>
+                    <div class="order-summary-content">
+                        <div class="order-summary-item">
+                            <span>Subtotal</span>
+                            <span>TK.100</span>
                         </div>
-                    @endforeach
-
-                    @php
-                        // Use the subtotal calculated by the controller instead of recalculating
-                        $subtotal = $total; // This is the subtotal from controller
-
-                        // Get applied promo code discount from session
-                        $promoDiscount = session()->get('promo_discount', 0);
-                        $appliedPromoCode = session()->get('applied_promo_code');
-
-                        $tax = ($subtotal - $promoDiscount) * 0.15; // 15% VAT on amount after discount
-                        $finalTotal = $subtotal - $promoDiscount + $tax;
-                    @endphp
-
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Subtotal</span>
-                        <span>TK {{ number_format($subtotal, 2) }}</span>
-                    </div>
-
-                    @if ($promoDiscount > 0)
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span>Promo Discount @if ($appliedPromoCode)
-                                    ({{ $appliedPromoCode->code }})
-                                @endif
-                            </span>
-                            <span>- TK {{ number_format($promoDiscount, 2) }}</span>
+                        <div class="order-summary-item">
+                            <span>Shipping</span>
+                            <span>TK.1000</span>
                         </div>
-                    @endif
-
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>VAT (15%)</span>
-                        <span>TK {{ number_format($tax, 2) }}</span>
-                    </div>
-
-                    <div class="d-flex justify-content-between mt-3">
-                        <span class="fw-bold fs-5">Total</span>
-                        <span class="fw-bold fs-5">TK {{ number_format($finalTotal, 2) }}</span>
+                        <div class="order-summary-item">
+                            <span>Tax</span>
+                            <span>TK.1000</span>
+                        </div>
+                        <div class="order-summary-item">
+                            <span>Total</span>
+                            <span>TK.1000</span>
+                        </div>
                     </div>
                 </div>
 
@@ -556,7 +499,7 @@
                         if (!$(this).next('.invalid-feedback').length) {
                             $(this).after(
                                 '<div class="invalid-feedback">Please enter a valid phone number (10-11 digits). +880 prefix will be added automatically.</div>'
-                                );
+                            );
                         }
                     } else {
                         $(this).removeClass('is-invalid');
@@ -571,7 +514,7 @@
                         if (!$(this).next('.invalid-feedback').length) {
                             $(this).after(
                                 '<div class="invalid-feedback">Please enter a valid phone number (10-11 digits). +880 prefix will be added automatically.</div>'
-                                );
+                            );
                         }
                     } else {
                         $(this).removeClass('is-invalid');

@@ -115,32 +115,41 @@
                 <div class="col-lg-4">
                     <div class="card shadow-sm sticky-top">
                         <div class="card-body">
+                            @php
+                                $total = $subtotal;
+                                $vatData = calculateVAT($total);
+                            @endphp
 
-                            <div class="pt-3">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span>Promo Discount</span>
-                                    <span class="fw-medium">TK 0.00</span>
-                                </div>
-
-                                @php $total = $subtotal; @endphp
-
-                                @php
-                                    $vatData = calculateVAT($total);
-                                @endphp
-                                <div class="d-flex justify-content-between mt-3 pt-3">
-                                    <strong>VAT (15%)</strong>
-                                    <strong class="fs-5">TK {{ number_format($vatData['vat'], 2) }}</strong>
-                                </div>
-
-                                <div class="d-flex justify-content-between mt-3 pt-3 border-top">
-                                    <strong>Total Amount</strong>
-                                    <strong class="fs-5">TK {{ number_format($vatData['total'], 2) }}</strong>
-                                </div>
-                            </div>
-
-                            <!-- Checkout -->
                             <form action="{{ url('checkout') }}" method="GET">
+                                <div class="pt-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Promo Discount</span>
+                                        <span class="fw-medium">TK 0.00</span>
+                                    </div>
 
+                                    <div class="d-flex justify-content-between mt-3 pt-3">
+                                        <strong>VAT (15%)</strong>
+                                        <strong class="fs-5">TK {{ number_format($vatData['vat'], 2) }}</strong>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                                        <strong>Total Amount</strong>
+                                        <strong class="fs-5">TK {{ number_format($vatData['total'], 2) }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="terms-conditions mt-3 mb-3">
+                                    <p class="text-muted small">
+                                        By placing your order, you agree to Adventour Adventure Bandarban's
+                                        <a href="{{ route('frontend.privacy-policy') }}" target="_blank"
+                                            class="text-decoration-none">privacy policy</a>
+                                        and
+                                        <a href="{{ route('frontend.terms-conditions') }}" target="_blank"
+                                            class="text-decoration-none">conditions of use</a>.
+                                    </p>
+                                </div>
+
+                                <!-- Hidden inputs for cart items (UUID, quantity, ID) -->
                                 @foreach ($guestCartItems as $index => $ci)
                                     <input type="hidden" name="cart_items[{{ $index }}][uuid]"
                                         value="{{ $ci->cart_uuid }}">
@@ -148,22 +157,23 @@
                                         value="{{ $ci->quantity }}">
                                 @endforeach
 
-                                <div class="d-flex justify-content-center  mt-4  gap-3">
+                                <!-- Hidden inputs for subtotal, VAT, and total -->
+                                <input type="hidden" name="subtotal" value="{{ $total }}">
+                                <input type="hidden" name="vat" value="{{ $vatData['vat'] }}">
+                                <input type="hidden" name="total" value="{{ $vatData['total'] }}">
 
+                                <div class="d-flex justify-content-center mt-4 gap-3">
                                     <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
                                         <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                                     </a>
-
                                     <button type="submit" class="checkout-btn equal-btn">
-                                        Placer Order
+                                        Place Order
                                     </button>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                 </div>
-
 
 
             </div>
@@ -197,6 +207,7 @@
         .equal-btn {
             width: 100%;
             max-width: 325px;
+            text-decoration: none;
         }
 
         .sticky-top {

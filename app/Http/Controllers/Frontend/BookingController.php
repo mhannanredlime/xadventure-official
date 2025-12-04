@@ -18,9 +18,9 @@ use App\Services\PhoneNumberService;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth; // ✅ সঠিক
-use Illuminate\Support\Facades\DB; // Added this import for Payment model
-use Illuminate\Support\Facades\Log; // Added this import for ReservationItem model
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -290,38 +290,39 @@ class BookingController extends Controller
         ]);
     }
 
-    public function checkout()
+    public function checkout(Request $request)
     {
-        $cart = session()->get('cart', []);
-        if (empty($cart)) {
-            return redirect()->route('frontend.cart.index')->with('info', 'Your cart is empty. Please add some items before proceeding to checkout.');
-        }
 
-        $packages = [];
-        $total = 0;
-        $priceService = app(\App\Services\PriceCalculationService::class);
+        // dd($request->all());
+        // $cart = session()->get('cart', []);
+        // if (empty($cart)) {
+        //     return redirect()->route('frontend.cart.index')->with('info', 'Your cart is empty. Please add some items before proceeding to checkout.');
+        // }
+        $data['packages'] = $request->input('cart_items', []);
+        $total = 100;
 
-        foreach ($cart as $item) {
-            $variant = PackageVariant::with(['package.primaryImage', 'package.images'])->find($item['variant_id']);
-            $slot = ScheduleSlot::find($item['slot_id']);
 
-            if ($variant && $slot) {
-                $price = $priceService->getPriceForDate($variant, $item['date']);
-                $subtotal = $price * $item['quantity'];
-                $total += $subtotal;
+        // $priceService = app(\App\Services\PriceCalculationService::class);
+        // foreach ($packages as $item) {
+        //     $variant = PackageVariant::with(['package.primaryImage', 'package.images'])->find($item['variant_id']);
+        //     $slot = ScheduleSlot::find($item['slot_id']);
 
-                $packages[] = [
-                    'variant' => $variant,
-                    'quantity' => $item['quantity'],
-                    'date' => $item['date'],
-                    'slot' => $slot,
-                    'price' => $price,
-                    'subtotal' => $subtotal,
-                ];
-            }
-        }
+        //     if ($variant && $slot) {
+        //         $price = $priceService->getPriceForDate($variant, $item['date']);
+        //         $subtotal = $price * $item['quantity'];
+        //         $total += $subtotal;
 
-        return view('frontend.checkout.index', compact('packages', 'total'));
+        //         $packages[] = [
+        //             'variant' => $variant,
+        //             'quantity' => $item['quantity'],
+        //             'date' => $item['date'],
+        //             'slot' => $slot,
+        //             'price' => $price,
+        //             'subtotal' => $subtotal,
+        //         ];
+        //     }
+        // }
+        return view('frontend.checkout.index', $data);
     }
 
     public function processBooking(Request $request)
