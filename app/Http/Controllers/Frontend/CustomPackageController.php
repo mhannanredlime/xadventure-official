@@ -26,8 +26,10 @@ class CustomPackageController extends Controller
             'images',
         ])
             ->where('is_active', true)
+            ->where('type', 'regular')
             ->orderBy('created_at', 'desc')
             ->get();
+        $data['page_title'] = 'Regular Packages';
 
         // Cart count
         $cartCount = $this->cartService->getCartTotalItems();

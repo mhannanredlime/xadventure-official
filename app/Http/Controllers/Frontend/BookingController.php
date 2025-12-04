@@ -2,24 +2,25 @@
 
 namespace App\Http\Controllers\Frontend;
 
-// Event imports removed - no notifications sent at checkout time
 use App\Http\Controllers\Controller;
+use App\Http\Requests\XCartUpdateRequest;
+use App\Models\Cart;
 use App\Models\Customer;
-use App\Models\Reservation;
+use App\Models\Package;
 use App\Models\PackageVariant;
-use App\Models\ScheduleSlot;
+use App\Models\Payment;
 use App\Models\PromoCode;
+use App\Models\Reservation;
+use App\Models\ReservationItem;
+use App\Models\ScheduleSlot;
 use App\Models\User;
-use App\Services\PromoCodeService;
 use App\Services\PhoneNumberService;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use App\Models\Payment; // Added this import for Payment model
-use App\Models\ReservationItem; // Added this import for ReservationItem model
-use Exception;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth; // ✅ সঠিক
+use Illuminate\Support\Facades\DB; // Added this import for Payment model
+use Illuminate\Support\Facades\Log; // Added this import for ReservationItem model
 
 class BookingController extends Controller
 {
@@ -41,10 +42,11 @@ class BookingController extends Controller
                 $variant = PackageVariant::with(['package.primaryImage', 'package.images'])->find($item['variant_id']);
                 $slot = ScheduleSlot::find($item['slot_id']);
 
-                if (!$variant || !$slot) {
+                if (! $variant || ! $slot) {
                     $cartErrors[] = 'Invalid package or time slot found in cart. Item has been removed.';
                     // Remove invalid item from cart
                     unset($cart[$key]);
+
                     continue;
                 }
 
@@ -61,9 +63,10 @@ class BookingController extends Controller
                     // Final availability recheck to avoid oversell in concurrent cases
                     $availability = $priceService->getPricingAndAvailabilityForDate($variant, $item['date'], $slot->id);
                     if ($item['quantity'] > $availability['total_vehicles']) {
-                        $cartErrors[] = 'Only ' . $availability['total_vehicles'] . ' available for ' . $variant->package->name . ' on ' . $item['date'] . ' at selected time. Item has been removed.';
+                        $cartErrors[] = 'Only '.$availability['total_vehicles'].' available for '.$variant->package->name.' on '.$item['date'].' at selected time. Item has been removed.';
                         // Remove unavailable item from cart
                         unset($cart[$key]);
+
                         continue;
                     }
                 }
@@ -76,19 +79,19 @@ class BookingController extends Controller
                     'quantity' => $item['quantity'],
                     'date' => $item['date'],
                     'slot' => $slot,
-                    'price' => $price
+                    'price' => $price,
                 ];
 
                 // Group by date only (not by time slot)
                 $dateKey = $item['date'];
-                if (!isset($packagesByDate[$dateKey])) {
+                if (! isset($packagesByDate[$dateKey])) {
                     $packagesByDate[$dateKey] = [
                         'date' => $item['date'],
                         'slots' => [], // Store all slots for this date
-                        'packages' => []
+                        'packages' => [],
                     ];
                 }
-                
+
                 // Add slot to slots array if not already present
                 $slotExists = false;
                 foreach ($packagesByDate[$dateKey]['slots'] as $existingSlot) {
@@ -97,10 +100,10 @@ class BookingController extends Controller
                         break;
                     }
                 }
-                if (!$slotExists) {
+                if (! $slotExists) {
                     $packagesByDate[$dateKey]['slots'][] = $slot;
                 }
-                
+
                 $packagesByDate[$dateKey]['packages'][] = $packageItem;
 
                 // Keep the original flat array for backward compatibility
@@ -109,10 +112,10 @@ class BookingController extends Controller
                 Log::error('Error processing cart item', [
                     'item' => $item,
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'trace' => $e->getTraceAsString(),
                 ]);
 
-                $cartErrors[] = 'Error processing item: ' . $e->getMessage() . '. Item has been removed.';
+                $cartErrors[] = 'Error processing item: '.$e->getMessage().'. Item has been removed.';
                 // Remove problematic item from cart
                 unset($cart[$key]);
             }
@@ -137,207 +140,98 @@ class BookingController extends Controller
 
     public function addToCart(Request $request)
     {
-        // Debug logging
-        Log::info('addToCart called', [
-            'isJson' => $request->isJson(),
-            'contentType' => $request->header('Content-Type'),
-            'method' => $request->method(),
-            'data' => $request->all()
-        ]);
+        try {
+            // Validate input
+            $request->validate([
+                'package_id' => 'required|integer|exists:packages,id',
+                'rider_type_id' => 'nullable|integer', // optional
+            ]);
 
-        // Check if this is an AJAX request with multiple items
-        if ($request->isJson() || $request->header('Content-Type') === 'application/json') {
-            // Handle multiple items from AJAX
-            $items = $request->all();
-            $cart = session()->get('cart', []);
+            $packageId = $request->input('package_id');
+            $riderTypeId = $request->input('rider_type_id'); // null if not provided
+            $sessionId = session()->getId();
 
-            // If it's a single item array, wrap it
-            if (!isset($items[0]) && isset($items['variant_id'])) {
-                $items = [$items];
+            // Prevent adding inactive/unavailable packages
+            $package = Package::where('id', $packageId)
+                ->where('is_active', 1)
+                ->first();
+
+            if (! $package) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Selected package is invalid or unavailable.',
+                ]);
             }
 
-            foreach ($items as $item) {
-                $validated = validator($item, [
-                    'variant_id' => 'required|exists:package_variants,id',
-                    'quantity' => 'required|integer|min:1',
-                    'date' => 'required|date|after_or_equal:today',
-                    'slot_id' => 'required|exists:schedule_slots,id',
-                    'acknowledgment_data' => 'nullable|array',
-                    'signature_data' => 'nullable|string',
-                ])->validate();
+            // Auto-detect current day
+            $today = strtolower(Carbon::now()->format('D'));
 
-                // Re-check availability server-side before adding to cart
-                $variant = PackageVariant::find($validated['variant_id']);
-                $package = $variant->package;
+            // Get price based on display_starting_price, day and optional rider type
+            $price = get_package_price($package, $today, $riderTypeId);
 
-                // Only check availability for ATV/UTV packages, not regular packages
-                if (
-                    $package->type === 'atv' || $package->type === 'utv' ||
-                    str_contains(strtolower($package->name), 'atv') ||
-                    str_contains(strtolower($package->name), 'utv') ||
-                    $package->name === 'ATV/UTV Trail Rides' ||
-                    $package->name === 'UTV Trail Rides 2'
-                ) {
-                    // Validate acknowledgment data for ATV/UTV packages
-                    if (empty($validated['acknowledgment_data']) || empty($validated['signature_data'])) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Acknowledgment and signature are required for ATV/UTV bookings.',
-                        ], 422);
-                    }
-
-                    // Validate acknowledgment data structure
-                    $acknowledgmentData = $validated['acknowledgment_data'];
-                    if (!isset($acknowledgmentData['driver_license_requirement']) || 
-                        !isset($acknowledgmentData['license_show_requirement']) ||
-                        !$acknowledgmentData['driver_license_requirement'] ||
-                        !$acknowledgmentData['license_show_requirement']) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Both acknowledgment checkboxes must be checked for ATV/UTV bookings.',
-                        ], 422);
-                    }
-
-                    $priceService = app(\App\Services\PriceCalculationService::class);
-                    $availability = $priceService->getPricingAndAvailabilityForDate($variant, $validated['date'], $validated['slot_id']);
-                    if ($validated['quantity'] > $availability['total_vehicles']) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Only ' . $availability['total_vehicles'] . ' available for the selected slot.',
-                            'available_quantity' => $availability['total_vehicles'],
-                        ], 422);
-                    }
-                }
-
-                $key = $validated['variant_id'] . '_' . $validated['date'] . '_' . $validated['slot_id'];
-                $cart[$key] = $validated;
+            if (! $price) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Price not available for this package today.',
+                ]);
             }
 
-            session()->put('cart', $cart);
+            // Use firstOrNew with session_id and package_id as search condition
+            $cartItem = Cart::firstOrNew([
+                'session_id' => $sessionId,
+                'package_id' => $packageId,
+                'package_type' => $package->type,
+            ], [
+                'cart_amount' => $price,
+                'rider_type_id' => $riderTypeId, // optional, can be null
+            ]);
+
+            $cartItem->quantity = ($cartItem->quantity ?? 0) + 1;
+            $cartItem->save();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Items added to cart successfully.',
-                'cart_count' => count($cart),
-                'cart_total_items' => array_sum(array_column($cart, 'quantity'))
+                'cart_count' => Cart::where('session_id', $sessionId)->count(),
+                'cart_total_items' => Cart::where('session_id', $sessionId)->sum('quantity'),
             ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while adding to cart.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Handle single item (existing logic)
-        $validated = $request->validate([
-            'variant_id' => 'required|exists:package_variants,id',
-            'quantity' => 'required|integer|min:1',
-            'date' => 'required|date|after_or_equal:today',
-            'slot_id' => 'required|exists:schedule_slots,id',
-            'acknowledgment_data' => 'nullable|array',
-            'signature_data' => 'nullable|string',
-        ]);
-
-        // Re-check availability server-side before adding to cart
-        $variant = PackageVariant::find($validated['variant_id']);
-        $package = $variant->package;
-
-        // Only check availability for ATV/UTV packages, not regular packages
-        if (
-            $package->type === 'atv' || $package->type === 'utv' ||
-            str_contains(strtolower($package->name), 'atv') ||
-            str_contains(strtolower($package->name), 'utv') ||
-            $package->name === 'ATV/UTV Trail Rides' ||
-            $package->name === 'UTV Trail Rides 2'
-        ) {
-            // Validate acknowledgment data for ATV/UTV packages
-            if (empty($validated['acknowledgment_data']) || empty($validated['signature_data'])) {
-                return redirect()->back()->with('error', 'Acknowledgment and signature are required for ATV/UTV bookings.');
-            }
-
-            // Validate acknowledgment data structure
-            $acknowledgmentData = $validated['acknowledgment_data'];
-            if (!isset($acknowledgmentData['driver_license_requirement']) || 
-                !isset($acknowledgmentData['license_show_requirement']) ||
-                !$acknowledgmentData['driver_license_requirement'] ||
-                !$acknowledgmentData['license_show_requirement']) {
-                return redirect()->back()->with('error', 'Both acknowledgment checkboxes must be checked for ATV/UTV bookings.');
-            }
-
-            $priceService = app(\App\Services\PriceCalculationService::class);
-            $availability = $priceService->getPricingAndAvailabilityForDate($variant, $validated['date'], $validated['slot_id']);
-            if ($validated['quantity'] > $availability['total_available']) {
-                return redirect()->back()->with('error', 'Only ' . $availability['total_available'] . ' available for the selected slot.');
-            }
-        }
-
-        $cart = session()->get('cart', []);
-        $key = $validated['variant_id'] . '_' . $validated['date'] . '_' . $validated['slot_id'];
-
-        $cart[$key] = $validated;
-        session()->put('cart', $cart);
-
-        return redirect()->route('frontend.cart.index')
-            ->with('success', 'Item added to cart successfully.');
     }
 
-    public function updateCart(Request $request)
+    public function updateCart(XCartUpdateRequest $request)
     {
-        // Handle both GET and POST requests for simplicity
-        $cartKey = $request->get('cart_key') ?? $request->input('cart_key');
-        $quantity = $request->get('quantity') ?? $request->input('quantity');
+        $validated = $request->validated();
+        // Fetch cart item
+        $cartItem = Cart::where('cart_uuid', $validated['cart_uuid'])->firstOrFail();
+        switch ($validated['change']) {
+            case 'addition':
+                $cartItem->quantity += 1;
+                $cartItem->save();
+                ToastMagic::success('Cart updated successfully!');
+                break;
 
-        if (!$cartKey || !$quantity) {
-            return redirect()->route('frontend.cart.index')
-                ->with('error', 'Invalid request parameters.');
+            case 'minus':
+                if ($cartItem->quantity <= 1) {
+                    // Quantity 1 already, cannot decrease further
+                    ToastMagic::error('Quantity cannot be less than 1.');
+                } else {
+                    $cartItem->quantity -= 1;
+                    $cartItem->save();
+                    ToastMagic::success('Cart updated successfully!');
+                }
+                break;
+
+            default:
+                return redirect()->back()->with('error', 'Invalid action.');
         }
 
-        $quantity = (int) $quantity;
-        if ($quantity < 1) {
-            return redirect()->route('frontend.cart.index')
-                ->with('error', 'Quantity must be at least 1.');
-        }
-
-        $cart = session()->get('cart', []);
-
-        if (!isset($cart[$cartKey])) {
-            return redirect()->route('frontend.cart.index')
-                ->with('error', 'Item not found in cart.');
-        }
-
-        $cartItem = $cart[$cartKey];
-        $variant = \App\Models\PackageVariant::find($cartItem['variant_id']);
-
-        if (!$variant) {
-            return redirect()->route('frontend.cart.index')
-                ->with('error', 'Package variant not found.');
-        }
-
-        $package = $variant->package;
-
-        // Check availability for ATV/UTV packages
-        if (
-            $package->type === 'atv' || $package->type === 'utv' ||
-            str_contains(strtolower($package->name), 'atv') ||
-            str_contains(strtolower($package->name), 'utv') ||
-            $package->name === 'ATV/UTV Trail Rides' ||
-            $package->name === 'UTV Trail Rides 2'
-        ) {
-
-            $priceService = app(\App\Services\PriceCalculationService::class);
-            $availability = $priceService->getPricingAndAvailabilityForDate(
-                $variant,
-                $cartItem['date'],
-                $cartItem['slot_id']
-            );
-
-            if ($quantity > $availability['total_vehicles']) {
-                return redirect()->route('frontend.cart.index')
-                    ->with('error', 'Only ' . $availability['total_vehicles'] . ' vehicles available for the selected slot.');
-            }
-        }
-
-        // Update the quantity
-        $cart[$cartKey]['quantity'] = $quantity;
-        session()->put('cart', $cart);
-
-        return redirect()->route('frontend.cart.index')
-            ->with('success', 'Quantity updated successfully.');
+        return redirect()->back();
     }
 
     /**
@@ -348,20 +242,20 @@ class BookingController extends Controller
         $cartKey = $request->get('cart_key');
         $cart = session()->get('cart', []);
 
-        if (!isset($cart[$cartKey])) {
+        if (! isset($cart[$cartKey])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Item not found in cart.'
+                'message' => 'Item not found in cart.',
             ], 404);
         }
 
         $cartItem = $cart[$cartKey];
         $variant = \App\Models\PackageVariant::find($cartItem['variant_id']);
 
-        if (!$variant) {
+        if (! $variant) {
             return response()->json([
                 'success' => false,
-                'message' => 'Package variant not found.'
+                'message' => 'Package variant not found.',
             ], 404);
         }
 
@@ -378,7 +272,7 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'title' => $package->name . ' - ' . $variant->variant_name,
+                'title' => $package->name.' - '.$variant->variant_name,
                 'image' => $package->display_image_url ?? asset('admin/images/pack-1.png'),
                 'unit_price' => $availability['final_price'],
                 'current_quantity' => $cartItem['quantity'],
@@ -386,26 +280,21 @@ class BookingController extends Controller
                 'available_capacity' => $availability['available_capacity'],
                 'price_tag' => $availability['price_tag'],
                 'has_discount' => $availability['has_discount'],
-                'default_price' => $availability['default_price']
-            ]
+                'default_price' => $availability['default_price'],
+            ],
         ]);
     }
 
-    public function removeFromCart(Request $request)
+    public function removeFromCart(Request $request, $cart_uuid)
     {
-        $key = $request->get('key');
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$key])) {
-            unset($cart[$key]);
-            session()->put('cart', $cart);
-
+        $cartItem = Cart::where('cart_uuid', $cart_uuid)->first();
+        if (! $cartItem) {
             return redirect()->route('frontend.cart.index')
-                ->with('success', 'Item removed from cart successfully.');
+                ->with('error', 'Item not found in cart.');
         }
+        $cartItem->delete();
 
-        return redirect()->route('frontend.cart.index')
-            ->with('error', 'Item not found in cart.');
+        return redirect()->back()->with('success', 'Item removed from cart successfully.');
     }
 
     public function updateCartDateTime(Request $request)
@@ -422,7 +311,7 @@ class BookingController extends Controller
                 $item = $cart[$cartKey];
 
                 // Create new cart key with updated slot_id
-                $newCartKey = $item['variant_id'] . '_' . $date . '_' . $timeSlot;
+                $newCartKey = $item['variant_id'].'_'.$date.'_'.$timeSlot;
 
                 // Update the item with new date and slot_id
                 $item['date'] = $date;
@@ -438,7 +327,7 @@ class BookingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Booking details updated successfully.'
+            'message' => 'Booking details updated successfully.',
         ]);
     }
 
@@ -476,14 +365,14 @@ class BookingController extends Controller
                 'success' => true,
                 'message' => 'Promo code applied successfully!',
                 'discount' => $result['discount'],
-                'discount_formatted' => 'TK ' . number_format($result['discount']),
+                'discount_formatted' => 'TK '.number_format($result['discount']),
                 'total_after_discount' => $subtotal - $result['discount'],
-                'total_after_discount_formatted' => 'TK ' . number_format($subtotal - $result['discount'])
+                'total_after_discount_formatted' => 'TK '.number_format($subtotal - $result['discount']),
             ]);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => $result['message']
+                'message' => $result['message'],
             ], 422);
         }
     }
@@ -496,7 +385,7 @@ class BookingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Promo code removed successfully!'
+            'message' => 'Promo code removed successfully!',
         ]);
     }
 
@@ -537,7 +426,7 @@ class BookingController extends Controller
     public function processBooking(Request $request)
     {
         // Initialize phone number service
-        $phoneService = new PhoneNumberService();
+        $phoneService = new PhoneNumberService;
 
         // Custom validation for password fields based on create_account checkbox
         $createAccount = $request->has('create_account') && $request->create_account;
@@ -577,11 +466,12 @@ class BookingController extends Controller
             'error' => $phoneValidation['error'] ?? null,
         ]);
 
-        if (!$phoneValidation['valid']) {
+        if (! $phoneValidation['valid']) {
             Log::warning('Phone validation failed during checkout', [
                 'original_phone' => $request->customer_phone,
                 'error' => $phoneValidation['error'],
             ]);
+
             return redirect()->back()
                 ->withErrors(['customer_phone' => $phoneValidation['error']])
                 ->withInput();
@@ -608,7 +498,7 @@ class BookingController extends Controller
             // Debug logging
             Log::info('processBooking started', [
                 'request_data' => $request->all(),
-                'cart' => session()->get('cart', [])
+                'cart' => session()->get('cart', []),
             ]);
 
             // Validate cart has items
@@ -720,13 +610,13 @@ class BookingController extends Controller
                 $variant = PackageVariant::find($item['variant_id']);
                 $slot = ScheduleSlot::find($item['slot_id']);
 
-                if (!$variant || !$slot) {
+                if (! $variant || ! $slot) {
                     throw new \Exception('Invalid package or time slot.');
                 }
 
                 Log::info('Found variant and slot', [
                     'variant_id' => $variant->id,
-                    'slot_id' => $slot->id
+                    'slot_id' => $slot->id,
                 ]);
 
                 $price = $priceService->getPriceForDate($variant, $item['date']);
@@ -736,7 +626,7 @@ class BookingController extends Controller
                 Log::info('Calculated price', [
                     'price' => $price,
                     'quantity' => $item['quantity'],
-                    'itemTotal' => $itemTotal
+                    'itemTotal' => $itemTotal,
                 ]);
 
                 // Create reservation
@@ -776,14 +666,14 @@ class BookingController extends Controller
                 Log::info('Reservation item created', [
                     'reservation_item_id' => $reservationItem->id,
                     'qty' => $item['quantity'],
-                    'variant_capacity' => $variant->capacity
+                    'variant_capacity' => $variant->capacity,
                 ]);
 
                 $reservations[] = $reservation;
-                
+
                 Log::info('Reservation added to array', [
                     'reservation_id' => $reservation->id,
-                    'total_reservations' => count($reservations)
+                    'total_reservations' => count($reservations),
                 ]);
             }
 
@@ -807,7 +697,7 @@ class BookingController extends Controller
                     $promoDiscount = $promoValidation['discount'];
 
                     // Record promo code redemption (use first reservation)
-                    if (!empty($reservations)) {
+                    if (! empty($reservations)) {
                         $promoService->recordRedemption(
                             $appliedPromoCode->id,
                             $reservations[0]->id, // Use first reservation for promo record
@@ -827,60 +717,59 @@ class BookingController extends Controller
             $reservationCount = count($reservations);
             $distributedDiscount = 0;
             $distributedTax = 0;
-            
+
             foreach ($reservations as $index => $reservation) {
                 // Calculate this reservation's proportion of the total
                 $reservationProportion = $reservation->total_amount / $totalAmount;
-                
+
                 // Distribute tax and discount proportionally
                 $reservationDiscount = $promoDiscount * $reservationProportion;
                 $reservationTax = $tax * $reservationProportion;
-                
+
                 // For the last reservation, ensure we distribute exactly the remaining amounts to avoid rounding errors
                 if ($index === $reservationCount - 1) {
                     $reservationDiscount = $promoDiscount - $distributedDiscount;
                     $reservationTax = $tax - $distributedTax;
                 }
-                
+
                 $reservationFinalTotal = $reservation->total_amount - $reservationDiscount + $reservationTax;
-                
+
                 $reservation->update([
                     'subtotal' => $reservation->total_amount, // Keep original subtotal
                     'discount_amount' => $reservationDiscount,
                     'tax_amount' => $reservationTax,
                     'total_amount' => $reservationFinalTotal, // Update with final total including tax and discount
                 ]);
-                
+
                 // Track distributed amounts
                 $distributedDiscount += $reservationDiscount;
                 $distributedTax += $reservationTax;
             }
 
-
             // Generate transaction ID based on payment method
             $transactionId = null;
             $paymentDetails = [];
-            
+
             if ($request->payment_method === 'check_payment') {
-                $transactionId = 'CHK-' . strtoupper(uniqid());
+                $transactionId = 'CHK-'.strtoupper(uniqid());
                 $paymentDetails = [
                     'method' => 'check_payment',
                     'status' => 'pending',
-                    'instructions' => 'Please mail your check to complete the payment'
+                    'instructions' => 'Please mail your check to complete the payment',
                 ];
             } elseif ($request->payment_method === 'amarpay') {
-                $transactionId = 'AMAR-' . strtoupper(uniqid());
+                $transactionId = 'AMAR-'.strtoupper(uniqid());
                 $paymentDetails = [
                     'method' => 'amarpay',
                     'status' => 'pending',
-                    'gateway' => 'amarpay'
+                    'gateway' => 'amarpay',
                 ];
             } else {
-                $transactionId = 'CC-' . strtoupper(uniqid());
+                $transactionId = 'CC-'.strtoupper(uniqid());
                 $paymentDetails = [
                     'method' => 'credit_card',
                     'status' => 'pending',
-                    'gateway' => 'credit_card'
+                    'gateway' => 'credit_card',
                 ];
             }
 
@@ -890,7 +779,7 @@ class BookingController extends Controller
             }
 
             // Create ONE payment for the entire checkout (total amount)
-            $totalAmount = array_sum(array_map(fn($r) => $r->total_amount, $reservations));
+            $totalAmount = array_sum(array_map(fn ($r) => $r->total_amount, $reservations));
             $payment = Payment::create([
                 'reservation_id' => $reservations[0]->id, // Use first reservation ID to maintain schema
                 'method' => $request->payment_method,
@@ -898,19 +787,19 @@ class BookingController extends Controller
                 'currency' => 'BDT',
                 'status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'completed',
                 'transaction_id' => $transactionId,
-                'payment_details' => $paymentDetails
+                'payment_details' => $paymentDetails,
             ]);
 
             Log::info('Single payment created for entire checkout', [
                 'payment_id' => $payment->id,
                 'total_amount' => $totalAmount,
-                'reservation_count' => count($reservations)
+                'reservation_count' => count($reservations),
             ]);
 
             // Update all reservations with payment status
             foreach ($reservations as $reservation) {
                 $reservation->update([
-                    'payment_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'paid'
+                    'payment_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'paid',
                 ]);
             }
 
@@ -929,23 +818,23 @@ class BookingController extends Controller
             $accountMessage = '';
             if (session()->get('guest_checkout', false) && $user && $createAccount) {
                 $accountMessage = ' A customer account has been created and you are now logged in! You can access your dashboard to track your bookings.';
-            } elseif (session()->get('guest_checkout', false) && $user && !$createAccount) {
+            } elseif (session()->get('guest_checkout', false) && $user && ! $createAccount) {
                 $accountMessage = ' A customer account already exists with your email. You can login at /customer/login to track your bookings.';
             }
 
             // Redirect based on payment method
             if ($request->payment_method === 'check_payment') {
                 return redirect()->route('booking-confirmation')
-                    ->with('success', 'Check payment booking confirmed!' . $accountMessage . ' Please mail your check to complete the payment. Your booking reference: ' . $transactionId);
+                    ->with('success', 'Check payment booking confirmed!'.$accountMessage.' Please mail your check to complete the payment. Your booking reference: '.$transactionId);
             } elseif ($request->payment_method === 'amarpay') {
                 // Initiate Amar Pay payment
                 if (empty($reservations)) {
                     throw new \Exception('No reservations available for payment processing.');
                 }
-                
+
                 $amarPayService = app(\App\Services\AmarPayService::class);
                 $result = $amarPayService->initiatePayment($reservations[0], $finalTotal);
-                
+
                 if ($result['success']) {
                     return redirect($result['redirect_url']);
                 } else {
@@ -953,17 +842,17 @@ class BookingController extends Controller
                         ->with('error', 'Failed to initiate payment. Please try again.')
                         ->with('payment_details', [
                             'reason' => 'Payment initiation failed',
-                            'error_message' => $result['message'] ?? 'Unknown error'
+                            'error_message' => $result['message'] ?? 'Unknown error',
                         ]);
                 }
             } else {
                 // Redirect to payment gateway for credit card processing
-                if (!$payment) {
+                if (! $payment) {
                     throw new \Exception('No payment was created. Please try again.');
                 }
-                
+
                 return redirect()->route('frontend.payment.index')
-                    ->with('success', 'Booking confirmed!' . $accountMessage . ' Redirecting to payment gateway...')
+                    ->with('success', 'Booking confirmed!'.$accountMessage.' Redirecting to payment gateway...')
                     ->with('payment_id', $payment->id);
             }
         } catch (\Exception $e) {
@@ -974,7 +863,7 @@ class BookingController extends Controller
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Check if this is a payment-related error
@@ -984,10 +873,10 @@ class BookingController extends Controller
                     ->with('error', 'An error occurred while processing your payment. Please try again.')
                     ->with('payment_details', [
                         'reason' => 'Payment processing error',
-                        'error_message' => $errorMessage
+                        'error_message' => $errorMessage,
                     ]);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'An error occurred while processing your booking. Please try again.')
                 ->withInput();
@@ -997,13 +886,14 @@ class BookingController extends Controller
     private function getPriceForDate(PackageVariant $variant, string $date): float
     {
         $priceService = app(\App\Services\PriceCalculationService::class);
+
         return $priceService->getPriceForDate($variant, $date);
     }
 
     private function generateBookingCode(): string
     {
         do {
-            $code = 'BK' . date('Ymd') . strtoupper(substr(md5(uniqid()), 0, 6));
+            $code = 'BK'.date('Ymd').strtoupper(substr(md5(uniqid()), 0, 6));
         } while (Reservation::where('booking_code', $code)->exists());
 
         return $code;
@@ -1014,7 +904,7 @@ class BookingController extends Controller
         // Get booking code from URL parameter or session
         $bookingCode = $request->get('booking_code') ?? session()->get('last_booking_code');
 
-        if (!$bookingCode) {
+        if (! $bookingCode) {
             return redirect()->route('frontend.packages.index')
                 ->with('error', 'No booking found. Please make a new booking.');
         }
@@ -1025,10 +915,10 @@ class BookingController extends Controller
             'packageVariant.package.images',
             'scheduleSlot',
             'payments',
-            'promoRedemptions.promoCode'
+            'promoRedemptions.promoCode',
         ])->where('booking_code', $bookingCode)->first();
 
-        if (!$firstReservation) {
+        if (! $firstReservation) {
             return redirect()->route('frontend.packages.index')
                 ->with('error', 'Booking not found. Please check your booking code.');
         }
@@ -1051,12 +941,12 @@ class BookingController extends Controller
             $allReservations = Reservation::with([
                 'customer',
                 'packageVariant.package.images',
-                'scheduleSlot'
+                'scheduleSlot',
             ])->where('customer_id', $firstReservation->customer_id)
-              ->where('created_at', '>=', $payment->created_at->subMinutes(5))
-              ->where('created_at', '<=', $payment->created_at->addMinutes(5))
-              ->orderBy('created_at')
-              ->get();
+                ->where('created_at', '>=', $payment->created_at->subMinutes(5))
+                ->where('created_at', '<=', $payment->created_at->addMinutes(5))
+                ->orderBy('created_at')
+                ->get();
 
             // Sum up totals from all reservations
             foreach ($allReservations as $reservation) {
@@ -1120,7 +1010,7 @@ class BookingController extends Controller
             'rocket' => 'Rocket',
             'upay' => 'Upay',
             'bank_transfer' => 'Bank Transfer',
-            'cash' => 'Cash Payment'
+            'cash' => 'Cash Payment',
         ];
 
         return $methods[$method] ?? ucfirst(str_replace('_', ' ', $method));

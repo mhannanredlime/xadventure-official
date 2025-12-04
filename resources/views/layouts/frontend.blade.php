@@ -135,12 +135,14 @@
         .btn-close {
             background-size: 1.2em;
         }
-        .default-page-marign-top{
+
+        .default-page-marign-top {
             margin-top: 170px !important;
         }
     </style>
 
     @stack('styles')
+    {!! ToastMagic::styles() !!}
 </head>
 
 <body>
@@ -215,7 +217,18 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('contact') }}">Contact</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-1 gap-md-3">
-                    <a href="{{ url('/shopping-cart') }}"
+                    {{-- <a href="{{ url('/shopping-cart') }}"
+                        style="color: white; text-decoration: none; position: relative;">
+                        <i class="fa-solid fa-cart-arrow-down"></i>
+                        @if ($cartCount > 0)
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style="font-size: 0.6rem; transform: translate(-50%, -50%);">
+                                {{ $cartCount }}
+                            </span>
+                        @endif
+                    </a> --}}
+                    <a href="{{ url('/regular-packages-booking') }}"
                         style="color: white; text-decoration: none; position: relative;">
                         <i class="fa-solid fa-cart-arrow-down"></i>
                         @if ($cartCount > 0)
@@ -255,8 +268,8 @@
                         </div>
                     @elseif(Auth::check() && Auth::user()->is_admin)
                         <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle primary-btn-border-radius" type="button" id="accountDropdown"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-outline-light dropdown-toggle primary-btn-border-radius" type="button"
+                                id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi  bi-user-shield"></i> {{ Auth::user()->name }}
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="accountDropdown">
@@ -603,6 +616,8 @@
 
 
     @stack('scripts')
+    {!! ToastMagic::scripts() !!}
+
 
 </body>
 

@@ -115,7 +115,7 @@ Route::post('/cart/add', [BookingController::class, 'addToCart'])->name('fronten
 Route::post('/cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update');
 Route::get('/cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update.get');
 Route::get('/cart/availability', [BookingController::class, 'getCartItemAvailability'])->name('frontend.cart.availability');
-Route::post('/cart/remove', [BookingController::class, 'removeFromCart'])->name('frontend.cart.remove');
+Route::post('/cart/remove/{cart_uuid}', [BookingController::class, 'removeFromCart'])->name('frontend.cart.remove');
 Route::post('/cart/update-datetime', [BookingController::class, 'updateCartDateTime'])->name('frontend.cart.updateDateTime');
 Route::post('/cart/validate-promo', [BookingController::class, 'validatePromoCode'])->name('frontend.cart.validate-promo');
 Route::post('/cart/remove-promo', [BookingController::class, 'removePromoCode'])->name('frontend.cart.remove-promo');

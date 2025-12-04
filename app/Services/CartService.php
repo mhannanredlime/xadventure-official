@@ -26,7 +26,7 @@ class CartService
         foreach ($cart as $key => $item) {
             $items[] = [
                 'key' => $key,
-                'variant_id' => $item['variant_id'],
+                'package_id' => $item['package_id'],
                 'quantity' => $item['quantity'],
                 'date' => $item['date'],
                 'slot_id' => $item['slot_id'],
@@ -42,7 +42,7 @@ class CartService
     public function addToCart(array $item): void
     {
         $cart = Session::get('cart', []);
-        $key = $item['variant_id'] . '_' . $item['date'] . '_' . $item['slot_id'];
+        $key = $item['package_id'] . '_' . $item['date'] . '_' . $item['slot_id'];
         $cart[$key] = $item;
         Session::put('cart', $cart);
     }
