@@ -101,7 +101,6 @@
                 <div class="col-lg-12">
                     <div class="card shadow-sm sticky-top" style="top: 20px;">
                         <div class="card-body">
-
                             <!-- ----------------- Calendar Section ----------------- -->
                             <div class="date-selection mb-4">
                                 <h6 class="fw-medium mb-3"><i class="fas fa-calendar-alt me-2"></i>Choose Date</h6>
@@ -190,7 +189,7 @@
                             </div>
 
                             <!-- ----------------- Buttons ----------------- -->
-                            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+                            {{-- <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
                                 <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn">
                                     <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                                 </a>
@@ -198,7 +197,28 @@
                                 <button type="submit" class="checkout-btn">
                                     Proceed to Checkout
                                 </button>
-                            </div>
+                            </div> --}}
+
+                            <form action="{{ route('frontend.cart.index') }}" method="GET" id="checkoutForm">
+
+                                <input type="hidden" name="selected_date" id="checkout_selected_date">
+                                <input type="hidden" name="time_slot_id" id="checkout_time_slot_id">
+                                <input type="hidden" name="time_slot_text" id="checkout_time_slot_text">
+                                {{-- <input type="hidden" name="guest_cart_items" id="guest_cart_items"> --}}
+
+
+                                <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+                                    <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn">
+                                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                                    </a>
+
+                                    <button type="submit" class="checkout-btn">
+                                        Proceed to Checkout
+                                    </button>
+                                </div>
+
+                            </form>
+
                         </div>
                     </div>
                 </div>

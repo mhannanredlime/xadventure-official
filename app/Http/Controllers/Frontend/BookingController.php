@@ -26,116 +26,16 @@ class BookingController extends Controller
 {
     public function cart(Request $request)
     {
-        $cart = session()->get('cart', []);
+        $data['guestCartItems'] = Cart::with('package')
+            ->where('session_id', session()->getId())
+            ->where('created_at', '>=', now()->subMinutes(env('SESSION_LIFETIME')))
+            ->get();
 
-        if (empty($cart)) {
-            return view('frontend.shopping-cart', compact('cart'));
-        }
+        $data['time_slot'] = ScheduleSlot::where('id', $request->time_slot_id)->first();
 
-        $packages = [];
-        $packagesByDate = [];
-        $priceService = app(\App\Services\PriceCalculationService::class);
-        $cartErrors = [];
+        $data['selected_date'] = $request->selected_date;
 
-        foreach ($cart as $key => $item) {
-            try {
-                $variant = PackageVariant::with(['package.primaryImage', 'package.images'])->find($item['variant_id']);
-                $slot = ScheduleSlot::find($item['slot_id']);
-
-                if (! $variant || ! $slot) {
-                    $cartErrors[] = 'Invalid package or time slot found in cart. Item has been removed.';
-                    // Remove invalid item from cart
-                    unset($cart[$key]);
-
-                    continue;
-                }
-
-                $package = $variant->package;
-
-                // Only check availability for ATV/UTV packages, not regular packages
-                if (
-                    $package->type === 'atv' || $package->type === 'utv' ||
-                    str_contains(strtolower($package->name), 'atv') ||
-                    str_contains(strtolower($package->name), 'utv') ||
-                    $package->name === 'ATV/UTV Trail Rides' ||
-                    $package->name === 'UTV Trail Rides 2'
-                ) {
-                    // Final availability recheck to avoid oversell in concurrent cases
-                    $availability = $priceService->getPricingAndAvailabilityForDate($variant, $item['date'], $slot->id);
-                    if ($item['quantity'] > $availability['total_vehicles']) {
-                        $cartErrors[] = 'Only '.$availability['total_vehicles'].' available for '.$variant->package->name.' on '.$item['date'].' at selected time. Item has been removed.';
-                        // Remove unavailable item from cart
-                        unset($cart[$key]);
-
-                        continue;
-                    }
-                }
-
-                $price = $priceService->getPriceForDate($variant, $item['date']);
-
-                $packageItem = [
-                    'key' => $key,
-                    'variant' => $variant,
-                    'quantity' => $item['quantity'],
-                    'date' => $item['date'],
-                    'slot' => $slot,
-                    'price' => $price,
-                ];
-
-                // Group by date only (not by time slot)
-                $dateKey = $item['date'];
-                if (! isset($packagesByDate[$dateKey])) {
-                    $packagesByDate[$dateKey] = [
-                        'date' => $item['date'],
-                        'slots' => [], // Store all slots for this date
-                        'packages' => [],
-                    ];
-                }
-
-                // Add slot to slots array if not already present
-                $slotExists = false;
-                foreach ($packagesByDate[$dateKey]['slots'] as $existingSlot) {
-                    if ($existingSlot->id === $slot->id) {
-                        $slotExists = true;
-                        break;
-                    }
-                }
-                if (! $slotExists) {
-                    $packagesByDate[$dateKey]['slots'][] = $slot;
-                }
-
-                $packagesByDate[$dateKey]['packages'][] = $packageItem;
-
-                // Keep the original flat array for backward compatibility
-                $packages[] = $packageItem;
-            } catch (\Exception $e) {
-                Log::error('Error processing cart item', [
-                    'item' => $item,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-
-                $cartErrors[] = 'Error processing item: '.$e->getMessage().'. Item has been removed.';
-                // Remove problematic item from cart
-                unset($cart[$key]);
-            }
-        }
-
-        // Update cart session if items were removed
-        if (count($cart) !== count(session()->get('cart', []))) {
-            session()->put('cart', $cart);
-        }
-
-        // If all items were removed due to errors, return empty cart
-        if (empty($packages)) {
-            return view('frontend.shopping-cart', compact('cart', 'cartErrors'));
-        }
-
-        // Get applied promo code data from session
-        $appliedPromoCode = session()->get('applied_promo_code');
-        $promoDiscount = session()->get('promo_discount', 0);
-
-        return view('frontend.shopping-cart', compact('cart', 'packages', 'packagesByDate', 'appliedPromoCode', 'promoDiscount', 'cartErrors'));
+        return view('frontend.shopping-cart', $data);
     }
 
     public function addToCart(Request $request)
