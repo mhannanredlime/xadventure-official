@@ -199,7 +199,6 @@
                                     Proceed to Checkout
                                 </button>
                             </div>
-
                         </div>
                     </div>
                 </div>
