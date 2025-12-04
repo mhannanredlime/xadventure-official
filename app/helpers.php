@@ -102,3 +102,15 @@ if (! function_exists('get_package_price')) {
         }
     }
 }
+if (! function_exists('calculateVAT')) {
+    function calculateVAT(float $amount, float $vatRate = 15): array
+    {
+        $vatAmount = ($amount * $vatRate) / 100;
+        $totalWithVAT = $amount + $vatAmount;
+
+        return [
+            'vat' => $vatAmount,
+            'total' => $totalWithVAT
+        ];
+    }   
+}

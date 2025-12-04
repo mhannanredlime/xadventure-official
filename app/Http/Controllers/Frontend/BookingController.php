@@ -187,6 +187,7 @@ class BookingController extends Controller
 
     public function removeFromCart(Request $request, $cart_uuid)
     {
+        // dd($request->all());
         $cartItem = Cart::where('cart_uuid', $cart_uuid)->first();
         if (! $cartItem) {
             return redirect()->route('frontend.cart.index')

@@ -82,7 +82,7 @@
                                                 <form action="{{ route('frontend.cart.remove', $item->cart_uuid) }}"
                                                     method="POST" class="d-inline">
                                                     @csrf
-                                                    @method('DELETE')
+                                                    {{-- @method('DELETE') --}}
                                                     <button type="submit" class="btn btn-outline-danger btn-sm"
                                                         onclick="return confirm('Remove this item from cart?')">
                                                         <i class="fas fa-trash-alt"></i>

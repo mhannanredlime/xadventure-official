@@ -1,17 +1,20 @@
 @extends('layouts.frontend')
 
-@section('title', 'Your Cart')
+@section('title', 'Your order summary')
 
 @section('content')
     <div class="container mt-5 default-page-marign-top">
-        <h2 class="mb-4">Your Shopping Cart</h2>
+        <h2 class="mb-4">Your order summary</h2>
 
         @if ($guestCartItems->count() > 0)
             <div class="row">
                 <div class="col-lg-8">
+
+                    {{-- HEre show time slot --}}
                     <div class="card shadow-sm mb-4">
                         <div class="card-body">
                             <table class="table table-borderless align-middle">
+
                                 <thead class="border-bottom">
                                     <tr>
                                         <th>SL</th>
@@ -44,9 +47,12 @@
 
                                                     <div>
                                                         <h6 class="mb-1">{{ $item->package->name ?? 'Package Name' }}</h6>
-                                                        <small class="text-muted">
-                                                            {{ $item->package->category->name ?? '' }}
-                                                        </small>
+                                                        @if (isset($time_slot))
+                                                            <div class="schedule-color small mt-1">
+                                                                Schedule:
+                                                                {{ $time_slot->name ?? $time_slot->start_time . ' - ' . $time_slot->end_time }}
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </td>
@@ -118,19 +124,22 @@
 
                                 @php $total = $subtotal; @endphp
 
-                                <div class="d-flex justify-content-between mt-3 pt-3 ">
+                                @php
+                                    $vatData = calculateVAT($total);
+                                @endphp
+                                <div class="d-flex justify-content-between mt-3 pt-3">
                                     <strong>VAT (15%)</strong>
-                                    <strong class="fs-5">TK {{ number_format($total, 2) }}</strong>
+                                    <strong class="fs-5">TK {{ number_format($vatData['vat'], 2) }}</strong>
                                 </div>
 
                                 <div class="d-flex justify-content-between mt-3 pt-3 border-top">
                                     <strong>Total Amount</strong>
-                                    <strong class="fs-5">TK {{ number_format($total, 2) }}</strong>
+                                    <strong class="fs-5">TK {{ number_format($vatData['total'], 2) }}</strong>
                                 </div>
                             </div>
 
                             <!-- Checkout -->
-                            <form action="{{ url('shopping-cart') }}" method="GET">
+                            <form action="{{ url('checkout') }}" method="GET">
 
                                 @foreach ($guestCartItems as $index => $ci)
                                     <input type="hidden" name="cart_items[{{ $index }}][uuid]"
@@ -139,16 +148,15 @@
                                         value="{{ $ci->quantity }}">
                                 @endforeach
 
-                                <div class="d-flex justify-content-center align-items-center mt-4 flex-wrap gap-3">
+                                <div class="d-flex justify-content-center  mt-4  gap-3">
 
                                     <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
                                         <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                                     </a>
 
                                     <button type="submit" class="checkout-btn equal-btn">
-                                        Proceed to Checkout
+                                        Placer Order
                                     </button>
-
                                 </div>
                             </form>
 
@@ -181,6 +189,11 @@
             object-fit: cover;
         }
 
+        .schedule-color {
+            color: #e55a22;
+            font-weight: bold;
+        }
+
         .equal-btn {
             width: 100%;
             max-width: 325px;
@@ -199,8 +212,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 12px 16px;
-            width: 325px;
+            padding: 12px 10px;
             height: 57px;
             background: #FC692A;
             color: #fff;
