@@ -19,8 +19,9 @@ class AmarPayService
 
     public function initiatePayment(Reservation $reservation, float $amount): array
     {
+        // dd($reservation->customer);
         // Generate unique transaction ID (max 32 characters)
-        $tranId = 'ATV_' . $reservation->booking_code . '_' . time();
+        $tranId = generateTransactionId($reservation->booking_code);
         
         $payload = [
             'store_id' => $this->config['store_id'],
@@ -28,20 +29,20 @@ class AmarPayService
             'tran_id' => $tranId,
             'amount' => number_format($amount, 2, '.', ''),
             'currency' => 'BDT',
-            'desc' => 'ATV/UTV Adventure Tour Booking - ' . $reservation->packageVariant->package->name,
-            'cus_name' => $reservation->customer->name,
-            'cus_email' => $reservation->customer->email,
-            'cus_phone' => $reservation->customer->phone,
+            'desc' => 'Package Booking Booking',
+            'cus_name' => isset($reservation->customer->name) ? $reservation->customer->name : 'Unknown',
+            'cus_email' => isset($reservation->customer->email) ? $reservation->customer->email : 'Unknown',
+            'cus_phone' => isset($reservation->customer->phone) ? $reservation->customer->phone : 'Unknown',
             'success_url' => url($this->config['success_url']),
             'fail_url' => url($this->config['fail_url']),
             'cancel_url' => url($this->config['cancel_url']),
             'type' => 'json',
-            'cus_add1' => $reservation->customer->address ?? 'Dhaka',
-            'cus_city' => 'Dhaka',
-            'cus_state' => 'Dhaka',
-            'cus_country' => 'Bangladesh',
-            'opt_a' => $reservation->id, // Store reservation ID in optional field
-            'opt_b' => $reservation->booking_code, // Store booking code
+            'cus_add1' => isset($reservation->customer->address) ? $reservation->customer->address : 'Dhaka',
+            'cus_city' => isset($reservation->customer->city) ? $reservation->customer->city : 'Dhaka',
+            'cus_state' => isset($reservation->customer->state) ? $reservation->customer->state : 'Dhaka',
+            'cus_country' => isset($reservation->customer->country) ? $reservation->customer->country : 'Bangladesh',
+            'opt_a' => $reservation->id, 
+            'opt_b' => $reservation->booking_code,
         ];
 
         Log::info('AmarPay payment initiation request', [
@@ -106,18 +107,14 @@ class AmarPayService
             $payment = Payment::where('method', 'amarpay')
                              ->where('status', 'pending')
                              ->where('amount', $amount)
-                             ->where('created_at', '>=', now()->subMinutes(30)) // Within last 30 minutes
+                             ->where('created_at', '>=', now()->subMinutes(30))
                              ->orderBy('created_at', 'desc')
                              ->first();
         }
         
-        // If still not found, try to find by reservation amount match
-        if (!$payment) {
+        if (!$payment) {    
             $payment = Payment::where('method', 'amarpay')
                              ->where('status', 'pending')
-                             ->whereHas('reservation', function($query) use ($amount) {
-                                 return $query->where('total_amount', $amount);
-                             })
                              ->where('created_at', '>=', now()->subMinutes(30))
                              ->orderBy('created_at', 'desc')
                              ->first();
@@ -151,7 +148,7 @@ class AmarPayService
             // Find all reservations that were created in the same checkout session
             // Since we don't have payment_id in reservations, we'll find by customer and recent creation time
             $primaryReservation = $payment->reservation;
-            $allReservations = \App\Models\Reservation::where('customer_id', $primaryReservation->customer_id)
+            $allReservations = Reservation::where('customer_id', $primaryReservation->customer_id)
                 ->where('created_at', '>=', $payment->created_at->subMinutes(5)) // Within 5 minutes of payment creation
                 ->where('payment_status', 'pending')
                 ->get();
@@ -161,8 +158,8 @@ class AmarPayService
                 $reservation->update([
                     'payment_status' => 'paid',
                     'booking_status' => 'confirmed',
-                    'deposit_amount' => $reservation->total_amount, // Individual reservation amount as deposit
-                    'balance_amount' => 0, // No remaining balance since full amount paid
+                    'deposit_amount' => $reservation->total_amount, 
+                    'balance_amount' => 0, 
                 ]);
                 
                 Log::info('Updated reservation payment status', [
@@ -206,7 +203,7 @@ class AmarPayService
 
             // Find all reservations that were created in the same checkout session
             $primaryReservation = $payment->reservation;
-            $allReservations = \App\Models\Reservation::where('customer_id', $primaryReservation->customer_id)
+            $allReservations = Reservation::where('customer_id', $primaryReservation->customer_id)
                 ->where('created_at', '>=', $payment->created_at->subMinutes(5)) // Within 5 minutes of payment creation
                 ->where('payment_status', 'pending')
                 ->get();

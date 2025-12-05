@@ -2,24 +2,26 @@
 
 namespace App\Http\Controllers\Frontend;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\OrderPlacingMakePaymentRequest;
-use App\Http\Requests\XCartUpdateRequest;
+use Exception;
 use App\Models\Cart;
-use App\Models\Customer;
+use App\Models\User;
 use App\Models\Package;
-use App\Models\PackageVariant;
 use App\Models\Payment;
+use App\Models\Customer;
 use App\Models\PromoCode;
 use App\Models\Reservation;
 use App\Models\ScheduleSlot;
-use App\Models\User;
-use App\Services\PhoneNumberService;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
+use App\Models\PackageVariant;
 use Illuminate\Support\Carbon;
+use App\Services\AmarPayService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Services\PhoneNumberService;
+use App\Http\Requests\XCartUpdateRequest;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+use App\Http\Requests\OrderPlacingMakePaymentRequest;
 
 class BookingController extends Controller
 {
@@ -314,7 +316,7 @@ class BookingController extends Controller
         return view('frontend.checkout.index', $data);
     }
 
-    public function processBooking(OrderPlacingMakePaymentRequest $request)
+    public function processBooking(OrderPlacingMakePaymentRequest $request, AmarPayService $amarPayService)
     {
         // Validate request
         $validated = $request->validated();
@@ -330,18 +332,16 @@ class BookingController extends Controller
         DB::beginTransaction();
 
         try {
-
-            // Convert checkbox to real boolean (TRUE/FALSE)
+            // Convert checkbox to real boolean
             $createAccount = $request->boolean('create_account');
 
-            // Email & phone normalize
+            // Normalize email & phone
             $email = $request->customer_email;
-            $phone = $formattedPhone; // already formatted earlier
+            $phone = $formattedPhone;
 
             $user = null;
 
             if ($createAccount) {
-                // dd('asdfd');
                 // Find existing user by email or phone
                 $user = User::where('email', $email)
                     ->orWhere('phone', $phone)
@@ -357,63 +357,70 @@ class BookingController extends Controller
                         'password' => bcrypt($request->password),
                         'is_admin' => false,
                     ]);
-
                 } else {
+                    // UPDATE existing user
                     $user->update([
                         'name' => $request->customer_name,
                         'phone' => $phone,
                         'address' => $request->customer_address,
                     ]);
+
                     if ($request->filled('password')) {
                         $user->update([
                             'password' => bcrypt($request->password),
                         ]);
                     }
                 }
-
-            } else {
-                // Guest checkout
-                $user = new \stdClass;
-                $user->id = null;
             }
 
             // Calculate subtotal
             $subtotal = 0;
             foreach ($cartItems as $cartItem) {
-                $package = $cartItem->package;
-                $price = get_package_price($package, now()->format('D'));
+                if (! $cartItem->package) {
+                    continue; // skip missing packages
+                }
+
+                $price = get_package_price($cartItem->package, now()->format('D'));
                 $subtotal += $price * $cartItem->quantity;
             }
 
-            // Apply promo code if exists
+            // Apply promo code
             $promoDiscount = 0;
             $appliedPromoCode = session()->get('applied_promo_code');
             if ($appliedPromoCode) {
+                $userId = $user->id ?? null;
                 $promoValidation = $promoService->validatePromoCode(
                     $appliedPromoCode->code,
                     $subtotal,
-                    $user->id
+                    $userId
                 );
+
                 if ($promoValidation['valid']) {
                     $promoDiscount = $promoValidation['discount'];
                 }
             }
-            // dd($user);
+
             // Calculate VAT & total
             $taxData = calculateVAT($subtotal - $promoDiscount);
             $totalAmount = $taxData['total'];
-            // dd($taxData);
+
+            // Create reservations
             $reservations = [];
             foreach ($cartItems as $cartItem) {
-                $package = $cartItem->package;
-                $price = get_package_price($package, now()->format('D'));
+                if (! $cartItem->package) {
+                    continue;
+                }
+
+                $price = get_package_price($cartItem->package, now()->format('D'));
                 $itemSubtotal = $price * $cartItem->quantity;
 
                 $reservation = Reservation::create([
                     'booking_code' => $this->generateBookingCode(),
-                    'user_id' => $user->id,
-                    // 'customer_id' => $user->id,
-                    'package_variant_id' => null, // For simple package
+                    'user_id' => $user->id ?? null,
+                    'customer_name' => $request->customer_name,
+                    'customer_email' => $request->customer_email,
+                    'customer_phone' => $formattedPhone,
+                    'package_variant_id' => null,
                     'schedule_slot_id' => null,
                     'date' => now()->toDateString(),
                     'report_time' => '09:00:00',
@@ -429,6 +436,10 @@ class BookingController extends Controller
                 $reservations[] = $reservation;
             }
 
+            if (empty($reservations)) {
+                throw new Exception('No valid reservations could be created.');
+            }
+
             // Create Payment record
             $transactionId = strtoupper(uniqid('TXN-'));
             $payment = Payment::create([
@@ -440,16 +451,42 @@ class BookingController extends Controller
                 'transaction_id' => $transactionId,
                 'payment_details' => [],
             ]);
-            // dd('hello')
-            Log::info('Transaction ID: '.$transactionId.''.$payment->id.''.$request->payment_method.''.$request->payment_method);
+
+            Log::info('Transaction ID: '.$transactionId.' | Payment ID: '.$payment->id.' | Method: '.$request->payment_method);
+            // dd($request->payment_method);
             DB::commit();
-            // dd($reservations[0]->booking_code);
-            ToastMagic::success('Booking successful!');
 
-            return redirect()->route('booking.confirmation.code', [
-                'booking_code' => $reservations[0]->booking_code,
-            ]);
+            // Account messages
+            $accountMessage = '';
+            if ($user && $createAccount) {
+                $accountMessage = ' A customer account has been created and you are now logged in! You can access your dashboard to track your bookings.';
+            } elseif ($user && ! $createAccount) {
+                $accountMessage = ' A customer account already exists with your email. You can login at /customer/login to track your bookings.';
+            }
 
+            // Redirect based on payment method
+            if ($request->payment_method === 'check_payment') {
+                return redirect()->route('booking.confirmation')
+                    ->with('success', 'Check payment booking confirmed!'.$accountMessage.' Please mail your check to complete the payment. Your booking reference: '.$transactionId);
+
+            } elseif ($request->payment_method === 'amarpay') {
+                $result = $amarPayService->initiatePayment($reservations[0], $totalAmount);
+                if ($result['success']) {
+                    return redirect($result['redirect_url']);
+                } else {
+                    return redirect()->route('payment.failed')
+                        ->with('error', 'Failed to initiate payment. Please try again.')
+                        ->with('payment_details', [
+                            'reason' => 'Payment initiation failed',
+                            'error_message' => $result['message'] ?? 'Unknown error',
+                        ]);
+                }
+            } else {
+                return redirect()->route('frontend.payment.index')
+                    ->with('success', 'Booking confirmed!'.$accountMessage.' Redirecting to payment gateway...')
+                    ->with('payment_id', $payment->id);
+            }
+            cleanOldCarts(session()->getId());
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('processBooking error', ['error' => $e->getMessage()]);
@@ -474,9 +511,9 @@ class BookingController extends Controller
         return $code;
     }
 
-    public function showConfirmation(Request $request, string $bookingCode)
+    public function showConfirmation(Request $request, string $bookingCode = null)
     {
-        // Fetch the first reservation with all related data or fail with 404
+        $bookingCode = $request->query('booking_code');
         $reservation = Reservation::with([
             'customer',
             'packageVariant.package.images',

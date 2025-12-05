@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\PaymentConfirmed;
-use App\Http\Controllers\Controller;
+use App\Models\Payment;
 use App\Models\Reservation;
-use App\Services\AmarPayService;
 use Illuminate\Http\Request;
+use App\Events\PaymentConfirmed;
+use App\Services\AmarPayService;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 
 class PaymentController extends Controller
 {
@@ -24,7 +25,7 @@ class PaymentController extends Controller
         $paymentId = session()->get('payment_id');
         
         if ($paymentId) {
-            $payment = \App\Models\Payment::with(['reservation.customer', 'reservation.packageVariant.package'])->find($paymentId);
+            $payment = Payment::with(['reservation.customer', 'reservation.packageVariant.package'])->find($paymentId);
             if ($payment) {
                 return view('frontend.payment', compact('payment'));
             }
@@ -83,10 +84,10 @@ class PaymentController extends Controller
                 
                 Log::info('Redirecting to booking confirmation', [
                     'booking_code' => $bookingCode,
-                    'route' => booking.confirmation
+                    'route' => 'booking.confirmation'
                 ]);
                 
-                return redirect()->route(booking.confirmation, ['booking_code' => $bookingCode])
+                return redirect()->route('booking.confirmation', ['booking_code' => $bookingCode])
                     ->with('success', 'Payment completed successfully!');
             } else {
                 // Fallback if booking code is not available
@@ -94,7 +95,7 @@ class PaymentController extends Controller
                     'callback_data' => $request->all()
                 ]);
                 
-                return redirect()->route(booking.confirmation)
+                return redirect()->route('booking.confirmation')
                     ->with('success', 'Payment completed successfully!');
             }
         }
@@ -186,17 +187,16 @@ class PaymentController extends Controller
     public function success(Request $request)
     {
         $transactionId = $request->get('tran_id');
-        $payment = \App\Models\Payment::with(['reservation.customer', 'reservation.packageVariant.package'])->where('transaction_id', $transactionId)->first();
+        $payment = Payment::with(['reservation.customer', 'reservation.packageVariant.package'])->where('transaction_id', $transactionId)->first();
         
         if ($payment) {
             $reservation = $payment->reservation;
             
-            // Store booking code in session for confirmation page
             session()->put('last_booking_code', $reservation->booking_code);
             
             // Payment confirmation event is fired by AmarPayService->processCallback()
             
-            return redirect()->route(booking.confirmation)
+            return redirect()->route('booking.confirmation')
                 ->with('success', 'Payment successful! Your booking has been confirmed.');
         }
         

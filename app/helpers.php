@@ -176,3 +176,44 @@ if (!function_exists('getGuestCartItems')) {
             ->get();
     }
 }
+
+
+if (! function_exists('generateTransactionId')) {
+    /**
+     * Generate a transaction ID based on reservation booking code
+     *
+     * @param string $bookingCode
+     * @param string $prefix
+     * @return string
+     */
+    function generateTransactionId(string $bookingCode, string $prefix = 'XADB'): string
+    {
+        $tranId = $prefix . '-' . $bookingCode . '-' . uniqid();
+        return strtolower($tranId);
+    }
+}
+
+
+
+if (! function_exists('cleanOldCarts')) {
+    /**
+     * Delete carts older than SESSION_LIFETIME but keep current session carts
+     *
+     * @param string|null $currentSessionId
+     * @return int Number of deleted rows
+     */
+    function cleanOldCarts(?string $currentSessionId = null): int
+    {
+        $sessionLifetime = env('SESSION_LIFETIME', 120); // default 120 minutes
+
+        return Cart::where(function ($query) use ($sessionLifetime, $currentSessionId) {
+            $query->where('created_at', '<', now()->subMinutes($sessionLifetime))
+                  ->orWhere(function ($q) use ($currentSessionId) {
+                      // Keep current session carts, delete others regardless of age
+                      if ($currentSessionId) {
+                          $q->where('session_id', '!=', $currentSessionId);
+                      }
+                  });
+        })->delete();
+    }
+}

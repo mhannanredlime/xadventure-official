@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Reservation;
 use Illuminate\Support\Facades\Blade;
+use App\Observers\ReservationObserver;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('versionedAsset', function ($expression) {
             return "<?php echo App\Helpers\AssetHelper::versioned($expression); ?>";
         });
+        Reservation::observe(ReservationObserver::class);
+
     }
 }
