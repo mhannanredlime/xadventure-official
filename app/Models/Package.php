@@ -30,6 +30,7 @@ class Package extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'display_starting_price' => 'decimal:2',
     ];
 
     public function variants(): HasMany

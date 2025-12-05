@@ -146,6 +146,7 @@ class PackageController extends Controller
 
             return redirect()->route('admin.packege.list');
         } catch (\Throwable $e) {
+            dd($e->getMessage());
             \Log::error($e->getMessage());
             ToastMagic::error('Something went wrong while creating the package.');
 

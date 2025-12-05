@@ -13,6 +13,7 @@ class Reservation extends Model
 
     protected $fillable = [
         'booking_code',
+        'user_id',
         'customer_id',
         'package_variant_id',
         'schedule_slot_id',
@@ -46,7 +47,7 @@ class Reservation extends Model
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function packageVariant(): BelongsTo

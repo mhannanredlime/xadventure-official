@@ -4,6 +4,8 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('frontEnd/css/payment.css') }}">
+    <link rel="stylesheet" href="{{ asset('frontEnd/css/custom-packages.css') }}">
+
     <style>
         .error-message {
             background: #f8d7da;
@@ -123,17 +125,7 @@
             margin-bottom: 5px;
         }
 
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-            color: white;
-        }
 
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-            color: white;
-        }
 
         /* Payment form visibility */
         .payment-form {
@@ -194,7 +186,8 @@
                     <h2>Guest Information</h2>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="customer_name" class="form-label">Full Name *</label>
+                            <label for="customer_name" class="form-label">Full Name <span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('customer_name') is-invalid @enderror"
                                 id="customer_name" name="customer_name" value="{{ old('customer_name') }}" required>
                             @error('customer_name')
@@ -202,7 +195,7 @@
                             @enderror
                         </div>
                         <div class="col-md-6">
-                            <label for="customer_email" class="form-label">Email *</label>
+                            <label for="customer_email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control @error('customer_email') is-invalid @enderror"
                                 id="customer_email" name="customer_email" value="{{ old('customer_email') }}" required>
                             @error('customer_email')
@@ -212,7 +205,8 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="customer_phone" class="form-label">Phone Number *</label>
+                            <label for="customer_phone" class="form-label">Phone Number <span
+                                    class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0">
                                     <i class="bi bi-telephone text-muted"></i>
@@ -244,8 +238,10 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="form-check mb-3">
+
                                 <input class="form-check-input" type="checkbox" id="create_account" name="create_account"
                                     value="1" {{ old('create_account') ? 'checked' : '' }}>
+
                                 <label class="form-check-label" for="create_account">
                                     <strong>Create an account for future bookings</strong>
                                     <small class="text-muted d-block">You'll be able to track your bookings and get faster
@@ -355,31 +351,16 @@
 
             <!-- Order Summary Sidebar -->
             <div class="col-lg-4">
-                <div class="order-summary">
-                    <h2>Order Summary</h2>
-                    <div class="order-summary-content">
-                        <div class="order-summary-item">
-                            <span>Subtotal</span>
-                            <span>TK.100</span>
-                        </div>
-                        <div class="order-summary-item">
-                            <span>Shipping</span>
-                            <span>TK.1000</span>
-                        </div>
-                        <div class="order-summary-item">
-                            <span>Tax</span>
-                            <span>TK.1000</span>
-                        </div>
-                        <div class="order-summary-item">
-                            <span>Total</span>
-                            <span>TK.1000</span>
-                        </div>
-                    </div>
-                </div>
+                @php
+                    $subtotal = $guestCartItems->sum(function ($item) {
+                        return $item->cart_amount * $item->quantity;
+                    });
+                @endphp
 
-                <a href="{{ route('frontend.cart.index') }}" class="btn btn-outline-secondary w-100">
-                    Back to Cart
-                </a>
+                @include('frontend._order_summary', [
+                    'guestCartItems' => isset($guestCartItems) ? $guestCartItems : [],
+                    'subtotal' => isset($subtotal) ? $subtotal : 0,
+                ])
             </div>
         </div>
     </div>

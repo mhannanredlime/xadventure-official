@@ -188,19 +188,8 @@
                                 </div>
                             </div>
 
-                            <!-- ----------------- Buttons ----------------- -->
-                            {{-- <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-                                <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn">
-                                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
-                                </a>
-
-                                <button type="submit" class="checkout-btn">
-                                    Proceed to Checkout
-                                </button>
-                            </div> --}}
-
-                            <form action="{{ route('frontend.cart.index') }}" method="GET" id="checkoutForm">
-
+                            <form action="{{ route('frontend.cart.index') }}" method="POST" id="checkoutForm">
+                                @csrf
                                 <input type="hidden" name="selected_date" id="checkout_selected_date">
                                 <input type="hidden" name="time_slot_id" id="checkout_time_slot_id">
                                 <input type="hidden" name="time_slot_text" id="checkout_time_slot_text">
@@ -229,14 +218,14 @@
                 <div class="mb-4"><i class="fas fa-shopping-cart fa-4x text-muted"></i></div>
                 <h3 class="mb-3">Your cart is empty</h3>
                 <p class="text-muted mb-4">Looks like you haven't added any packages to your cart yet.</p>
-                <a href="{{ route('frontend.packages.index') }}" class="btn btn-primary btn-lg">
+                <a href="{{ url('custom-packages') }}"
+                    class="btn-orange jatio-bg-color primary-btn-border-radius btn-lg text-decoration-none">
                     <i class="fas fa-store me-2"></i>Browse Packages
                 </a>
             </div>
         @endif
     </div>
 @endsection
-
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -254,14 +243,17 @@
             let currentYear = today.getFullYear();
             let selectedDate = null;
             let selectedTimeSlot = null;
+
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
                 "September", "October", "November", "December"
             ];
 
+            // Format date for hidden input (YYYY-MM-DD)
             function formatDate(date) {
                 return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
             }
 
+            // Format date for display (Friday, December 5, 2025)
             function formatDateDisplay(date) {
                 return date.toLocaleDateString('en-US', {
                     weekday: 'long',
@@ -278,12 +270,14 @@
                 const startingDay = firstDay.getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+                // Empty cells for alignment
                 for (let i = 0; i < startingDay; i++) {
                     const emptyCell = document.createElement('div');
                     emptyCell.className = 'calendar-day disabled';
                     container.appendChild(emptyCell);
                 }
 
+                // Render days
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(year, month, day);
                     const dayEl = document.createElement('div');
@@ -331,10 +325,19 @@
             function selectDate(date, el) {
                 document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
                 el.classList.add('selected');
+
                 selectedDate = date;
-                document.getElementById('selectedDate').value = formatDate(date);
+                const formatted = formatDate(date);
+
+                // Update calendar display
+                document.getElementById('selectedDate').value = formatted;
                 document.getElementById('displayDate').textContent = formatDateDisplay(date);
                 document.getElementById('selectedDateDisplay').classList.remove('d-none');
+
+                // Update checkout hidden input
+                document.getElementById('checkout_selected_date').value = formatted;
+
+                // Show time selection
                 showTimeSelection();
             }
 
@@ -342,6 +345,13 @@
                 const container = document.getElementById('timeSelectionContainer');
                 container.classList.remove('d-none');
                 populateTimeSlots();
+
+                // Auto-select first slot if none selected
+                if (!selectedTimeSlot && timeSlots.length > 0) {
+                    const firstSlotEl = container.querySelector('.time-slot');
+                    if (firstSlotEl) firstSlotEl.click();
+                }
+
                 container.scrollIntoView({
                     behavior: 'smooth',
                     block: 'nearest'
@@ -351,13 +361,18 @@
             function populateTimeSlots() {
                 const container = document.getElementById('timeSlots');
                 container.innerHTML = '';
+
                 timeSlots.forEach(slot => {
                     const el = document.createElement('div');
                     el.className = 'time-slot';
                     if (selectedTimeSlot && selectedTimeSlot.id === slot.id) el.classList.add('selected');
                     el.dataset.slotId = slot.id;
-                    el.innerHTML =
-                        `<div class="time-slot-content">${slot.name ? `<strong class="text-muted d-block mt-1">${slot.name}</strong>` : ''}</div>`;
+                    el.innerHTML = `
+                <div class="time-slot-content">
+                    ${slot.name ? `<strong class="text-muted d-block mt-1">${slot.name}</strong>` : ''}
+                    
+                </div>
+            `;
 
                     el.addEventListener('click', function() {
                         document.querySelectorAll('.time-slot.selected').forEach(s => s.classList
@@ -365,9 +380,10 @@
                         this.classList.add('selected');
                         selectedTimeSlot = slot;
 
-                        document.getElementById('displaySlot').textContent = slot.name;
+                        document.getElementById('displaySlot').textContent = slot.name ?? slot.time;
                         document.getElementById('selectedSlotDisplay').classList.remove('d-none');
 
+                        // Update checkout hidden inputs
                         document.getElementById('checkout_time_slot_id').value = slot.id;
                         document.getElementById('checkout_time_slot_text').value = slot.time;
                     });
@@ -376,7 +392,10 @@
                 });
             }
 
+            // Initial render
             renderTwoMonths();
+
+            // Auto-select today by default
             setTimeout(() => {
                 const todayEl = document.querySelector('.calendar-day.today:not(.disabled)');
                 if (todayEl) todayEl.click();
@@ -384,6 +403,7 @@
         });
     </script>
 @endpush
+
 
 @push('styles')
     <style>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OrderPlacingMakePaymentRequest;
 use App\Http\Requests\XCartUpdateRequest;
 use App\Models\Cart;
 use App\Models\Customer;
@@ -11,14 +12,12 @@ use App\Models\PackageVariant;
 use App\Models\Payment;
 use App\Models\PromoCode;
 use App\Models\Reservation;
-use App\Models\ReservationItem;
 use App\Models\ScheduleSlot;
 use App\Models\User;
 use App\Services\PhoneNumberService;
 use Devrabiul\ToastMagic\Facades\ToastMagic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -26,16 +25,30 @@ class BookingController extends Controller
 {
     public function cart(Request $request)
     {
-        $data['guestCartItems'] = Cart::with('package')
-            ->where('session_id', session()->getId())
-            ->where('created_at', '>=', now()->subMinutes(env('SESSION_LIFETIME')))
-            ->get();
+        // Trim and cast inputs
+        $request->merge([
+            'selected_date' => trim($request->selected_date),
+            'time_slot_id' => (int) $request->time_slot_id,
+        ]);
 
-        $data['time_slot'] = ScheduleSlot::where('id', $request->time_slot_id)->first();
+        // Parse selected date using Carbon
+        try {
+            $selectedDate = Carbon::parse($request->selected_date);
+        } catch (\Exception $e) {
+            return back()->withErrors(['selected_date' => 'Invalid date format']);
+        }
 
-        $data['selected_date'] = $request->selected_date;
+        // Fetch guest cart items
+        $guestCartItems = getGuestCartItems();
 
-        return view('frontend.shopping-cart', $data);
+        $time_slot = ScheduleSlot::find($request->time_slot_id);
+
+        // Pass data to the view
+        return view('frontend.shopping-cart', [
+            'guestCartItems' => $guestCartItems,
+            'time_slot' => $time_slot,
+            'selected_date' => format_full_date($selectedDate), // ensure format
+        ]);
     }
 
     public function addToCart(Request $request)
@@ -293,495 +306,155 @@ class BookingController extends Controller
     public function checkout(Request $request)
     {
 
-        // dd($request->all());
-        // $cart = session()->get('cart', []);
-        // if (empty($cart)) {
-        //     return redirect()->route('frontend.cart.index')->with('info', 'Your cart is empty. Please add some items before proceeding to checkout.');
-        // }
-        $data['packages'] = $request->input('cart_items', []);
-        $total = 100;
+        $data['guestCartItems'] = Cart::with('package')
+            ->where('session_id', session()->getId())
+            ->where('created_at', '>=', now()->subMinutes(env('SESSION_LIFETIME')))
+            ->get();
 
-
-        // $priceService = app(\App\Services\PriceCalculationService::class);
-        // foreach ($packages as $item) {
-        //     $variant = PackageVariant::with(['package.primaryImage', 'package.images'])->find($item['variant_id']);
-        //     $slot = ScheduleSlot::find($item['slot_id']);
-
-        //     if ($variant && $slot) {
-        //         $price = $priceService->getPriceForDate($variant, $item['date']);
-        //         $subtotal = $price * $item['quantity'];
-        //         $total += $subtotal;
-
-        //         $packages[] = [
-        //             'variant' => $variant,
-        //             'quantity' => $item['quantity'],
-        //             'date' => $item['date'],
-        //             'slot' => $slot,
-        //             'price' => $price,
-        //             'subtotal' => $subtotal,
-        //         ];
-        //     }
-        // }
         return view('frontend.checkout.index', $data);
     }
 
-    public function processBooking(Request $request)
+    public function processBooking(OrderPlacingMakePaymentRequest $request)
     {
-        // Initialize phone number service
+        // Validate request
+        $validated = $request->validated();
+
         $phoneService = new PhoneNumberService;
+        $formattedPhone = $phoneService->validateAndFormat($request->customer_phone)['formatted'] ?? $request->customer_phone;
 
-        // Custom validation for password fields based on create_account checkbox
-        $createAccount = $request->has('create_account') && $request->create_account;
-
-        $validationRules = [
-            'customer_name' => 'required|string|max:255',
-            'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'required|string|max:20',
-            'customer_address' => 'nullable|string|max:500',
-            'payment_method' => 'required|in:credit_card,check_payment,amarpay',
-            'create_account' => 'nullable|boolean',
-        ];
-
-        // Only add password validation if create_account is checked
-        if ($createAccount) {
-            $validationRules['password'] = 'required|string|min:8|confirmed';
-            $validationRules['password_confirmation'] = 'required|string|min:8';
-        } else {
-            $validationRules['password'] = 'nullable|string|min:8';
-            $validationRules['password_confirmation'] = 'nullable|string|min:8';
+        $cartItems = getGuestCartItems(); // Fetch guest cart items
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('frontend.cart.index')->with('error', 'Your cart is empty.');
         }
 
-        $request->validate($validationRules);
-
-        // Validate and format phone number
-        Log::info('Starting checkout process', [
-            'customer_name' => $request->customer_name,
-            'customer_email' => $request->customer_email,
-            'customer_phone' => $request->customer_phone,
-            'payment_method' => $request->payment_method,
-        ]);
-
-        $phoneValidation = $phoneService->validateAndFormat($request->customer_phone);
-        Log::info('Phone validation result', [
-            'valid' => $phoneValidation['valid'],
-            'formatted' => $phoneValidation['formatted'] ?? null,
-            'error' => $phoneValidation['error'] ?? null,
-        ]);
-
-        if (! $phoneValidation['valid']) {
-            Log::warning('Phone validation failed during checkout', [
-                'original_phone' => $request->customer_phone,
-                'error' => $phoneValidation['error'],
-            ]);
-
-            return redirect()->back()
-                ->withErrors(['customer_phone' => $phoneValidation['error']])
-                ->withInput();
-        }
-
-        // Additional validation for credit card payment
-        if ($request->payment_method === 'credit_card') {
-            $request->validate([
-                'card_holder' => 'required|string|max:255',
-                'card_number' => 'required|string|max:19',
-                'expiry_date' => 'required|string|max:5',
-                'cvv' => 'required|string|max:4',
-            ]);
-        }
-
-        $cart = session()->get('cart', []);
-
-        if (empty($cart)) {
-            return redirect()->route('frontend.cart.index')
-                ->with('error', 'Your cart is empty.');
-        }
+        DB::beginTransaction();
 
         try {
-            // Debug logging
-            Log::info('processBooking started', [
-                'request_data' => $request->all(),
-                'cart' => session()->get('cart', []),
-            ]);
 
-            // Validate cart has items
-            if (empty($cart)) {
-                throw new \Exception('Cart is empty');
-            }
+            // Convert checkbox to real boolean (TRUE/FALSE)
+            $createAccount = $request->boolean('create_account');
 
-            DB::beginTransaction();
+            // Email & phone normalize
+            $email = $request->customer_email;
+            $phone = $formattedPhone; // already formatted earlier
 
-            // Handle user account creation/login
             $user = null;
-            $wasGuestCheckout = false;
 
-            if (Auth::check()) {
-                // User is already logged in
-                $user = Auth::user();
-                Log::info('User already logged in', ['user_id' => $user->id]);
-            } else {
-                // Mark this as a guest checkout
-                $wasGuestCheckout = true;
-                session()->put('guest_checkout', true);
+            if ($createAccount) {
+                // dd('asdfd');
+                // Find existing user by email or phone
+                $user = User::where('email', $email)
+                    ->orWhere('phone', $phone)
+                    ->first();
 
-                // Check if user exists with this email
-                $user = User::where('email', $request->customer_email)->first();
+                if (! $user) {
+                    // CREATE new user
+                    $user = User::create([
+                        'name' => $request->customer_name,
+                        'email' => $email,
+                        'phone' => $phone,
+                        'address' => $request->customer_address,
+                        'password' => bcrypt($request->password),
+                        'is_admin' => false,
+                    ]);
 
-                if ($user) {
-                    // User exists, check if they want to create account with password
-                    if ($createAccount && $request->password) {
-                        // User wants to set a password for existing account
+                } else {
+                    $user->update([
+                        'name' => $request->customer_name,
+                        'phone' => $phone,
+                        'address' => $request->customer_address,
+                    ]);
+                    if ($request->filled('password')) {
                         $user->update([
                             'password' => bcrypt($request->password),
                         ]);
-                        Log::info('Password updated for existing user', ['user_id' => $user->id]);
-                        // Don't login the user here - we'll login the customer instead
-                    } else {
-                        // User exists but doesn't want to create account - don't login
-                        Log::info('Existing user found but not logging in (guest checkout)', ['user_id' => $user->id]);
-                    }
-                } else {
-                    // Check if user wants to create an account
-                    if ($createAccount && $request->password) {
-                        // Create new user account with provided password
-                        $user = User::create([
-                            'name' => $request->customer_name,
-                            'email' => $request->customer_email,
-                            'phone' => $phoneValidation['formatted'], // Use formatted phone number
-                            'address' => $request->customer_address,
-                            'password' => bcrypt($request->password), // Use provided password
-                            'is_admin' => false, // Explicitly set as customer, not admin
-                        ]);
-
-                        // Don't log in the user here - we'll log in the customer instead
-                        Log::info('New user account created', ['user_id' => $user->id]);
-                    } else {
-                        // Guest checkout - don't create user account or login
-                        $user = null;
-                        Log::info('Guest checkout - no user account created');
                     }
                 }
+
+            } else {
+                // Guest checkout
+                $user = new \stdClass;
+                $user->id = null;
             }
 
-            // Create or find customer and link to user account (if exists)
-            Log::info('Creating customer', [
-                'email' => $request->customer_email,
-                'phone' => $phoneValidation['formatted'],
-                'user_id' => $user ? $user->id : null,
-            ]);
-
-            $customer = Customer::updateOrCreate(
-                ['email' => $request->customer_email],
-                [
-                    'name' => $request->customer_name,
-                    'phone' => $phoneValidation['formatted'], // Use formatted phone number
-                    'address' => $request->customer_address,
-                    'user_id' => $user ? $user->id : null, // Link to user account if exists
-                    'password' => $user && $createAccount ? $user->password : null, // Copy password from user if account was created
-                ]
-            );
-
-            Log::info('Customer created/found', [
-                'customer_id' => $customer->id,
-                'user_id' => $user ? $user->id : null,
-                'phone_stored' => $customer->phone,
-            ]);
-
-            // Log in the customer if they created an account or updated their password
-            if ($createAccount && $customer->password) {
-                Auth::guard('customer')->login($customer);
-                Log::info('Customer logged in after account creation/update', ['customer_id' => $customer->id]);
+            // Calculate subtotal
+            $subtotal = 0;
+            foreach ($cartItems as $cartItem) {
+                $package = $cartItem->package;
+                $price = get_package_price($package, now()->format('D'));
+                $subtotal += $price * $cartItem->quantity;
             }
 
-            // Store customer ID in session for future use
-            session()->put('customer_id', $customer->id);
-
-            $priceService = app(\App\Services\PriceCalculationService::class);
-            $promoService = app(\App\Services\PromoCodeService::class);
-
-            $totalAmount = 0;
-            $reservations = [];
-
-            // Ensure we have cart items to process
-            if (empty($cart)) {
-                throw new \Exception('Cart is empty - cannot create reservations.');
-            }
-
-            foreach ($cart as $key => $item) {
-                Log::info('Processing cart item', ['item' => $item]);
-
-                $variant = PackageVariant::find($item['variant_id']);
-                $slot = ScheduleSlot::find($item['slot_id']);
-
-                if (! $variant || ! $slot) {
-                    throw new \Exception('Invalid package or time slot.');
-                }
-
-                Log::info('Found variant and slot', [
-                    'variant_id' => $variant->id,
-                    'slot_id' => $slot->id,
-                ]);
-
-                $price = $priceService->getPriceForDate($variant, $item['date']);
-                $itemTotal = $price * $item['quantity'];
-                $totalAmount += $itemTotal;
-
-                Log::info('Calculated price', [
-                    'price' => $price,
-                    'quantity' => $item['quantity'],
-                    'itemTotal' => $itemTotal,
-                ]);
-
-                // Create reservation
-                Log::info('Creating reservation');
-
-                // Get report time from schedule slot
-                $reportTime = $slot->start_time ?? '09:00:00';
-
-                $reservation = Reservation::create([
-                    'booking_code' => $this->generateBookingCode(),
-                    'customer_id' => $customer->id,
-                    'package_variant_id' => $variant->id,
-                    'schedule_slot_id' => $slot->id,
-                    'date' => $item['date'],
-                    'report_time' => $reportTime,
-                    'party_size' => $item['quantity'] * $variant->capacity, // Total number of people
-                    'subtotal' => $itemTotal,
-                    'total_amount' => $itemTotal,
-                    'booking_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'confirmed',
-                    'payment_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'paid',
-                    'notes' => 'Booking created from checkout',
-                    'acknowledgment_data' => $item['acknowledgment_data'] ?? null,
-                    'signature_data' => $item['signature_data'] ?? null,
-                ]);
-
-                Log::info('Reservation created', ['reservation_id' => $reservation->id]);
-
-                // Create reservation item to track the actual vehicles booked
-                $reservationItem = ReservationItem::create([
-                    'reservation_id' => $reservation->id,
-                    'package_variant_id' => $variant->id,
-                    'qty' => $item['quantity'], // Number of vehicles booked
-                    'unit_price' => $price,
-                    'line_total' => $itemTotal,
-                ]);
-
-                Log::info('Reservation item created', [
-                    'reservation_item_id' => $reservationItem->id,
-                    'qty' => $item['quantity'],
-                    'variant_capacity' => $variant->capacity,
-                ]);
-
-                $reservations[] = $reservation;
-
-                Log::info('Reservation added to array', [
-                    'reservation_id' => $reservation->id,
-                    'total_reservations' => count($reservations),
-                ]);
-            }
-
-            // Final validation - ensure we created at least one reservation
-            if (empty($reservations)) {
-                throw new \Exception('Failed to create any reservations. Please check your cart items and try again.');
-            }
-
-            // Apply promo code if available
+            // Apply promo code if exists
             $promoDiscount = 0;
             $appliedPromoCode = session()->get('applied_promo_code');
-
             if ($appliedPromoCode) {
                 $promoValidation = $promoService->validatePromoCode(
                     $appliedPromoCode->code,
-                    $totalAmount,
-                    $customer->id
+                    $subtotal,
+                    $user->id
                 );
-
                 if ($promoValidation['valid']) {
                     $promoDiscount = $promoValidation['discount'];
-
-                    // Record promo code redemption (use first reservation)
-                    if (! empty($reservations)) {
-                        $promoService->recordRedemption(
-                            $appliedPromoCode->id,
-                            $reservations[0]->id, // Use first reservation for promo record
-                            $customer->id,
-                            $promoDiscount
-                        );
-                    }
                 }
             }
+            // dd($user);
+            // Calculate VAT & total
+            $taxData = calculateVAT($subtotal - $promoDiscount);
+            $totalAmount = $taxData['total'];
+            // dd($taxData);
+            $reservations = [];
+            foreach ($cartItems as $cartItem) {
+                $package = $cartItem->package;
+                $price = get_package_price($package, now()->format('D'));
+                $itemSubtotal = $price * $cartItem->quantity;
 
-            // Calculate final amounts
-            $subtotal = $totalAmount;
-            $tax = ($subtotal - $promoDiscount) * 0.15; // 15% VAT
-            $finalTotal = $subtotal - $promoDiscount + $tax;
-
-            // Calculate per-reservation amounts (distribute tax and discount proportionally based on each reservation's contribution)
-            $reservationCount = count($reservations);
-            $distributedDiscount = 0;
-            $distributedTax = 0;
-
-            foreach ($reservations as $index => $reservation) {
-                // Calculate this reservation's proportion of the total
-                $reservationProportion = $reservation->total_amount / $totalAmount;
-
-                // Distribute tax and discount proportionally
-                $reservationDiscount = $promoDiscount * $reservationProportion;
-                $reservationTax = $tax * $reservationProportion;
-
-                // For the last reservation, ensure we distribute exactly the remaining amounts to avoid rounding errors
-                if ($index === $reservationCount - 1) {
-                    $reservationDiscount = $promoDiscount - $distributedDiscount;
-                    $reservationTax = $tax - $distributedTax;
-                }
-
-                $reservationFinalTotal = $reservation->total_amount - $reservationDiscount + $reservationTax;
-
-                $reservation->update([
-                    'subtotal' => $reservation->total_amount, // Keep original subtotal
-                    'discount_amount' => $reservationDiscount,
-                    'tax_amount' => $reservationTax,
-                    'total_amount' => $reservationFinalTotal, // Update with final total including tax and discount
+                $reservation = Reservation::create([
+                    'booking_code' => $this->generateBookingCode(),
+                    'user_id' => $user->id,
+                    // 'customer_id' => $user->id,
+                    'package_variant_id' => null, // For simple package
+                    'schedule_slot_id' => null,
+                    'date' => now()->toDateString(),
+                    'report_time' => '09:00:00',
+                    'party_size' => $cartItem->quantity ?? 0,
+                    'subtotal' => $itemSubtotal,
+                    'discount_amount' => ($itemSubtotal / $subtotal) * $promoDiscount,
+                    'tax_amount' => ($itemSubtotal / $subtotal) * $taxData['vat'],
+                    'total_amount' => ($itemSubtotal - (($itemSubtotal / $subtotal) * $promoDiscount)) + (($itemSubtotal / $subtotal) * $taxData['vat']),
+                    'booking_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'confirmed',
+                    'payment_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'paid',
                 ]);
 
-                // Track distributed amounts
-                $distributedDiscount += $reservationDiscount;
-                $distributedTax += $reservationTax;
+                $reservations[] = $reservation;
             }
 
-            // Generate transaction ID based on payment method
-            $transactionId = null;
-            $paymentDetails = [];
-
-            if ($request->payment_method === 'check_payment') {
-                $transactionId = 'CHK-'.strtoupper(uniqid());
-                $paymentDetails = [
-                    'method' => 'check_payment',
-                    'status' => 'pending',
-                    'instructions' => 'Please mail your check to complete the payment',
-                ];
-            } elseif ($request->payment_method === 'amarpay') {
-                $transactionId = 'AMAR-'.strtoupper(uniqid());
-                $paymentDetails = [
-                    'method' => 'amarpay',
-                    'status' => 'pending',
-                    'gateway' => 'amarpay',
-                ];
-            } else {
-                $transactionId = 'CC-'.strtoupper(uniqid());
-                $paymentDetails = [
-                    'method' => 'credit_card',
-                    'status' => 'pending',
-                    'gateway' => 'credit_card',
-                ];
-            }
-
-            // Validate that we have reservations before proceeding
-            if (empty($reservations)) {
-                throw new \Exception('No reservations were created. Please try again.');
-            }
-
-            // Create ONE payment for the entire checkout (total amount)
-            $totalAmount = array_sum(array_map(fn ($r) => $r->total_amount, $reservations));
+            // Create Payment record
+            $transactionId = strtoupper(uniqid('TXN-'));
             $payment = Payment::create([
-                'reservation_id' => $reservations[0]->id, // Use first reservation ID to maintain schema
+                'reservation_id' => $reservations[0]->id,
                 'method' => $request->payment_method,
-                'amount' => $totalAmount, // Total amount for entire checkout
+                'amount' => $totalAmount,
                 'currency' => 'BDT',
                 'status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'completed',
                 'transaction_id' => $transactionId,
-                'payment_details' => $paymentDetails,
+                'payment_details' => [],
             ]);
-
-            Log::info('Single payment created for entire checkout', [
-                'payment_id' => $payment->id,
-                'total_amount' => $totalAmount,
-                'reservation_count' => count($reservations),
-            ]);
-
-            // Update all reservations with payment status
-            foreach ($reservations as $reservation) {
-                $reservation->update([
-                    'payment_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'paid',
-                ]);
-            }
-
-            Log::info('All reservations updated with payment status', ['count' => count($reservations)]);
-            session()->put('last_booking_code', $reservations[0]->booking_code ?? 'UNKNOWN');
-
-            // Clear cart and promo code from session
-            session()->forget(['cart', 'applied_promo_code', 'promo_discount']);
-
+            // dd('hello')
+            Log::info('Transaction ID: '.$transactionId.''.$payment->id.''.$request->payment_method.''.$request->payment_method);
             DB::commit();
+            // dd($reservations[0]->booking_code);
+            ToastMagic::success('Booking successful!');
 
-            // Checkout completed - no notifications sent at this stage
-            // Notifications will be sent only after successful payment completion
+            return redirect()->route('booking.confirmation.code', [
+                'booking_code' => $reservations[0]->booking_code,
+            ]);
 
-            // Prepare success message with account information
-            $accountMessage = '';
-            if (session()->get('guest_checkout', false) && $user && $createAccount) {
-                $accountMessage = ' A customer account has been created and you are now logged in! You can access your dashboard to track your bookings.';
-            } elseif (session()->get('guest_checkout', false) && $user && ! $createAccount) {
-                $accountMessage = ' A customer account already exists with your email. You can login at /customer/login to track your bookings.';
-            }
-
-            // Redirect based on payment method
-            if ($request->payment_method === 'check_payment') {
-                return redirect()->route('booking-confirmation')
-                    ->with('success', 'Check payment booking confirmed!'.$accountMessage.' Please mail your check to complete the payment. Your booking reference: '.$transactionId);
-            } elseif ($request->payment_method === 'amarpay') {
-                // Initiate Amar Pay payment
-                if (empty($reservations)) {
-                    throw new \Exception('No reservations available for payment processing.');
-                }
-
-                $amarPayService = app(\App\Services\AmarPayService::class);
-                $result = $amarPayService->initiatePayment($reservations[0], $finalTotal);
-
-                if ($result['success']) {
-                    return redirect($result['redirect_url']);
-                } else {
-                    return redirect()->route('payment.failed')
-                        ->with('error', 'Failed to initiate payment. Please try again.')
-                        ->with('payment_details', [
-                            'reason' => 'Payment initiation failed',
-                            'error_message' => $result['message'] ?? 'Unknown error',
-                        ]);
-                }
-            } else {
-                // Redirect to payment gateway for credit card processing
-                if (! $payment) {
-                    throw new \Exception('No payment was created. Please try again.');
-                }
-
-                return redirect()->route('frontend.payment.index')
-                    ->with('success', 'Booking confirmed!'.$accountMessage.' Redirecting to payment gateway...')
-                    ->with('payment_id', $payment->id);
-            }
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('processBooking error', ['error' => $e->getMessage()]);
 
-            // Debug logging
-            Log::error('processBooking error', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            // Check if this is a payment-related error
-            $errorMessage = $e->getMessage();
-            if (strpos($errorMessage, 'payment') !== false || strpos($errorMessage, 'Payment') !== false) {
-                return redirect()->route('payment.failed')
-                    ->with('error', 'An error occurred while processing your payment. Please try again.')
-                    ->with('payment_details', [
-                        'reason' => 'Payment processing error',
-                        'error_message' => $errorMessage,
-                    ]);
-            }
-
-            return redirect()->back()
-                ->with('error', 'An error occurred while processing your booking. Please try again.')
-                ->withInput();
+            return redirect()->back()->with('error', 'Booking failed: '.$e->getMessage());
         }
     }
 
@@ -801,88 +474,57 @@ class BookingController extends Controller
         return $code;
     }
 
-    public function showConfirmation(Request $request)
+    public function showConfirmation(Request $request, string $bookingCode)
     {
-        // Get booking code from URL parameter or session
-        $bookingCode = $request->get('booking_code') ?? session()->get('last_booking_code');
-
-        if (! $bookingCode) {
-            return redirect()->route('frontend.packages.index')
-                ->with('error', 'No booking found. Please make a new booking.');
-        }
-
-        // Find the first reservation with all related data
-        $firstReservation = Reservation::with([
+        // Fetch the first reservation with all related data or fail with 404
+        $reservation = Reservation::with([
             'customer',
             'packageVariant.package.images',
             'scheduleSlot',
             'payments',
             'promoRedemptions.promoCode',
-        ])->where('booking_code', $bookingCode)->first();
+        ])->where('booking_code', $bookingCode)->firstOrFail();
 
-        if (! $firstReservation) {
-            return redirect()->route('frontend.packages.index')
-                ->with('error', 'Booking not found. Please check your booking code.');
+        // Get the latest payment
+        $payment = $reservation->payments()->latest()->first();
+        $paymentCreatedAt = $payment?->created_at;
+
+        // Get all reservations in the same checkout (within 5 minutes of payment)
+        $allReservations = Reservation::with([
+            'customer',
+            'packageVariant.package.images',
+            'scheduleSlot',
+        ])
+            ->when($paymentCreatedAt, function ($query) use ($reservation, $paymentCreatedAt) {
+                $query->where('customer_id', $reservation->customer_id)
+                    ->whereBetween('created_at', [
+                        $paymentCreatedAt->copy()->subMinutes(5),
+                        $paymentCreatedAt->copy()->addMinutes(5),
+                    ]);
+            })
+            ->orderBy('created_at')
+            ->get();
+
+        // Fallback to single reservation if no other reservations found
+        if ($allReservations->isEmpty()) {
+            $allReservations = collect([$reservation]);
         }
 
-        // Get the payment for this reservation
-        $payment = $firstReservation->payments()->latest()->first();
-        $transactionId = $payment->transaction_id ?? null;
+        // Calculate totals
+        $totalSubtotal = $allReservations->sum(fn ($r) => $r->subtotal ?? 0);
+        $totalDiscount = $allReservations->sum(fn ($r) => $r->discount_amount ?? 0);
+        $totalTax = $allReservations->sum(fn ($r) => $r->tax_amount ?? 0);
+        $totalAmount = $allReservations->sum(fn ($r) => $r->total_amount ?? 0);
 
-        // Find all reservations that were created in the same checkout session
-        // Since we now have one payment per checkout, we need to find all reservations
-        // created around the same time as the payment
-        $allReservations = [];
-        $totalAmount = 0;
-        $totalSubtotal = 0;
-        $totalDiscount = 0;
-        $totalTax = 0;
-
-        if ($payment && $payment->created_at) {
-            // Find all reservations created within 5 minutes of the payment creation
-            $allReservations = Reservation::with([
-                'customer',
-                'packageVariant.package.images',
-                'scheduleSlot',
-            ])->where('customer_id', $firstReservation->customer_id)
-                ->where('created_at', '>=', $payment->created_at->subMinutes(5))
-                ->where('created_at', '<=', $payment->created_at->addMinutes(5))
-                ->orderBy('created_at')
-                ->get();
-
-            // Sum up totals from all reservations
-            foreach ($allReservations as $reservation) {
-                $totalSubtotal += $reservation->subtotal ?? 0;
-                $totalDiscount += $reservation->discount_amount ?? 0;
-                $totalTax += $reservation->tax_amount ?? 0;
-                $totalAmount += $reservation->total_amount ?? 0;
-            }
-        } else {
-            // Fallback to single reservation if no payment found
-            $allReservations = [$firstReservation];
-            $totalSubtotal = $firstReservation->subtotal ?? 0;
-            $totalDiscount = $firstReservation->discount_amount ?? 0;
-            $totalTax = $firstReservation->tax_amount ?? 0;
-            $totalAmount = $firstReservation->total_amount ?? 0;
-        }
-
-        // Use the first reservation for customer info and other details
-        $reservation = $firstReservation;
-
-        // Define individual reservation variables for backward compatibility
+        // Use first reservation for customer info and promo code
         $subtotal = $reservation->subtotal ?? 0;
         $discount = $reservation->discount_amount ?? 0;
         $tax = $reservation->tax_amount ?? 0;
         $total = $reservation->total_amount ?? 0;
+        $promoCode = $reservation->promoRedemptions->first()?->promoCode;
 
-        // Get promo code if applied (from first reservation)
-        $promoCode = null;
-        if ($reservation->promoRedemptions->isNotEmpty()) {
-            $promoCode = $reservation->promoRedemptions->first()->promoCode;
-        }
-
-        // Format payment method for display
-        $paymentMethod = $this->formatPaymentMethod($payment->payment_method ?? $payment->method ?? 'unknown');
+        // Format payment method
+        $paymentMethod = $this->formatPaymentMethod($payment?->payment_method ?? $payment?->method ?? 'unknown');
 
         return view('frontend.booking-confirmation', compact(
             'reservation',

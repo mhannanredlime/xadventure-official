@@ -110,7 +110,8 @@ Route::get('/api/schedule-slots/availability', [FrontendPackageController::class
 
 
 // Booking routes
-Route::get('/shopping-cart', [BookingController::class, 'cart'])->name('frontend.cart.index');
+Route::match(['post'], '/shopping-cart', [BookingController::class, 'cart'])->name('frontend.cart.index');
+
 Route::post('/cart/add', [BookingController::class, 'addToCart'])->name('frontend.cart.add');
 Route::post('/cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update');
 Route::get('/cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update.get');
@@ -151,8 +152,8 @@ Route::withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken
     Route::post('/payment/amarpay/ipn', [PaymentController::class, 'amarpayIPN'])->name('payment.amarpay.ipn');
 });
 
-Route::get('/booking-confirmation', [BookingController::class, 'showConfirmation'])->name('booking-confirmation');
-Route::get('/booking-confirmation/{booking_code}', [BookingController::class, 'showConfirmation'])->name('booking-confirmation.code');
+Route::get('/booking-confirmation', [BookingController::class, 'showConfirmation'])->name('booking.confirmation');
+Route::get('/booking-confirmation/{booking_code}', [BookingController::class, 'showConfirmation'])->name('booking.confirmation.code');
 
 // Payment Failed Page
 Route::get('/payment-failed', function () {

@@ -83,10 +83,10 @@ class PaymentController extends Controller
                 
                 Log::info('Redirecting to booking confirmation', [
                     'booking_code' => $bookingCode,
-                    'route' => 'booking-confirmation'
+                    'route' => booking.confirmation
                 ]);
                 
-                return redirect()->route('booking-confirmation', ['booking_code' => $bookingCode])
+                return redirect()->route(booking.confirmation, ['booking_code' => $bookingCode])
                     ->with('success', 'Payment completed successfully!');
             } else {
                 // Fallback if booking code is not available
@@ -94,7 +94,7 @@ class PaymentController extends Controller
                     'callback_data' => $request->all()
                 ]);
                 
-                return redirect()->route('booking-confirmation')
+                return redirect()->route(booking.confirmation)
                     ->with('success', 'Payment completed successfully!');
             }
         }
@@ -196,7 +196,7 @@ class PaymentController extends Controller
             
             // Payment confirmation event is fired by AmarPayService->processCallback()
             
-            return redirect()->route('booking-confirmation')
+            return redirect()->route(booking.confirmation)
                 ->with('success', 'Payment successful! Your booking has been confirmed.');
         }
         
