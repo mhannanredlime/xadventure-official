@@ -371,6 +371,8 @@ class BookingController extends Controller
                         ]);
                     }
                 }
+            } else {
+                $user = null;
             }
 
             // Calculate subtotal
@@ -394,7 +396,6 @@ class BookingController extends Controller
                     $subtotal,
                     $userId
                 );
-
                 if ($promoValidation['valid']) {
                     $promoDiscount = $promoValidation['discount'];
                 }
