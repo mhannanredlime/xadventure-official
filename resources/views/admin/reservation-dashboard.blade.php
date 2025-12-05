@@ -255,7 +255,8 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        @if (isset($primaryReservation->packageVariant->package->vehicleTypes) && $primaryReservation->packageVariant->package->vehicleTypes->isNotEmpty())
+                                        @if (isset($primaryReservation->packageVariant->package->vehicleTypes) &&
+                                                $primaryReservation->packageVariant->package->vehicleTypes->isNotEmpty())
                                             @foreach ($primaryReservation->packageVariant->package->vehicleTypes as $vehicleType)
                                                 <span class="badge bg-primary me-1">{{ $vehicleType->name }}</span>
                                             @endforeach
@@ -442,17 +443,20 @@
                         @php
                             $atvCount = $reservations
                                 ->filter(function ($reservation) {
-                                    return isset($reservation->packageVariant->package->vehicleTypes) && $reservation->packageVariant->package->vehicleTypes->contains('name', 'ATV');
+                                    return isset($reservation->packageVariant->package->vehicleTypes) &&
+                                        $reservation->packageVariant->package->vehicleTypes->contains('name', 'ATV');
                                 })
                                 ->count();
                             $utvCount = $reservations
                                 ->filter(function ($reservation) {
-                                    return isset($reservation->packageVariant->package->vehicleTypes) && $reservation->packageVariant->package->vehicleTypes->contains('name', 'UTV');
+                                    return isset($reservation->packageVariant->package->vehicleTypes) &&
+                                        $reservation->packageVariant->package->vehicleTypes->contains('name', 'UTV');
                                 })
                                 ->count();
                             $regularCount = $reservations
                                 ->filter(function ($reservation) {
-                                    return isset($reservation->packageVariant->package->type) && $reservation->packageVariant->package->type === 'regular';
+                                    return isset($reservation->packageVariant->package->type) &&
+                                        $reservation->packageVariant->package->type === 'regular';
                                 })
                                 ->count();
                         @endphp
