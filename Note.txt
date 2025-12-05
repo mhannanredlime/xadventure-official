@@ -12,12 +12,11 @@ php artisan db:seed --class=RiderTypeSeeder
 php artisan db:seed --class=PackagePriceSeeder
 
 
+Dec 5, 2025 Tas summary:
 
-December 3, 2025 – Task Summary
-
-
-1. Fix `editAtvUtv` controller to prepare `$dayPrices` in a flat array for proper Blade JS rendering.
-2. Refactor ATV/UTV create and edit Blade JS into a single reusable Blade partial.
-3. Ensure `day_prices` validation in `AtvUtvPackageRequest` handles null or empty prices correctly.
-4. Update `edit.blade.php` to use `$dayPrices[$day]` safely and prevent undefined array key errors.
-5. Test form submission for both create and edit to confirm correct JSON structure is sent for day-wise pricing.
+1. Fix AmarPay `cus_email` error by passing correct customer email.
+2. Update `processBooking()` to handle guest checkout and account creation safely.
+3. Refactor Reservation creation to skip missing packages and calculate totals correctly.
+4. Create `cleanOldCarts()` observer to auto-delete old carts after reservation.
+5. Fix `showConfirmation()` route to accept 2 arguments fix the booking code issue.
+6. Create helper for generating lowercase, unique transaction IDs from booking code.

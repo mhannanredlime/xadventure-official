@@ -47,23 +47,14 @@
             <input type="hidden" name="vat" value="{{ $vatData['vat'] }}">
             <input type="hidden" name="total" value="{{ $vatData['total'] }}">
 
-            @if (!isset($showPlaceOrder) || $showPlaceOrder)
-                <div class="d-flex justify-content-center mt-4 gap-3">
-                    <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
-                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
-                    </a>
-                    <button type="submit" class="checkout-btn equal-btn">
-                        Place Order
-                    </button>
-                </div>
-            @else
-                <div class="d-flex justify-content-center mt-4 gap-3">
-                    <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
-                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
-                    </a>
-                </div>
-            @endif
-
+            <div class="d-flex justify-content-center mt-4 gap-3">
+                <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
+                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                </a>
+                <button type="submit" class="checkout-btn equal-btn">
+                    Place Order
+                </button>
+            </div>
         </form>
     </div>
 </div>

@@ -358,9 +358,11 @@
                 @endphp
 
                 @include('frontend._order_summary', [
-                    'guestCartItems' => isset($guestCartItems) ? $guestCartItems : [],
-                    'subtotal' => isset($subtotal) ? $subtotal : 0,
+                    'guestCartItems' => $guestCartItems ?? [],
+                    'subtotal' => $subtotal ?? 0,
+                    'showPlaceOrder' => false, // hide button
                 ])
+
             </div>
         </div>
     </div>

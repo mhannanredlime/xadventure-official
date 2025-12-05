@@ -110,7 +110,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Order Summary -->
                 <div class="col-lg-4">
                     @php
@@ -118,9 +117,10 @@
                             return $item->cart_amount * $item->quantity;
                         });
                     @endphp
-                    @include('frontend._order_summary', [
+                    @include('frontend.checkout._order_summary', [
                         'guestCartItems' => $guestCartItems,
                         'subtotal' => $subtotal,
+                        'showPlaceOrder' => true,
                     ])
                 </div>
 

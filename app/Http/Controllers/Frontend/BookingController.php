@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers\Frontend;
 
-use Exception;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\OrderPlacingMakePaymentRequest;
+use App\Http\Requests\XCartUpdateRequest;
 use App\Models\Cart;
-use App\Models\User;
-use App\Models\Package;
-use App\Models\Payment;
 use App\Models\Customer;
+use App\Models\Package;
+use App\Models\PackageVariant;
+use App\Models\Payment;
 use App\Models\PromoCode;
 use App\Models\Reservation;
 use App\Models\ScheduleSlot;
-use Illuminate\Http\Request;
-use App\Models\PackageVariant;
-use Illuminate\Support\Carbon;
+use App\Models\User;
 use App\Services\AmarPayService;
+use App\Services\PhoneNumberService;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use App\Services\PhoneNumberService;
-use App\Http\Requests\XCartUpdateRequest;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
-use App\Http\Requests\OrderPlacingMakePaymentRequest;
 
 class BookingController extends Controller
 {
@@ -457,6 +457,10 @@ class BookingController extends Controller
             // dd($request->payment_method);
             DB::commit();
 
+            if (! $reservation->customer || ! $reservation->customer->email) {
+                throw new \Exception('Reservation customer email is missing. Cannot process payment.');
+            }
+
             // Account messages
             $accountMessage = '';
             if ($user && $createAccount) {
@@ -512,7 +516,7 @@ class BookingController extends Controller
         return $code;
     }
 
-    public function showConfirmation(Request $request, string $bookingCode = null)
+    public function showConfirmation(Request $request, ?string $bookingCode = null)
     {
         $bookingCode = $request->query('booking_code');
         $reservation = Reservation::with([
