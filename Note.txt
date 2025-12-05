@@ -21,37 +21,3 @@ December 3, 2025 – Task Summary
 3. Ensure `day_prices` validation in `AtvUtvPackageRequest` handles null or empty prices correctly.
 4. Update `edit.blade.php` to use `$dayPrices[$day]` safely and prevent undefined array key errors.
 5. Test form submission for both create and edit to confirm correct JSON structure is sent for day-wise pricing.
-
-
-
-
-
-<div class="col">
-                    <div class="custom-card">
-                        <img src="" class="card-img-top" alt="{{ $package->name }}">
-                        <div class="card-body">
-                            <h5 class="card-title"></h5>
-                            <p class="card-text">30 (min) Guided Tour<br><span class="price-text"
-                                    data-price-for-variant="{{ $firstVariant->id ?? '' }}"
-                                    data-display-price="{{ $package->display_starting_price ?? '' }}">Starting from TK
-                                    {{ $package->display_starting_price ? number_format($package->display_starting_price) : '0' }}</span>
-                            </p>
-                            <center>
-                                <div class="add-to-cart-container">
-                                    <a href="#" class="btn jatio-bg-color w-100 btn-add-regular"
-                                        >
-                                        <i class="fa-solid fa-cart-shopping me-2"></i> Add to Cart
-                                    </a>
-                                    <div class="quantity-controls" style="display: none;">
-                                        <div class="quantity-selector jatio-bg-color w-100">
-                                            <button class="quantity-btn quantity-btn-minus" type="button">-</button>
-                                            <span class="quantity-text">{{ $package->min_participants }}
-                                                Package{{ $package->min_participants > 1 ? 's' : '' }}</span>
-                                            <button class="quantity-btn quantity-btn-plus" type="button">+</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </center>
-                        </div>
-                    </div>
-                </div>
