@@ -110,7 +110,7 @@ Route::get('/api/schedule-slots/availability', [FrontendPackageController::class
 
 
 // Booking routes
-Route::match(['post'], '/shopping-cart', [BookingController::class, 'cart'])->name('frontend.cart.index');
+Route::match(['post'], '/process-to-checkout', [BookingController::class, 'processToCheckout'])->name('frontend.process-to-checkout');
 
 Route::post('/cart/add', [BookingController::class, 'addToCart'])->name('frontend.cart.add');
 Route::post('/cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update');

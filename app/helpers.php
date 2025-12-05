@@ -1,8 +1,8 @@
 <?php
 
-use Carbon\Carbon;
 use App\Models\Cart;
 use App\Models\Package;
+use Carbon\Carbon;
 
 /**
  * Global Helper Functions
@@ -109,9 +109,9 @@ if (! function_exists('calculateVAT')) {
     /**
      * Calculate VAT and total amount including VAT
      *
-     * @param  float  $amount   Base amount
+     * @param  float  $amount  Base amount
      * @param  float|null  $vatRate  VAT percentage (default from env)
-     * @return array  ['vat' => float, 'total' => float]
+     * @return array ['vat' => float, 'total' => float]
      */
     function calculateVAT(float $amount, ?float $vatRate = null): array
     {
@@ -128,22 +128,21 @@ if (! function_exists('calculateVAT')) {
             'vat' => $vatAmount,
             'total' => $totalWithVAT,
         ];
-    }   
+    }
 }
 
-
-if (!function_exists('format_full_date')) {
+if (! function_exists('format_full_date')) {
 
     /**
      * Format date or datetime into: December 05, 2025
      *
      * @param  mixed  $value  Carbon|string|int|null
-     * @param  string $format (default: F d, Y)
+     * @param  string  $format  (default: F d, Y)
      * @return string|null
      */
     function format_full_date($value, $format = 'F d, Y')
     {
-        if (!$value) {
+        if (! $value) {
             return null;
         }
 
@@ -162,7 +161,7 @@ if (!function_exists('format_full_date')) {
     }
 }
 
-if (!function_exists('getGuestCartItems')) {
+if (! function_exists('getGuestCartItems')) {
     /**
      * Current session এর active guest cart items fetch করবে
      *
@@ -177,29 +176,22 @@ if (!function_exists('getGuestCartItems')) {
     }
 }
 
-
 if (! function_exists('generateTransactionId')) {
     /**
      * Generate a transaction ID based on reservation booking code
-     *
-     * @param string $bookingCode
-     * @param string $prefix
-     * @return string
      */
     function generateTransactionId(string $bookingCode, string $prefix = 'XADB'): string
     {
-        $tranId = $prefix . '-' . $bookingCode . '-' . uniqid();
+        $tranId = $prefix.'-'.$bookingCode.'-'.uniqid();
+
         return strtolower($tranId);
     }
 }
-
-
 
 if (! function_exists('cleanOldCarts')) {
     /**
      * Delete carts older than SESSION_LIFETIME but keep current session carts
      *
-     * @param string|null $currentSessionId
      * @return int Number of deleted rows
      */
     function cleanOldCarts(?string $currentSessionId = null): int
@@ -208,12 +200,12 @@ if (! function_exists('cleanOldCarts')) {
 
         return Cart::where(function ($query) use ($sessionLifetime, $currentSessionId) {
             $query->where('created_at', '<', now()->subMinutes($sessionLifetime))
-                  ->orWhere(function ($q) use ($currentSessionId) {
-                      // Keep current session carts, delete others regardless of age
-                      if ($currentSessionId) {
-                          $q->where('session_id', '!=', $currentSessionId);
-                      }
-                  });
+                ->orWhere(function ($q) use ($currentSessionId) {
+                    // Keep current session carts, delete others regardless of age
+                    if ($currentSessionId) {
+                        $q->where('session_id', '!=', $currentSessionId);
+                    }
+                });
         })->delete();
     }
 }

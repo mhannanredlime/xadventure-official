@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
-    public function cart(Request $request)
+    public function processToCheckout(Request $request)
     {
         // Trim and cast inputs
         $request->merge([
@@ -39,11 +39,15 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['selected_date' => 'Invalid date format']);
         }
-
-        // Fetch guest cart items
-        $guestCartItems = getGuestCartItems();
-
         $time_slot = ScheduleSlot::find($request->time_slot_id);
+
+        // Fetch guest cart items and update selected date and time slot
+        $guestCartItems = getGuestCartItems();
+        foreach ($guestCartItems as $cartItem) {
+            $cartItem->selected_date = $selectedDate;
+            $cartItem->time_slot_id = $request->time_slot_id;
+            $cartItem->save();
+        }
 
         // Pass data to the view
         return view('frontend.shopping-cart', [
@@ -205,7 +209,7 @@ class BookingController extends Controller
         // dd($request->all());
         $cartItem = Cart::where('cart_uuid', $cart_uuid)->first();
         if (! $cartItem) {
-            return redirect()->route('frontend.cart.index')
+            return redirect()->route('frontend.process-to-checkout')
                 ->with('error', 'Item not found in cart.');
         }
         $cartItem->delete();
@@ -253,44 +257,76 @@ class BookingController extends Controller
             'promo_code' => 'required|string|max:50',
         ]);
 
-        $promoCode = $request->input('promo_code');
+        $promoCode = $request->promo_code;
 
-        // Calculate cart subtotal
-        $cart = session()->get('cart', []);
+        // Fetch guest cart items using your helper
+        $guestCartItems = getGuestCartItems();
+
+        if ($guestCartItems->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your cart is empty.',
+            ], 422);
+        }
+
+        // Calculate subtotal using helper get_package_price()
         $subtotal = 0;
-        $priceService = app(\App\Services\PriceCalculationService::class);
 
-        foreach ($cart as $item) {
-            $variant = PackageVariant::find($item['variant_id']);
-            if ($variant) {
-                $price = $priceService->getPriceForDate($variant, $item['date']);
-                $subtotal += $price * $item['quantity'];
+        foreach ($guestCartItems as $item) {
+            $package = $item->package;
+
+            if (! $package) {
+                continue;
             }
+
+            // Convert reservation date to day name (sun, mon, tue...)
+            $day = strtolower(Carbon::parse($item->reservation_date)->format('D'));
+
+            // Fetch price from helper
+            $price = get_package_price($package, $day, $item->rider_type_id);
+
+            if (! $price) {
+                continue;
+            }
+
+            $subtotal += $price * $item->quantity;
+        }
+
+        if ($subtotal <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to calculate cart total.',
+            ], 422);
         }
 
         // Validate promo code
         $promoCodeService = app(\App\Services\PromoCodeService::class);
         $result = $promoCodeService->validatePromoCode($promoCode, $subtotal);
 
-        if ($result['valid']) {
-            // Store promo code in session
-            session()->put('applied_promo_code', $result['promo_code']);
-            session()->put('promo_discount', $result['discount']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Promo code applied successfully!',
-                'discount' => $result['discount'],
-                'discount_formatted' => 'TK '.number_format($result['discount']),
-                'total_after_discount' => $subtotal - $result['discount'],
-                'total_after_discount_formatted' => 'TK '.number_format($subtotal - $result['discount']),
-            ]);
-        } else {
+        if (! $result['valid']) {
             return response()->json([
                 'success' => false,
                 'message' => $result['message'],
             ], 422);
         }
+
+        // Save promo data
+        session()->put('applied_promo_code', $result['promo_code']);
+        session()->put('promo_discount', $result['discount']);
+
+        $finalTotal = max($subtotal - $result['discount'], 0);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Promo code applied successfully!',
+            'promo_code' => $promoCode,
+            'discount' => $result['discount'],
+            'discount_formatted' => 'TK '.number_format($result['discount'], 2),
+            'subtotal' => $subtotal,
+            'subtotal_formatted' => 'TK '.number_format($subtotal, 2),
+            'final_total' => $finalTotal,
+            'final_total_formatted' => 'TK '.number_format($finalTotal, 2),
+        ]);
     }
 
     public function removePromoCode(Request $request)
@@ -326,29 +362,23 @@ class BookingController extends Controller
 
         $cartItems = getGuestCartItems(); // Fetch guest cart items
         if ($cartItems->isEmpty()) {
-            return redirect()->route('frontend.cart.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('frontend.process-to-checkout')->with('error', 'Your cart is empty.');
         }
 
         DB::beginTransaction();
 
         try {
-            // Convert checkbox to real boolean
+            // Create account logic
             $createAccount = $request->boolean('create_account');
-
-            // Normalize email & phone
             $email = $request->customer_email;
             $phone = $formattedPhone;
-
             $user = null;
 
             if ($createAccount) {
-                // Find existing user by email or phone
-                $user = User::where('email', $email)
-                    ->orWhere('phone', $phone)
-                    ->first();
+                $user = User::where('email', $email)->orWhere('phone', $phone)->first();
 
                 if (! $user) {
-                    // CREATE new user
+                    // Create new user
                     $user = User::create([
                         'name' => $request->customer_name,
                         'email' => $email,
@@ -358,7 +388,7 @@ class BookingController extends Controller
                         'is_admin' => false,
                     ]);
                 } else {
-                    // UPDATE existing user
+                    // Update existing user
                     $user->update([
                         'name' => $request->customer_name,
                         'phone' => $phone,
@@ -366,22 +396,17 @@ class BookingController extends Controller
                     ]);
 
                     if ($request->filled('password')) {
-                        $user->update([
-                            'password' => bcrypt($request->password),
-                        ]);
+                        $user->update(['password' => bcrypt($request->password)]);
                     }
                 }
-            } else {
-                $user = null;
             }
 
             // Calculate subtotal
             $subtotal = 0;
             foreach ($cartItems as $cartItem) {
                 if (! $cartItem->package) {
-                    continue; // skip missing packages
+                    continue;
                 }
-
                 $price = get_package_price($cartItem->package, now()->format('D'));
                 $subtotal += $price * $cartItem->quantity;
             }
@@ -391,18 +416,17 @@ class BookingController extends Controller
             $appliedPromoCode = session()->get('applied_promo_code');
             if ($appliedPromoCode) {
                 $userId = $user->id ?? null;
-                $promoValidation = $promoService->validatePromoCode(
-                    $appliedPromoCode->code,
-                    $subtotal,
-                    $userId
-                );
+                $promoValidation = app(\App\Services\PromoCodeService::class)
+                    ->validatePromoCode($appliedPromoCode->code, $subtotal, $userId);
+
                 if ($promoValidation['valid']) {
                     $promoDiscount = $promoValidation['discount'];
                 }
             }
 
-            // Calculate VAT & total
-            $taxData = calculateVAT($subtotal - $promoDiscount);
+            // Calculate VAT & total amount
+            $amountAfterDiscount = max(0, $subtotal - $promoDiscount);
+            $taxData = calculateVAT($amountAfterDiscount);
             $totalAmount = $taxData['total'];
 
             // Create reservations
@@ -415,6 +439,11 @@ class BookingController extends Controller
                 $price = get_package_price($cartItem->package, now()->format('D'));
                 $itemSubtotal = $price * $cartItem->quantity;
 
+                // Allocate promo & VAT proportionally
+                $itemDiscount = ($subtotal > 0) ? ($itemSubtotal / $subtotal) * $promoDiscount : 0;
+                $itemVAT = ($subtotal > 0) ? ($itemSubtotal / $subtotal) * $taxData['vat'] : 0;
+                $itemTotal = ($itemSubtotal - $itemDiscount) + $itemVAT;
+
                 $reservation = Reservation::create([
                     'booking_code' => $this->generateBookingCode(),
                     'user_id' => $user->id ?? null,
@@ -422,14 +451,15 @@ class BookingController extends Controller
                     'customer_email' => $request->customer_email,
                     'customer_phone' => $formattedPhone,
                     'package_variant_id' => null,
-                    'schedule_slot_id' => null,
-                    'date' => now()->toDateString(),
+                    'package_id' => $cartItem->package_id,
+                    'schedule_slot_id' => $cartItem->time_slot_id,
+                    'date' => $cartItem->selected_date,
                     'report_time' => '09:00:00',
                     'party_size' => $cartItem->quantity ?? 0,
                     'subtotal' => $itemSubtotal,
-                    'discount_amount' => ($itemSubtotal / $subtotal) * $promoDiscount,
-                    'tax_amount' => ($itemSubtotal / $subtotal) * $taxData['vat'],
-                    'total_amount' => ($itemSubtotal - (($itemSubtotal / $subtotal) * $promoDiscount)) + (($itemSubtotal / $subtotal) * $taxData['vat']),
+                    'discount_amount' => round($itemDiscount, 2),
+                    'tax_amount' => round($itemVAT, 2),
+                    'total_amount' => round($itemTotal, 2),
                     'booking_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'confirmed',
                     'payment_status' => in_array($request->payment_method, ['check_payment', 'amarpay']) ? 'pending' : 'paid',
                 ]);
@@ -440,9 +470,10 @@ class BookingController extends Controller
             if (empty($reservations)) {
                 throw new Exception('No valid reservations could be created.');
             }
+            Cart::whereIn('id', $cartItems->pluck('id'))->delete();
 
             // Create Payment record
-            $transactionId = strtoupper(uniqid('TXN-'));
+            $transactionId = generateTransactionId($reservations[0]->booking_code);
             $payment = Payment::create([
                 'reservation_id' => $reservations[0]->id,
                 'method' => $request->payment_method,
@@ -454,12 +485,8 @@ class BookingController extends Controller
             ]);
 
             Log::info('Transaction ID: '.$transactionId.' | Payment ID: '.$payment->id.' | Method: '.$request->payment_method);
-            // dd($request->payment_method);
+            cleanOldCarts(session()->getId());
             DB::commit();
-
-            if (! $reservation->customer || ! $reservation->customer->email) {
-                throw new \Exception('Reservation customer email is missing. Cannot process payment.');
-            }
 
             // Account messages
             $accountMessage = '';
@@ -491,7 +518,9 @@ class BookingController extends Controller
                     ->with('success', 'Booking confirmed!'.$accountMessage.' Redirecting to payment gateway...')
                     ->with('payment_id', $payment->id);
             }
-            cleanOldCarts(session()->getId());
+
+            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('processBooking error', ['error' => $e->getMessage()]);

@@ -15,6 +15,7 @@ class Reservation extends Model
         'booking_code',
         'user_id',
         'customer_id',
+        'package_id',
         'package_variant_id',
         'schedule_slot_id',
         'date',
@@ -48,6 +49,15 @@ class Reservation extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    /**
+     * Get the package that owns the Reservation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class, 'package_id');
     }
 
     public function packageVariant(): BelongsTo

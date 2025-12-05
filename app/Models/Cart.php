@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Package;
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Cart extends Model
 {
@@ -18,6 +17,8 @@ class Cart extends Model
         'session_id',
         'package_id',
         'quantity',
+        'selected_date',
+        'time_slot_id',
         'cart_amount',
         'metadata',
         'expires_at',
@@ -40,5 +41,4 @@ class Cart extends Model
             $cart->cart_uuid = (string) Str::uuid();
         });
     }
-
 }

@@ -7,14 +7,25 @@
 
         <form action="{{ url('checkout') }}" method="GET">
             <div class="pt-3">
+                @php
+                    // Calculate amount after promo discount
+                    $promoDiscount = session('promo_discount', 0);
+                    $amountAfterDiscount = max(0, $subtotal - $promoDiscount);
+                    $vatData = calculateVAT($amountAfterDiscount);
+                @endphp
+
                 <div class="d-flex justify-content-between mb-2">
                     <span>Promo Discount</span>
-                    <span class="fw-medium">TK
-                        {{ number_format(isset($promo_discount) ? $promo_discount : 0, 2) }}</span>
+                    <span class="fw-medium">TK {{ number_format($promoDiscount, 2) }}</span>
                 </div>
 
                 <div class="d-flex justify-content-between mt-3 pt-3">
-                    <strong>VAT (15%)</strong>
+                    <strong>Subtotal</strong>
+                    <strong class="fs-5">TK {{ number_format($subtotal, 2) }}</strong>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3 pt-3">
+                    <strong>VAT ({{ env('VAT_RATE', 15) }}%)</strong>
                     <strong class="fs-5">TK {{ number_format($vatData['vat'], 2) }}</strong>
                 </div>
 
@@ -23,6 +34,7 @@
                     <strong class="fs-5">TK {{ number_format($vatData['total'], 2) }}</strong>
                 </div>
             </div>
+
 
             <div class="terms-conditions mt-3 mb-3">
                 <p class="text-muted small">

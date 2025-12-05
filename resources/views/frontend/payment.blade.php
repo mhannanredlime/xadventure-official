@@ -100,7 +100,7 @@
               <a href="{{ route('frontend.packages.index') }}" class="btn btn-primary w-100 mb-2">
                 <i class="bi  bi-plus"></i> Book Another Adventure
               </a>
-              <a href="{{ route('frontend.cart.index') }}" class="btn btn-outline-secondary w-100 mb-2">
+              <a href="{{ route('frontend.process-to-checkout') }}" class="btn btn-outline-secondary w-100 mb-2">
                 <i class="bi  bi-shopping-cart"></i> View Cart
               </a>
               <a href="{{ url('/') }}" class="btn btn-outline-primary w-100">
@@ -134,7 +134,7 @@
       </div>
 
       <div class="text-center mt-4">
-        <a href="{{ route('frontend.cart.index') }}" class="btn btn-primary">
+        <a href="{{ route('frontend.process-to-checkout') }}" class="btn btn-primary">
           <i class="bi  bi-arrow-left"></i> Back to Cart
         </a>
       </div>

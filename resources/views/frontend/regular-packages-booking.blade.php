@@ -188,7 +188,7 @@
                                 </div>
                             </div>
 
-                            <form action="{{ route('frontend.cart.index') }}" method="POST" id="checkoutForm">
+                            <form action="{{ route('frontend.process-to-checkout') }}" method="POST" id="checkoutForm">
                                 @csrf
                                 <input type="hidden" name="selected_date" id="checkout_selected_date">
                                 <input type="hidden" name="time_slot_id" id="checkout_time_slot_id">

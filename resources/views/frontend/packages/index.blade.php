@@ -745,7 +745,7 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('frontend.cart.index') }}">
+                    <a href="{{ route('frontend.process-to-checkout') }}">
                         <button class="btn btn-orange btn-lg my-4" style="background-color: #ff6f00; color: #fff;">
                             View Cart
                         </button>

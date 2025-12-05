@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Payment;
+use App\Models\Customer;
+use App\Models\Reservation;
+use App\Models\VehicleType;
+use App\Models\ScheduleSlot;
+use Illuminate\Http\Request;
+use App\Models\PackageVariant;
+use Illuminate\Support\Facades\Log;
 use App\Events\BookingStatusUpdated;
 use App\Http\Controllers\Controller;
-use App\Models\Reservation;
-use App\Models\Customer;
-use App\Models\PackageVariant;
-use App\Models\ScheduleSlot;
-use App\Models\Payment;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
 class ReservationController extends Controller
@@ -23,7 +24,7 @@ class ReservationController extends Controller
     public function index(Request $request)
     {
 
-        $query = Reservation::with(['customer', 'packageVariant.package', 'scheduleSlot']);
+        $query = Reservation::with(['customer', 'package', 'scheduleSlot']);
 
         // Date range filtering
         if ($request->filled('date_from') && $request->filled('date_to')) {
@@ -44,7 +45,7 @@ class ReservationController extends Controller
         // Filter by vehicle type
         if ($request->filled('vehicle_type')) {
             $vehicleType = $request->vehicle_type;
-            $query->whereHas('packageVariant.package.vehicleTypes', function ($q) use ($vehicleType) {
+            $query->whereHas('package.vehicleTypes', function ($q) use ($vehicleType) {
                 $q->where('name', $vehicleType);
             });
         }
@@ -86,7 +87,7 @@ class ReservationController extends Controller
         $customers = Customer::orderBy('name')->get();
         $packageVariants = PackageVariant::with('package')->where('is_active', true)->get();
         $scheduleSlots = ScheduleSlot::orderBy('sort_order')->get();
-        $vehicleTypes = \App\Models\VehicleType::where('is_active', true)->orderBy('name')->get();
+        $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
         
         return view('admin.reservation-dashboard', compact('reservations', 'groupedReservations', 'customers', 'packageVariants', 'scheduleSlots', 'vehicleTypes'));
     }

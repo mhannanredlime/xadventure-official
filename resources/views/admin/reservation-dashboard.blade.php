@@ -238,16 +238,7 @@
                                 </td>
                                 <td data-label="Date">{{ date('m/d/Y', strtotime($primaryReservation->date)) }}</td>
                                 <td data-label="Package Name">
-                                    @if ($isMultiPackage)
-                                        <div class="fw-bold">Multi-Package Booking</div>
-                                        <div class="small text-muted">
-                                            @foreach ($reservations as $reservation)
-                                                <div>{{ $reservation->packageVariant->package->name ?? 'N/A' }}</div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        {{ $primaryReservation->packageVariant->package->name ?? 'N/A' }}
-                                    @endif
+                                    {{ $primaryReservation->package->name }}
                                 </td>
                                 <td data-label="Vehicle Type">
                                     @if ($isMultiPackage)
@@ -264,7 +255,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        @if ($primaryReservation->packageVariant->package->vehicleTypes->isNotEmpty())
+                                        @if (isset($primaryReservation->packageVariant->package->vehicleTypes) && $primaryReservation->packageVariant->package->vehicleTypes->isNotEmpty())
                                             @foreach ($primaryReservation->packageVariant->package->vehicleTypes as $vehicleType)
                                                 <span class="badge bg-primary me-1">{{ $vehicleType->name }}</span>
                                             @endforeach
@@ -293,7 +284,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        @if ($primaryReservation->scheduleSlot)
+                                        @if (isset($primaryReservation->scheduleSlot))
                                             {{ $primaryReservation->scheduleSlot->name }}
                                             <div class="small text-muted">
                                                 {{ \Carbon\Carbon::parse($primaryReservation->scheduleSlot->start_time)->format('g A') }}
@@ -451,17 +442,17 @@
                         @php
                             $atvCount = $reservations
                                 ->filter(function ($reservation) {
-                                    return $reservation->packageVariant->package->vehicleTypes->contains('name', 'ATV');
+                                    return isset($reservation->packageVariant->package->vehicleTypes) && $reservation->packageVariant->package->vehicleTypes->contains('name', 'ATV');
                                 })
                                 ->count();
                             $utvCount = $reservations
                                 ->filter(function ($reservation) {
-                                    return $reservation->packageVariant->package->vehicleTypes->contains('name', 'UTV');
+                                    return isset($reservation->packageVariant->package->vehicleTypes) && $reservation->packageVariant->package->vehicleTypes->contains('name', 'UTV');
                                 })
                                 ->count();
                             $regularCount = $reservations
                                 ->filter(function ($reservation) {
-                                    return $reservation->packageVariant->package->type === 'regular';
+                                    return isset($reservation->packageVariant->package->type) && $reservation->packageVariant->package->type === 'regular';
                                 })
                                 ->count();
                         @endphp

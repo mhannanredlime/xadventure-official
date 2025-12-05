@@ -60,48 +60,14 @@
                                             </td>
                                             <td>TK {{ number_format($item->cart_amount, 2) }}</td>
                                             <td>
-                                                <div class="d-flex align-items-center">
+                                                <div class="d-flex align-items-right">
                                                     <span class="mx-3 fw-bold">{{ $item->quantity }}</span>
-                                                    {{-- <form action="{{ route('frontend.cart.update') }}" method="POST"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        <input type="hidden" name="cart_uuid"
-                                                            value="{{ $item->cart_uuid }}">
-                                                        <input type="hidden" name="change" value="minus">
-                                                        <button type="submit"
-                                                            class="btn btn-outline-secondary btn-sm px-3 py-1 @if ($item->quantity <= 1) disabled @endif">
-                                                            <i class="fas fa-minus"></i>
-                                                        </button>
-                                                    </form>
 
-
-                                                    <form action="{{ route('frontend.cart.update') }}" method="POST"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        <input type="hidden" name="cart_uuid"
-                                                            value="{{ $item->cart_uuid }}">
-                                                        <input type="hidden" name="change" value="addition">
-                                                        <button type="submit"
-                                                            class="btn btn-outline-secondary btn-sm px-3 py-1">
-                                                            <i class="fas fa-plus"></i>
-                                                        </button>
-                                                    </form> --}}
                                                 </div>
                                             </td>
 
-                                            <td><strong>TK {{ number_format($itemTotal, 2) }}</strong></td>
-
-                                            {{-- <td>
-                                                <form action="{{ route('frontend.cart.remove', $item->cart_uuid) }}"
-                                                    method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm"
-                                                        onclick="return confirm('Remove this item from cart?')">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </td> --}}
+                                            <td class="d-flex align-items-right"><strong>TK
+                                                    {{ number_format($itemTotal, 2) }}</strong></td>
                                         </tr>
                                     @endforeach
 
@@ -109,6 +75,28 @@
                             </table>
                         </div>
                     </div>
+                    <!-- Promo Section -->
+                    <div class="promo-section mt-3 d-flex">
+                        <input type="text" placeholder="Promo Code" class="form-control me-2" id="promo-code"
+                            value="{{ $appliedPromoCode->code ?? '' }}" {{ isset($appliedPromoCode) ? 'readonly' : '' }}>
+
+                        @if (isset($appliedPromoCode))
+                            <button class="btn btn-danger me-2" id="remove-promo-btn" onclick="removePromo()">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        @endif
+
+                        <button class="btn btn-orange jatio-bg-color primary-btn-border-radius apply-promo-btn"
+                            id="apply-promo-btn" onclick="applyPromo()" {{ isset($appliedPromoCode) ? 'disabled' : '' }}>
+                            {{ isset($appliedPromoCode) ? 'Applied!' : 'Apply' }}
+                        </button>
+                    </div>
+
+                    <!-- Promo Message -->
+                    <div id="promo-message" class="mt-2 small"></div>
+
+
+
                 </div>
                 <!-- Order Summary -->
                 <div class="col-lg-4">
@@ -204,10 +192,136 @@
             color: #fff;
         }
 
+        .apply-promo-btn {
+            min-width: 110px;
+        }
+
+        #promo-message {
+            font-size: 14px;
+        }
+
+        #remove-promo-btn {
+            width: 48px;
+        }
+
         @media(max-width: 576px) {
             .checkout-btn {
                 height: 50px;
             }
         }
     </style>
+@endpush
+
+
+@push('scripts')
+    <script>
+        // Global function: Show message under promo input
+        function setPromoMessage(message, type = 'success') {
+            const box = document.getElementById('promo-message');
+            box.innerHTML = `<div class="text-${type}"><i class="bi bi-info-circle"></i> ${message}</div>`;
+        }
+
+        function applyPromo() {
+            const promoCode = document.getElementById('promo-code').value.trim();
+            const applyBtn = document.getElementById('apply-promo-btn');
+            const promoInput = document.getElementById('promo-code');
+
+            if (!promoCode) {
+                setPromoMessage('Please enter a promo code.', 'danger');
+                return;
+            }
+
+            // Disable UI
+            applyBtn.disabled = true;
+            promoInput.disabled = true;
+            applyBtn.innerHTML = `<i class="bi bi-arrow-repeat fa-spin"></i> Applying...`;
+
+            fetch('{{ route('frontend.cart.validate-promo') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        promo_code: promoCode
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        setPromoMessage(`Promo "${promoCode}" applied! Discount: ${data.discount_formatted}`,
+                            'success');
+                        applyBtn.innerHTML = "Applied!";
+                        promoInput.readOnly = true;
+
+                        // Insert remove button dynamically
+                        if (!document.getElementById('remove-promo-btn')) {
+                            const removeBtn = document.createElement('button');
+                            removeBtn.className = "btn btn-danger me-2";
+                            removeBtn.id = "remove-promo-btn";
+                            removeBtn.innerHTML = `<i class="bi bi-x"></i>`;
+                            removeBtn.onclick = removePromo;
+
+                            applyBtn.parentNode.insertBefore(removeBtn, applyBtn);
+                        }
+
+                        // Refresh page so totals update
+                        setTimeout(() => location.reload(), 5000);
+                    } else {
+                        setPromoMessage(data.message, 'danger');
+
+                        applyBtn.innerHTML = "Apply";
+                        applyBtn.disabled = false;
+                        promoInput.disabled = false;
+                    }
+                })
+                .catch(() => {
+                    setPromoMessage("Something went wrong. Try again.", 'danger');
+
+                    applyBtn.innerHTML = "Apply";
+                    applyBtn.disabled = false;
+                    promoInput.disabled = false;
+                });
+        }
+
+        function removePromo() {
+            const removeBtn = document.getElementById('remove-promo-btn');
+            removeBtn.disabled = true;
+            removeBtn.innerHTML = `<i class="bi bi-arrow-repeat fa-spin"></i>`;
+
+            fetch('{{ route('frontend.cart.remove-promo') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        setPromoMessage(data.message, 'success');
+                        setTimeout(() => location.reload(), 5000);
+                    } else {
+                        removeBtn.innerHTML = `<i class="bi bi-x"></i>`;
+                        removeBtn.disabled = false;
+                        setPromoMessage("Failed to remove promo.", "danger");
+                    }
+                })
+                .catch(() => {
+                    removeBtn.innerHTML = `<i class="bi bi-x"></i>`;
+                    removeBtn.disabled = false;
+                    setPromoMessage("Something went wrong. Try again.", "danger");
+                });
+        }
+
+        // Submit promo on Enter
+        document.getElementById('promo-code')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyPromo();
+            }
+        });
+    </script>
 @endpush
