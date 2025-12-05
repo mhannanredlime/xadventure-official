@@ -231,10 +231,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Additional sections (package details, acknowledgment, expectations, terms, contact) -->
-                {{-- Apply isset / null checks similarly for all other fields --}}
-
             </main>
         </div>
     </div>
