@@ -14,107 +14,13 @@
         </nav>
 
         <div class="card shadow mb-4">
-            <div class="card-body">
-                <form action="{{ route('admin.vehicles.store') }}" method="POST" enctype="multipart/form-data"
-                    onsubmit="updateFormData(this)">
-                    @csrf
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="vehicle_type_id" class="form-label">Vehicle Type <span
-                                        class="text-danger">*</span></label>
-                                <select class="form-select @error('vehicle_type_id') is-invalid @enderror"
-                                    id="vehicle_type_id" name="vehicle_type_id" required>
-                                    <option value="">Select Vehicle Type</option>
-                                    @foreach ($vehicleTypes as $type)
-                                        <option value="{{ $type->id }}" data-images="{{ $type->images->toJson() }}"
-                                            data-display-image="{{ $type->display_image_url }}"
-                                            {{ old('vehicle_type_id') == $type->id ? 'selected' : '' }}>
-                                            {{ $type->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('vehicle_type_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="name" class="form-label">Vehicle Name <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                    id="name" name="name" value="{{ old('name') }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+            <form action="{{ route('admin.vehicles.store') }}" method="POST" enctype="multipart/form-data"
+                onsubmit="updateFormData(this)">
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="details" class="form-label">Details</label>
-                                <input type="text" class="form-control @error('details') is-invalid @enderror"
-                                    id="details" name="details" value="{{ old('details') }}">
-                                @error('details')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="op_start_date" class="form-label">Operation Start Date</label>
-                                <input type="date" class="form-control @error('op_start_date') is-invalid @enderror"
-                                    id="op_start_date" name="op_start_date" value="{{ old('op_start_date') }}">
-                                @error('op_start_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+                @include('admin.vehicles._form')
+            </form>
 
-                    {{-- ---------- Image Upload Section ---------- --}}
-                    <h5 class="card-title"><i class="bi bi-images me-2"></i>Package Images</h5>
-                    <div class="row">
-                        <div class="col-12">
-                            <label class="form-label">Upload Package Images (Max 2 images)</label>
-                            <div id="multiple-image-upload" data-model-type="App\Models\Vehicle"
-                                data-model-id="{{ $vehicle->id ?? '' }}"
-                                data-upload-url="{{ route('admin.vehicles.store') }}"
-                                data-update-url="{{ isset($vehicle) ? route('admin.vehicles.update', $vehicle) : '' }}"
-                                data-images-url="{{ route('admin.images.get') }}"
-                                data-primary-url="{{ url('admin/images') }}/:id/primary"
-                                data-reorder-url="{{ route('admin.images.reorder') }}"
-                                data-alt-text-url="{{ url('admin/images') }}/:id/alt-text"
-                                data-delete-url="{{ url('admin/images') }}/:id"
-                                data-existing-images="{{ isset($vehicle) ? $vehicle->images->toJson() : '[]' }}"
-                                data-max-files="2" data-max-file-size="{{ 5 * 1024 * 1024 }}">
-                            </div>
-                            <input type="file" id="vehicle_images_input" name="images[]" multiple accept="image/*"
-                                style="display:none;">
-                        </div>
-                    </div>
-
-
-                    <div class="form-group">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
-                                {{ old('is_active', true) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="is_active">
-                                Active Status
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary">Save Vehicle</button>
-                        <a href="{{ route('admin.vehical-management') }}" class="btn btn-secondary">Cancel</a>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 @endsection
@@ -238,6 +144,38 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .vehicle-type-images-container {
+            min-height: 250px;
+            border: 2px dashed #d3d7dd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            padding: 25px;
+        }
+
+        .vehicle-type-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .vehicle-type-image-item {
+            border: 2px solid #e4e6e9;
+            border-radius: 10px;
+            padding: 8px;
+            background: white;
+            position: relative;
+            transition: 0.25s;
+        }
+
+        .vehicle-type-image-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .vehicle-type-image-item.border-primary {
+            border-color: #0d6efd !important;
         }
     </style>
 @endpush

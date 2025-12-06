@@ -14,6 +14,9 @@
     <!-- Bootstrap & Custom CSS -->
     <link rel="stylesheet" href="{{ versioned_asset('admin/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ versioned_asset('admin/css/custom-admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/css/multiple-image-upload.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/css/regular-package.css') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -178,6 +181,10 @@
     <script src="{{ versioned_asset('admin/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ versioned_asset('admin/js/toast-notifications.js') }}"></script>
     <script src="{{ versioned_asset('admin/js/modal-system.js') }}"></script>
+    <script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>
+    <script src="{{ asset('admin/js/gallery-manager.js') }}"></script>
+    <script src="{{ asset('admin/js/files-uploader-init.js') }}"></script>
+    <script src="{{ versioned_asset('admin/js/files-uploader-init.js') }}"></script>
 
     <script>
         // Bootstrap Icons fallback

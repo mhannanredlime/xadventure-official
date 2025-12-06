@@ -2,9 +2,7 @@
 @section('title', isset($package) ? 'Edit Regular Package' : 'Add Regular Package')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('admin/css/multiple-image-upload.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin/css/gallery.css') }}">
-    <link rel="stylesheet" href="{{ asset('admin/css/regular-package.css') }}">
+    
 @endpush
 
 @section('content')
@@ -51,8 +49,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>
-    <script src="{{ asset('admin/js/gallery-manager.js') }}"></script>
+    
 
     <script>
         $(document).ready(function() {
@@ -242,16 +239,6 @@
                         return;
                     }
                 }
-
-                // 4. DEBUG: Show what's being submitted
-                console.log('=== FORM DATA DEBUG ===');
-                console.log('Package Name:', packageName);
-                console.log('Package Type:', packageType);
-                console.log('Display Price:', displayPrice);
-                console.log('Min Participants:', minParticipant);
-                console.log('Max Participants:', maxParticipant);
-                console.log('Day Prices:', dayPricesArray);
-                console.log('Image Files Count:', fileInput.files.length);
 
                 // Show file details
                 for (let i = 0; i < fileInput.files.length; i++) {
