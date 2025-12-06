@@ -63,7 +63,7 @@ class PackageController extends Controller
                 return $variant->package_id == $package->id;
             });
         }
-
+        Log::info("ATV UTV Page");
         return view('frontend.adventure-details', compact(
             'atvPackages', 
             'utvPackages',
@@ -76,6 +76,7 @@ class PackageController extends Controller
 
     public function index()
     {
+        // dd("index");
         // Get only ATV/UTV packages with their variants, prices, and vehicle types
         $packages = Package::with(['variants.prices', 'vehicleTypes', 'images'])
             ->where('is_active', true)

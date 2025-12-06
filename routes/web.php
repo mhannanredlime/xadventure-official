@@ -96,30 +96,30 @@ Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Package routes
-Route::get('/packages', [FrontendPackageController::class, 'index'])->name('frontend.packages.index');
-Route::get('/atv-utv', [FrontendPackageController::class, 'atvUtvPage'])->name('frontend.atv-utv');
-Route::get('/packages/{package}', [FrontendPackageController::class, 'show'])->name('frontend.packages.show');
-Route::get('/api/variants', [FrontendPackageController::class, 'getVariants'])->name('frontend.packages.variants');
-Route::get('/api/availability', [FrontendPackageController::class, 'getAvailability'])->name('frontend.packages.availability');
-Route::get('/api/availability/date', [FrontendPackageController::class, 'getAvailabilityForDate'])->name('frontend.packages.availability.date');
-Route::get('/api/package/details', [FrontendPackageController::class, 'getPackageDetails'])->name('frontend.packages.details');
-Route::get('/api/vehicle-type/details', [FrontendPackageController::class, 'getVehicleTypeDetails'])->name('frontend.vehicle-type.details');
-Route::get('/api/pricing/date', [FrontendPackageController::class, 'getPricingForDate'])->name('frontend.pricing.date');
-Route::get('/api/availability/check', [FrontendPackageController::class, 'checkAvailability'])->name('frontend.availability.check');
-Route::get('/api/schedule-slots/availability', [FrontendPackageController::class, 'getSlotsAvailability'])->name('frontend.schedule-slots.availability');
+Route::get('atv-utv', [FrontendPackageController::class, 'atvUtvPage'])->name('frontend.atv-utv');
+Route::get('atv-utv/packages', [FrontendPackageController::class, 'index'])->name('frontend.packages.index');
+Route::get('atv-utv/packages/{package}', [FrontendPackageController::class, 'show'])->name('frontend.packages.show');
+Route::get('atv-utv/api/variants', [FrontendPackageController::class, 'getVariants'])->name('frontend.packages.variants');
+Route::get('atv-utv/api/availability', [FrontendPackageController::class, 'getAvailability'])->name('frontend.packages.availability');
+Route::get('atv-utv/api/availability/date', [FrontendPackageController::class, 'getAvailabilityForDate'])->name('frontend.packages.availability.date');
+Route::get('atv-utv/api/package/details', [FrontendPackageController::class, 'getPackageDetails'])->name('frontend.packages.details');
+Route::get('api/vehicle-type/details', [FrontendPackageController::class, 'getVehicleTypeDetails'])->name('frontend.vehicle-type.details');
+Route::get('api/pricing/date', [FrontendPackageController::class, 'getPricingForDate'])->name('frontend.pricing.date');
+Route::get('api/availability/check', [FrontendPackageController::class, 'checkAvailability'])->name('frontend.availability.check');
+Route::get('api/schedule-slots/availability', [FrontendPackageController::class, 'getSlotsAvailability'])->name('frontend.schedule-slots.availability');
 
 
 // Booking routes
 Route::match(['post'], '/process-to-checkout', [BookingController::class, 'processToCheckout'])->name('frontend.process-to-checkout');
 
-Route::post('/cart/add', [BookingController::class, 'addToCart'])->name('frontend.cart.add');
-Route::post('/cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update');
-Route::get('/cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update.get');
-Route::get('/cart/availability', [BookingController::class, 'getCartItemAvailability'])->name('frontend.cart.availability');
-Route::post('/cart/remove/{cart_uuid}', [BookingController::class, 'removeFromCart'])->name('frontend.cart.remove');
-Route::post('/cart/update-datetime', [BookingController::class, 'updateCartDateTime'])->name('frontend.cart.updateDateTime');
-Route::post('/cart/validate-promo', [BookingController::class, 'validatePromoCode'])->name('frontend.cart.validate-promo');
-Route::post('/cart/remove-promo', [BookingController::class, 'removePromoCode'])->name('frontend.cart.remove-promo');
+Route::post('cart/add', [BookingController::class, 'addToCart'])->name('frontend.cart.add');
+Route::post('cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update');
+Route::get('cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update.get');
+Route::get('cart/availability', [BookingController::class, 'getCartItemAvailability'])->name('frontend.cart.availability');
+Route::post('cart/remove/{cart_uuid}', [BookingController::class, 'removeFromCart'])->name('frontend.cart.remove');
+Route::post('cart/update-datetime', [BookingController::class, 'updateCartDateTime'])->name('frontend.cart.updateDateTime');
+Route::post('cart/validate-promo', [BookingController::class, 'validatePromoCode'])->name('frontend.cart.validate-promo');
+Route::post('cart/remove-promo', [BookingController::class, 'removePromoCode'])->name('frontend.cart.remove-promo');
 
 // Cart API routes
 Route::get('/api/cart/count', [CartController::class, 'getCartCount'])->name('frontend.cart.count');
