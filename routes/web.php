@@ -44,15 +44,9 @@ use App\Http\Controllers\Admin\VehicleAvailabilityController;
 use App\Http\Controllers\Frontend\RegularPackageBookingController;
 use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
 
-Route::get('/test-contact-mail', function () {
-    $name = 'John Doe';
-    $email = 'johndoe@yopmail.com';
-    $subject = 'Test Contact Form';
-    $user_message = "This is a test message from the contact form.";
-    $received_at = now()->format('F j, Y \a\t g:i A');
-    
-    return new ContactFormSubmitted($name, $email, $subject, $user_message, $received_at);
-});
+Route::get('/atv-booking-html-sample', function () {
+    return view('atv-booking-html-sample');
+})->name('atv-booking-html-sample');
 
 
 
