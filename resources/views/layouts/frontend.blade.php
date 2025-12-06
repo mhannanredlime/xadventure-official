@@ -210,7 +210,7 @@
                             data-bs-toggle="dropdown" aria-expanded="false">Package</a>
                         <ul class="dropdown-menu" aria-labelledby="packagesDropdown">
                             <li><a class="dropdown-item" href="{{ route('custom-packages') }}">Regular Package</a></li>
-                            <li><a class="dropdown-item" href="{{ route('frontend.atv-utv') }}">ATV-UTV Package</a>
+                            <li><a class="dropdown-item" href="{{ route('frontend.atv-utv-landing-page') }}">ATV-UTV Package</a>
                             </li>
                         </ul>
                     </li>
@@ -540,7 +540,7 @@
 
             // Navigate to the appropriate page based on package type
             if (packageType === 'atv-utv') {
-                window.location.href = '{{ route('frontend.atv-utv') }}';
+                window.location.href = '{{ route('frontend.atv-utv-landing-page') }}';
             } else if (packageType === 'regular') {
                 window.location.href = '{{ route('custom-packages') }}';
             }

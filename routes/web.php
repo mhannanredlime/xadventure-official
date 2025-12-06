@@ -1,5 +1,6 @@
 <?php
 
+use App\Mail\ContactFormSubmitted;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\LoginController;
@@ -23,11 +24,10 @@ use App\Http\Controllers\Auth\CustomerAuthController;
 use App\Http\Controllers\Admin\AvailabilityController;
 use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Frontend\CustomPackageController;
+use App\Http\Controllers\Frontend\AutvPackageNewController;
 use App\Http\Controllers\Frontend\BookingReceiptController;
 use App\Http\Controllers\Frontend\CheckoutReceiptController;
 use App\Http\Controllers\Admin\VehicleAvailabilityController;
-use App\Http\Controllers\Frontend\RegularPackageBookingController;
-use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +41,8 @@ use App\Http\Controllers\Frontend\PackageController as FrontendPackageController
 */
 
 
-use App\Mail\ContactFormSubmitted;
+use App\Http\Controllers\Frontend\RegularPackageBookingController;
+use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
 
 Route::get('/test-contact-mail', function () {
     $name = 'John Doe';
@@ -96,18 +97,26 @@ Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Package routes
-Route::get('atv-utv', [FrontendPackageController::class, 'atvUtvPage'])->name('frontend.atv-utv');
-Route::get('atv-utv/packages', [FrontendPackageController::class, 'index'])->name('frontend.packages.index');
-Route::get('atv-utv/packages/{package}', [FrontendPackageController::class, 'show'])->name('frontend.packages.show');
-Route::get('atv-utv/api/variants', [FrontendPackageController::class, 'getVariants'])->name('frontend.packages.variants');
-Route::get('atv-utv/api/availability', [FrontendPackageController::class, 'getAvailability'])->name('frontend.packages.availability');
-Route::get('atv-utv/api/availability/date', [FrontendPackageController::class, 'getAvailabilityForDate'])->name('frontend.packages.availability.date');
-Route::get('atv-utv/api/package/details', [FrontendPackageController::class, 'getPackageDetails'])->name('frontend.packages.details');
+Route::get('atv-utv-landing-page', [FrontendPackageController::class, 'atvUtvLandingPage'])->name('frontend.atv-utv-landing-page');
+Route::get('atv-utv-package-bookings', [FrontendPackageController::class, 'atvUtvPackBookings'])->name('frontend.atv-utv-package-bookings');
+Route::get('atv-utv-package-bookings/{package}', [FrontendPackageController::class, 'show'])->name('frontend.atv-utv-package-bookings.show');
+Route::get('atv-utv-package-bookings/api/variants', [FrontendPackageController::class, 'getVariants'])->name('frontend.atv-utv-package-bookings.variants');
+Route::get('atv-utv-package-bookings/api/availability', [FrontendPackageController::class, 'getAvailability'])->name('frontend.atv-utv-package-bookings.availability');
+Route::get('atv-utv-package-bookings/api/availability/date', [FrontendPackageController::class, 'getAvailabilityForDate'])->name('frontend.atv-utv-package-bookings.availability.date');
+Route::get('atv-utv-package-bookings/api/package/details', [FrontendPackageController::class, 'getPackageDetails'])->name('frontend.atv-utv-package-bookings.details');
 Route::get('api/vehicle-type/details', [FrontendPackageController::class, 'getVehicleTypeDetails'])->name('frontend.vehicle-type.details');
 Route::get('api/pricing/date', [FrontendPackageController::class, 'getPricingForDate'])->name('frontend.pricing.date');
 Route::get('api/availability/check', [FrontendPackageController::class, 'checkAvailability'])->name('frontend.availability.check');
 Route::get('api/schedule-slots/availability', [FrontendPackageController::class, 'getSlotsAvailability'])->name('frontend.schedule-slots.availability');
 
+// Package price calculation route (no API, regular web route)
+Route::post('/calculate-package-price', [AutvPackageNewController::class, 'calculatePrice'])->name('calculate.package.price');
+
+// Check availability route
+Route::post('/check-package-availability', [AutvPackageNewController::class, 'checkAvailability'])->name('check.package.availability');
+
+// Add to cart route
+Route::post('/cart/add-packages', [AutvPackageNewController::class, 'addPackagesToCart'])->name('cart.add.packages');
 
 // Booking routes
 Route::match(['post'], '/process-to-checkout', [BookingController::class, 'processToCheckout'])->name('frontend.process-to-checkout');

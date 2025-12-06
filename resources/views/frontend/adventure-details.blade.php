@@ -120,7 +120,7 @@
                     passengers here, just you and the thrill of the trail!</p>
                 <p class="additional-info">Seating Capacity: 1–2 riders per ATV (front and back, like a motorbike)</p>
                 <p class="additional-info">Driver Requirement: 18+ with a valid motorcycle license</p>
-                <a href="{{ route('frontend.packages.index') }}" class="btn btn-custom mt-3">Book Now</a>
+                <a href="{{ route('frontend.atv-utv-package-bookings') }}" class="btn btn-custom mt-3">Book Now</a>
             </div>
         </div>
 
@@ -160,7 +160,7 @@
                     of solo riding.</p>
                 <p class="additional-info">Seating Capacity: Up to 2 riders per UTV (side-by-side, like a car)</p>
                 <p class="additional-info">Driver Requirement: 18+ with a valid driving license</p>
-                <a href="{{ route('frontend.packages.index') }}" class="btn btn-custom mt-3">Book Now</a>
+                <a href="{{ route('frontend.atv-utv-package-bookings') }}" class="btn btn-custom mt-3">Book Now</a>
             </div>
         </div>
     </div>
