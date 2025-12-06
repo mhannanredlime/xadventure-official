@@ -63,89 +63,100 @@
         </div>
     </div>
 
-    <!-- Floating Cart Icon -->
-    <a href="{{ route('regular-packages-booking') }}" class="floating-cart-icon" id="floatingCartIcon">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span class="cart-count" id="cartCount">{{ $cartCount ?? 0 }}</span>
-        <span class="cart-text">Items</span>
-    </a>
+   
+
 @endsection
 
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    // Initialize ToastMagic
-    const toastMagic = new ToastMagic();
-    function toast(message, type = 'info', autoClose = true, actionText = null, actionUrl = null) {
-        toastMagic[type](message, '', autoClose, actionText, actionUrl);
-    }
+    <script>
+        $(document).ready(function() {
+            // Initialize ToastMagic
+            const toastMagic = new ToastMagic();
 
-    // Button loading state
-    function setBtnLoading($btn, isLoading, loadingText = 'Processing...') {
-        if (isLoading) {
-            $btn.data('original', $btn.html());
-            $btn.html(`<span class="spinner-border spinner-border-sm me-2"></span>${loadingText}`);
-            $btn.prop('disabled', true);
-        } else {
-            $btn.html($btn.data('original'));
-            $btn.prop('disabled', false);
-        }
-    }
+            function toast(message, type = 'info', autoClose = true, actionText = null, actionUrl = null) {
+                toastMagic[type](message, '', autoClose, actionText, actionUrl);
+            }
 
-    // Frontend session cart helpers
-    function getCart() { return JSON.parse(sessionStorage.getItem('cart') || '[]'); }
-    function saveCart(cart) { sessionStorage.setItem('cart', JSON.stringify(cart)); }
-    function updateCartCount() {
-        const cart = getCart();
-        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-        $("#cartCount").text(count);
-    }
+            // Button loading state
+            function setBtnLoading($btn, isLoading, loadingText = 'Processing...') {
+                if (isLoading) {
+                    $btn.data('original', $btn.html());
+                    $btn.html(`<span class="spinner-border spinner-border-sm me-2"></span>${loadingText}`);
+                    $btn.prop('disabled', true);
+                } else {
+                    $btn.html($btn.data('original'));
+                    $btn.prop('disabled', false);
+                }
+            }
 
-    // Add to cart
-    function addToCart(packageId, $btn) {
-        setBtnLoading($btn, true, "Adding...");
+            // Frontend session cart helpers
+            function getCart() {
+                return JSON.parse(sessionStorage.getItem('cart') || '[]');
+            }
 
-        // 1️⃣ Update frontend sessionStorage
-        let cart = getCart();
-        let existing = cart.find(item => item.packageId === packageId);
-        if (existing) {
-            existing.quantity += 1;
-        } else {
-            cart.push({ packageId: packageId, quantity: 1 });
-        }
-        saveCart(cart);
-        updateCartCount();
+            function saveCart(cart) {
+                sessionStorage.setItem('cart', JSON.stringify(cart));
+            }
 
-        // 2️⃣ Update backend session via AJAX
-        $.ajax({
-            url: "{{ route('frontend.cart.add') }}",
-            method: "POST",
-            data: { package_id: packageId, _token: "{{ csrf_token() }}" },
-            success: function(res) {
-                if (res.success) toast("Item added to cart!", "success");
-            },
-            error: function(err) {
-                toast(err.responseJSON?.message || "Server error.", "error");
-            },
-            complete: function() { setBtnLoading($btn, false); }
+            function updateCartCount() {
+                const cart = getCart();
+                const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+                $("#cartCount").text(count);
+            }
+
+            // Add to cart
+            function addToCart(packageId, $btn) {
+                setBtnLoading($btn, true, "Adding...");
+
+                // 1️⃣ Update frontend sessionStorage
+                let cart = getCart();
+                let existing = cart.find(item => item.packageId === packageId);
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    cart.push({
+                        packageId: packageId,
+                        quantity: 1
+                    });
+                }
+                saveCart(cart);
+                updateCartCount();
+
+                // 2️⃣ Update backend session via AJAX
+                $.ajax({
+                    url: "{{ route('frontend.cart.add') }}",
+                    method: "POST",
+                    data: {
+                        package_id: packageId,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(res) {
+                        if (res.success) toast("Item added to cart!", "success");
+                    },
+                    error: function(err) {
+                        toast(err.responseJSON?.message || "Server error.", "error");
+                    },
+                    complete: function() {
+                        setBtnLoading($btn, false);
+                    }
+                });
+            }
+
+            // Button click
+            $(".btn-add-to-cart").on("click", function(e) {
+                e.preventDefault();
+                const $btn = $(this);
+                const packageId = $btn.data("package-id");
+                if (!packageId) {
+                    toast("No package selected.", "warning");
+                    return;
+                }
+                addToCart(packageId, $btn);
+            });
+
+            // Initialize cart count on page load
+            updateCartCount();
         });
-    }
-
-    // Button click
-    $(".btn-add-to-cart").on("click", function(e) {
-        e.preventDefault();
-        const $btn = $(this);
-        const packageId = $btn.data("package-id");
-        if (!packageId) {
-            toast("No package selected.", "warning");
-            return;
-        }
-        addToCart(packageId, $btn);
-    });
-
-    // Initialize cart count on page load
-    updateCartCount();
-});
-</script>
+    </script>
 @endpush

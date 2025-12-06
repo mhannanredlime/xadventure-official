@@ -3,6 +3,7 @@
   --secondary-bg: #2b2b2b;
   --accent-color: #ff6f00;
   --text-color: #f8f9fa;
+  --dark: rgba(0, 0, 0, 0.8) !important;
 }
 
 
@@ -19,7 +20,7 @@ h4 {
 
 /* Navbar styles */
 .navbar {
-  background-color: var(--primary-bg) !important;
+  background-color: var(--dark) !important;
   padding: 1rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);

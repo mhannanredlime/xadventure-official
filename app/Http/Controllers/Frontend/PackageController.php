@@ -25,7 +25,7 @@ class PackageController extends Controller
         $this->priceService = $priceService;
     }
 
-    public function atvUtvPage()
+    public function atvUtvPage(Request $request)
     {
         // Get ATV and UTV packages specifically
         $atvPackages = Package::with(['variants.prices', 'vehicleTypes', 'images'])

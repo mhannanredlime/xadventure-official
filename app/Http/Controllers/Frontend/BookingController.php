@@ -70,7 +70,6 @@ class BookingController extends Controller
             $riderTypeId = $request->input('rider_type_id'); // null if not provided
             $sessionId = session()->getId();
 
-            // Prevent adding inactive/unavailable packages
             $package = Package::where('id', $packageId)
                 ->where('is_active', 1)
                 ->first();
@@ -82,10 +81,8 @@ class BookingController extends Controller
                 ]);
             }
 
-            // Auto-detect current day
             $today = strtolower(Carbon::now()->format('D'));
 
-            // Get price based on display_starting_price, day and optional rider type
             $price = get_package_price($package, $today, $riderTypeId);
 
             if (! $price) {
@@ -95,7 +92,6 @@ class BookingController extends Controller
                 ]);
             }
 
-            // Use firstOrNew with session_id and package_id as search condition
             $cartItem = Cart::firstOrNew([
                 'session_id' => $sessionId,
                 'package_id' => $packageId,
@@ -114,7 +110,7 @@ class BookingController extends Controller
                 'cart_total_items' => Cart::where('session_id', $sessionId)->sum('quantity'),
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong while adding to cart.',

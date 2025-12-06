@@ -11,7 +11,8 @@ class CartService
      */
     public function getCartCount(): int
     {
-        $cart = Session::get('cart', []);
+        // $cart = Session::get('cart', []);
+        $cart = getGuestCartItems();
         return count($cart);
     }
 
@@ -20,7 +21,7 @@ class CartService
      */
     public function getCartItems(): array
     {
-        $cart = Session::get('cart', []);
+        $cart = getGuestCartItems();
         $items = [];
 
         foreach ($cart as $key => $item) {
@@ -41,7 +42,7 @@ class CartService
      */
     public function addToCart(array $item): void
     {
-        $cart = Session::get('cart', []);
+        $cart = getGuestCartItems();
         $key = $item['package_id'] . '_' . $item['date'] . '_' . $item['slot_id'];
         $cart[$key] = $item;
         Session::put('cart', $cart);
@@ -52,7 +53,7 @@ class CartService
      */
     public function removeFromCart(string $key): void
     {
-        $cart = Session::get('cart', []);
+        $cart = getGuestCartItems();
         unset($cart[$key]);
         Session::put('cart', $cart);
     }
@@ -78,7 +79,7 @@ class CartService
      */
     public function getCartTotalItems(): int
     {
-        $cart = Session::get('cart', []);
+        $cart = getGuestCartItems();
         $total = 0;
 
         foreach ($cart as $item) {

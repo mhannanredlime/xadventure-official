@@ -20,6 +20,7 @@ class CartController extends Controller
      */
     public function getCartCount(Request $request)
     {
+        // dd($this->cartService->getCartCount());
         return response()->json([
             'cart_count' => $this->cartService->getCartCount(),
             'cart_total_items' => $this->cartService->getCartTotalItems(),
