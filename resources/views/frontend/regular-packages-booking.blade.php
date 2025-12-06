@@ -99,7 +99,7 @@
 
                 <!-- Order Summary & Date/Time Selection -->
                 <div class="col-lg-12">
-                    <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card shadow-sm">
                         <div class="card-body">
                             <!-- ----------------- Calendar Section ----------------- -->
                             <div class="date-selection mb-4">
@@ -407,6 +407,15 @@
 
 @push('styles')
     <style>
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.8) !important;
+            backdrop-filter: blur(10px);
+            position: fixed !important;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
         /* Calendar & Time Slots CSS */
         .object-fit-cover {
             object-fit: cover;
