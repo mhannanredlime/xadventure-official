@@ -86,7 +86,7 @@ class PackageController extends Controller
             ->orderByRaw("CASE WHEN name LIKE '%ATV%' THEN 1 WHEN name LIKE '%UTV%' THEN 2 ELSE 3 END")
             ->orderBy('created_at', 'desc')
             ->get();
-       
+
         // Get schedule slots for time selection
         $scheduleSlots = ScheduleSlot::where('is_active', true)
             ->orderBy('start_time')

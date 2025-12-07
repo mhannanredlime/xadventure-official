@@ -6,17 +6,17 @@
 class MultipleImageUpload {
     constructor(containerId, options = {}) {
         this.container = document.getElementById(containerId);
-
+        
         this.options = {
             maxFiles: options.maxFiles || 10,
             maxFileSize: options.maxFileSize || 5 * 1024 * 1024, // 5MB
             acceptedTypes: options.acceptedTypes || [
-                'image/jpeg',
-                'image/png',
-                'image/jpg',
-                'image/gif',
-                'image/webp',
-                'image/bmp',
+                'image/jpeg', 
+                'image/png', 
+                'image/jpg', 
+                'image/gif', 
+                'image/webp', 
+                'image/bmp', 
                 'image/svg+xml',
                 'image/tiff',
                 'image/avif',
@@ -26,7 +26,7 @@ class MultipleImageUpload {
             uploadUrl: options.uploadUrl || null,
             ...options
         };
-
+        
         // Get URLs from data attributes
         this.urls = {
             images: this.container.dataset.imagesUrl,
@@ -35,7 +35,7 @@ class MultipleImageUpload {
             altText: this.container.dataset.altTextUrl,
             delete: this.container.dataset.deleteUrl
         };
-
+        
         this.files = [];
         this.uploadedImages = [];
         this.init();
@@ -54,7 +54,7 @@ class MultipleImageUpload {
     loadExistingImages() {
         // First try to load from data attribute (server-side)
         const existingImagesData = this.container.dataset.existingImages;
-
+        
         if (existingImagesData) {
             try {
                 const images = JSON.parse(existingImagesData);
@@ -63,7 +63,7 @@ class MultipleImageUpload {
                     images.forEach(image => {
                         this.addExistingImage(image);
                     });
-
+                    
                     // Check for primary image and update main preview
                     const primaryImage = images.find(img => img.is_primary);
                     if (primaryImage) {
@@ -92,7 +92,7 @@ class MultipleImageUpload {
         // Get model type and ID from data attributes
         const modelType = this.container.dataset.modelType;
         const modelId = this.container.dataset.modelId;
-
+        
         if (modelType && modelId && this.urls.images) {
             // Fetch existing images from server
             fetch(`${this.urls.images}?model_type=${encodeURIComponent(modelType)}&model_id=${modelId}`, {
@@ -115,7 +115,7 @@ class MultipleImageUpload {
                         data.images.forEach(image => {
                             this.addExistingImage(image);
                         });
-
+                        
                         // If no primary image is set, use the first image as main preview
                         const primaryImage = data.images.find(img => img.is_primary);
                         if (!primaryImage && data.images.length > 0) {
@@ -129,14 +129,14 @@ class MultipleImageUpload {
         }
     }
 
-    createUploadArea() {
+        createUploadArea() {
         this.container.innerHTML = `
             <div class="multiple-image-upload-area">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <h6 class="mb-3">Main Image</h6>
-                        <div class="image-preview-box" style="position: relative; border: 2px dashed #ccc; border-radius: 8px; overflow: hidden; background-color: #f8f9fa;">
-                            <div id="main-preview-${this.container.id}" style="width: 100%; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 16px;">
+                        <div class="image-preview-box" style="position: relative; border: 2px dashed #ccc; border-radius: 8px; overflow: hidden; height: 300px; background-color: #f8f9fa;">
+                            <div id="main-preview-${this.container.id}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 16px;">
                                 <div style="text-align: center;">
                                     <i class="fa fa-image fa-4x mb-3"></i>
                                     <p>No image selected</p>
@@ -226,7 +226,7 @@ class MultipleImageUpload {
 
     handleFiles(fileList) {
         const files = Array.from(fileList);
-
+        
         files.forEach(file => {
             if (this.validateFile(file)) {
                 this.addFile(file);
@@ -273,7 +273,7 @@ class MultipleImageUpload {
         const reader = new FileReader();
         reader.onload = (e) => {
             const previewId = `preview-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
+            
             const previewHtml = `
                 <div class="additional-image-item" id="${previewId}" style="position: relative; margin-bottom: 10px; margin-right: 10px; display: inline-block;">
                     <div style="width: 300px; height: 300px; border-radius: 8px; overflow: hidden; position: relative;">
@@ -286,14 +286,14 @@ class MultipleImageUpload {
                     </div>
                 </div>
             `;
-
+            
             // Insert before the add-more box
             const addMoreBox = this.additionalImagesGrid.querySelector('.add-more-box');
             this.additionalImagesGrid.insertBefore(
                 this.createElementFromHTML(previewHtml),
                 addMoreBox
             );
-
+            
             // Bind remove event
             const removeBtn = document.querySelector(`#${previewId} .remove-image`);
             removeBtn.addEventListener('click', () => {
@@ -317,7 +317,7 @@ class MultipleImageUpload {
 
     createGalleryPreview(galleryImage) {
         const previewId = `gallery-preview-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
+        
         const previewHtml = `
             <div class="additional-image-item" id="${previewId}" style="position: relative; margin-bottom: 10px; margin-right: 10px; display: inline-block;">
                 <div style="width: 300px; height: 300px; border-radius: 8px; overflow: hidden; position: relative;">
@@ -333,14 +333,14 @@ class MultipleImageUpload {
                 </div>
             </div>
         `;
-
+        
         // Insert before the add-more box
         const addMoreBox = this.additionalImagesGrid.querySelector('.add-more-box');
         this.additionalImagesGrid.insertBefore(
             this.createElementFromHTML(previewHtml),
             addMoreBox
         );
-
+        
         // Bind remove event
         const removeBtn = document.querySelector(`#${previewId} .remove-image`);
         removeBtn.addEventListener('click', (e) => {
@@ -397,7 +397,7 @@ class MultipleImageUpload {
     removeFile(fileName) {
         // Remove from files array
         this.files = this.files.filter(file => file.name !== fileName);
-
+        
         // Remove the specific preview element
         const previewElement = document.querySelector(`[data-file="${fileName}"]`);
         if (previewElement) {
@@ -406,7 +406,7 @@ class MultipleImageUpload {
                 imageItem.remove();
             }
         }
-
+        
         // Update main preview only if we removed the first file
         if (this.files.length > 0) {
             this.updateMainPreviewWithGalleryImage();
@@ -424,7 +424,7 @@ class MultipleImageUpload {
     removeGalleryImage(fileName, galleryId) {
         // Remove from files array
         this.files = this.files.filter(file => file.name !== fileName);
-
+        
         // Remove the specific preview element
         const previewElement = document.querySelector(`[data-file="${fileName}"]`);
         if (previewElement) {
@@ -433,7 +433,7 @@ class MultipleImageUpload {
                 imageItem.remove();
             }
         }
-
+        
         // Update main preview only if we removed the first file
         if (this.files.length > 0) {
             this.updateMainPreviewWithGalleryImage();
@@ -452,27 +452,27 @@ class MultipleImageUpload {
         // Clear all previews
         const additionalItems = this.additionalImagesGrid.querySelectorAll('.additional-image-item');
         additionalItems.forEach(item => item.remove());
-
+        
         // Recreate previews
         this.files.forEach(file => {
             this.createPreview(file);
         });
-
+        
         // Update main preview
         this.updateMainPreview();
     }
 
     addExistingImage(image) {
         const imageId = `existing-${image.id}`;
-
+        
         const imageHtml = `
             <div class="additional-image-item" id="${imageId}" style="position: relative; margin-bottom: 10px; margin-right: 10px; display: inline-block;">
                 <div style="width: 300px; height: 300px; border-radius: 8px; overflow: hidden; position: relative;">
                     <img src="${image.url}" alt="${image.alt_text || 'Image'}" style="width: 100%; height: 100%; object-fit: cover;">
                     <div class="image-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
                         <div class="btn-group btn-group-sm">
-                            ${image.is_primary ? '<span class="badge bg-primary" style="font-size: 12px; padding: 4px 8px;">Primary</span>' :
-                '<button type="button" class="btn btn-sm btn-outline-primary set-primary" data-image-id="' + image.id + '" style="font-size: 12px; padding: 4px 8px;">Set Primary</button>'}
+                            ${image.is_primary ? '<span class="badge bg-primary" style="font-size: 12px; padding: 4px 8px;">Primary</span>' : 
+                              '<button type="button" class="btn btn-sm btn-outline-primary set-primary" data-image-id="' + image.id + '" style="font-size: 12px; padding: 4px 8px;">Set Primary</button>'}
                             <button type="button" class="btn btn-sm btn-outline-danger delete-image" data-image-id="${image.id}" style="font-size: 12px; padding: 4px 8px;">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -481,21 +481,21 @@ class MultipleImageUpload {
                 </div>
             </div>
         `;
-
+        
         // Insert before the add-more box
         const addMoreBox = this.additionalImagesGrid.querySelector('.add-more-box');
         this.additionalImagesGrid.insertBefore(
             this.createElementFromHTML(imageHtml),
             addMoreBox
         );
-
+        
         // Update main preview if this is the primary image
         if (image.is_primary) {
             setTimeout(() => {
                 this.updateMainPreviewWithExistingImage(image);
             }, 200);
         }
-
+        
         // Bind events
         const setPrimaryBtn = document.querySelector(`#${imageId} .set-primary`);
         if (setPrimaryBtn) {
@@ -503,19 +503,19 @@ class MultipleImageUpload {
                 this.setPrimaryImage(image.id);
             });
         }
-
+        
         const deleteBtn = document.querySelector(`#${imageId} .delete-image`);
         deleteBtn.addEventListener('click', () => {
             this.deleteImage(image.id);
         });
-
+        
         // Hover effects
         const imageItem = document.querySelector(`#${imageId}`);
         imageItem.addEventListener('mouseenter', () => {
             const overlay = imageItem.querySelector('.image-overlay');
             if (overlay) overlay.style.opacity = '1';
         });
-
+        
         imageItem.addEventListener('mouseleave', () => {
             const overlay = imageItem.querySelector('.image-overlay');
             if (overlay) overlay.style.opacity = '0';
@@ -527,12 +527,12 @@ class MultipleImageUpload {
         if (!this.mainPreview) {
             this.mainPreview = document.getElementById(`main-preview-${this.container.id}`);
         }
-
+        
         if (this.mainPreview) {
-
+            
             // Clear the main preview area first
             this.mainPreview.innerHTML = '';
-
+            
             // Create a new image element
             const img = document.createElement('img');
             img.src = image.url;
@@ -543,7 +543,7 @@ class MultipleImageUpload {
             img.style.display = 'block';
             img.style.position = 'relative';
             img.style.zIndex = '2';
-
+            
             // Add error handling for image loading
             img.onerror = () => {
                 this.mainPreview.innerHTML = `
@@ -554,10 +554,10 @@ class MultipleImageUpload {
                     </div>
                 `;
             };
-
+            
             // Append the image to the main preview area
             this.mainPreview.appendChild(img);
-
+            
             // Also update the main preview area style to ensure it's visible
             this.mainPreview.style.display = 'block';
             this.mainPreview.style.position = 'absolute';
@@ -570,7 +570,7 @@ class MultipleImageUpload {
                 '.image-preview-box div[id*="main-preview"]',
                 '.image-preview-box > div:first-child'
             ];
-
+            
             for (const selector of alternativeSelectors) {
                 const element = document.querySelector(selector);
                 if (element) {
@@ -579,7 +579,7 @@ class MultipleImageUpload {
                     return;
                 }
             }
-
+            
             // If still not found, try to find it by looking for the container and then the preview
             const container = document.getElementById(this.container.id);
             if (container) {
@@ -605,34 +605,34 @@ class MultipleImageUpload {
                 'Content-Type': 'application/json',
             }
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    this.showSuccess('Primary image updated successfully.');
-                    location.reload(); // Refresh to update UI
-                } else {
-                    this.showError(data.message || 'Failed to update primary image.');
-                }
-            })
-            .catch(error => {
-                this.showError('An error occurred while updating primary image.');
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                this.showSuccess('Primary image updated successfully.');
+                location.reload(); // Refresh to update UI
+            } else {
+                this.showError(data.message || 'Failed to update primary image.');
+            }
+        })
+        .catch(error => {
+            this.showError('An error occurred while updating primary image.');
+        });
     }
 
     deleteImage(imageId) {
         console.log('deleteImage called with imageId:', imageId);
-
+        
         // Prevent multiple calls for the same image
         if (this.deletingImages && this.deletingImages.has(imageId)) {
             console.log('Already deleting image:', imageId);
             return;
         }
-
+        
         if (!this.deletingImages) {
             this.deletingImages = new Set();
         }
         this.deletingImages.add(imageId);
-
+        
         // Use native confirm for now to test if the issue is with the modal system
         if (confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
             console.log('Native confirm confirmed, calling performDeleteImage with:', imageId);
@@ -646,7 +646,7 @@ class MultipleImageUpload {
     performDeleteImage(imageId) {
         const url = this.urls.delete.replace(':id', imageId);
         console.log('performDeleteImage called with:', { imageId, url, deleteUrl: this.urls.delete });
-
+        
         fetch(url, {
             method: 'DELETE',
             headers: {
@@ -655,46 +655,46 @@ class MultipleImageUpload {
                 'Content-Type': 'application/json',
             }
         })
-            .then(response => {
-                console.log('Delete response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Delete response data:', data);
-                if (data.success) {
-                    this.showSuccess('Image deleted successfully.');
-                    const imageElement = document.querySelector(`#existing-${imageId}`);
-                    console.log('Looking for image element with selector:', `#existing-${imageId}`, 'Found:', imageElement);
-                    if (imageElement) {
-                        // Check if this was the primary image
-                        const isPrimary = imageElement.querySelector('.badge.bg-primary');
-                        console.log('Is primary image:', !!isPrimary);
-                        imageElement.remove();
-
-                        // If this was the primary image, update main preview
-                        if (isPrimary) {
-                            this.updateMainPreviewAfterDeletion();
-                        }
-                    } else {
-                        console.warn('Image element not found for deletion');
+        .then(response => {
+            console.log('Delete response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Delete response data:', data);
+            if (data.success) {
+                this.showSuccess('Image deleted successfully.');
+                const imageElement = document.querySelector(`#existing-${imageId}`);
+                console.log('Looking for image element with selector:', `#existing-${imageId}`, 'Found:', imageElement);
+                if (imageElement) {
+                    // Check if this was the primary image
+                    const isPrimary = imageElement.querySelector('.badge.bg-primary');
+                    console.log('Is primary image:', !!isPrimary);
+                    imageElement.remove();
+                    
+                    // If this was the primary image, update main preview
+                    if (isPrimary) {
+                        this.updateMainPreviewAfterDeletion();
                     }
                 } else {
-                    this.showError(data.message || 'Failed to delete image.');
+                    console.warn('Image element not found for deletion');
                 }
-            })
-            .catch(error => {
-                console.error('Delete error:', error);
-                this.showError('An error occurred while deleting image: ' + error.message);
-            })
-            .finally(() => {
-                // Remove from deleting set
-                if (this.deletingImages) {
-                    this.deletingImages.delete(imageId);
-                }
-            });
+            } else {
+                this.showError(data.message || 'Failed to delete image.');
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            this.showError('An error occurred while deleting image: ' + error.message);
+        })
+        .finally(() => {
+            // Remove from deleting set
+            if (this.deletingImages) {
+                this.deletingImages.delete(imageId);
+            }
+        });
     }
 
     updateMainPreviewAfterDeletion() {
@@ -730,17 +730,17 @@ class MultipleImageUpload {
             },
             body: JSON.stringify({ alt_text: altText })
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    this.showSuccess('Alt text updated successfully.');
-                } else {
-                    this.showError(data.message || 'Failed to update alt text.');
-                }
-            })
-            .catch(error => {
-                this.showError('An error occurred while updating alt text.');
-            });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                this.showSuccess('Alt text updated successfully.');
+            } else {
+                this.showError(data.message || 'Failed to update alt text.');
+            }
+        })
+        .catch(error => {
+            this.showError('An error occurred while updating alt text.');
+        });
     }
 
     getFiles() {
@@ -785,7 +785,7 @@ class MultipleImageUpload {
 
     // Force update main preview with any available image
     forceUpdateMainPreview() {
-
+        
         // First try to find a primary image
         const primaryImageElement = document.querySelector('.additional-image-item .badge.bg-primary');
         if (primaryImageElement) {
@@ -801,7 +801,7 @@ class MultipleImageUpload {
                 return;
             }
         }
-
+        
         // If no primary image, use the first available image
         const firstImageElement = document.querySelector('.additional-image-item img');
         if (firstImageElement) {
@@ -839,7 +839,7 @@ class MultipleImageUpload {
                 galleryId: image.id,
                 url: image.url
             };
-
+            
             // Add to the upload component
             this.addGalleryImage(mockFile);
         });
@@ -847,19 +847,19 @@ class MultipleImageUpload {
 }
 
 // Initialize multiple image upload for all containers with class 'multiple-image-upload'
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const containers = document.querySelectorAll('#multiple-image-upload');
-
+    
     containers.forEach((container, index) => {
         const instance = new MultipleImageUpload(container.id, {
             maxFiles: parseInt(container.dataset.maxFiles) || 10,
             maxFileSize: parseInt(container.dataset.maxFileSize) || 2 * 1024 * 1024
         });
-
+        
         // Store instance globally for form submission and testing
         window.multipleImageUploadInstance = instance;
         window[`multipleImageUploadInstance_${index}`] = instance;
-
+        
         // Add a final fallback to ensure main preview is updated
         setTimeout(() => {
             if (instance && typeof instance.forceUpdateMainPreview === 'function') {

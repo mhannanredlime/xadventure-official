@@ -80,7 +80,7 @@ Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Package routes
-Route::get('/atv-utv-packages', [FrontendPackageController::class, 'index'])->name('frontend.packages.index');
+Route::get('/packages', [FrontendPackageController::class, 'index'])->name('frontend.packages.index');
 Route::get('/atv-utv', [FrontendPackageController::class, 'atvUtvPage'])->name('frontend.atv-utv');
 Route::get('/packages/{package}', [FrontendPackageController::class, 'show'])->name('frontend.packages.show');
 Route::get('/api/variants', [FrontendPackageController::class, 'getVariants'])->name('frontend.packages.variants');

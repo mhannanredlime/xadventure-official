@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -45,7 +44,8 @@ class LoginController extends Controller
             ]);
 
             // Check if user exists
-            $user = User::where('email', $credentials['email'])->first();
+            $user = \App\Models\User::where('email', $credentials['email'])->first();
+            
             if (!$user) {
                 return back()->withErrors([
                     'email' => 'No account found with this email address.',
@@ -61,7 +61,7 @@ class LoginController extends Controller
                     ])->withInput($request->only('email'));
                 }
             }
-            
+
             // Attempt authentication
             if (Auth::attempt($credentials, $request->boolean('remember'))) {
                 $request->session()->regenerate();
@@ -70,9 +70,12 @@ class LoginController extends Controller
                 Log::info('Admin login successful', [
                     'user_id' => $user->id,
                     'email' => $user->email,
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
                 ]);
 
-                return redirect()->intended('/admin/reservation-dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
+                return redirect()->intended('/admin/reservation-dashboard')
+                    ->with('success', 'Welcome back, ' . $user->name . '!');
             }
 
             // Failed authentication

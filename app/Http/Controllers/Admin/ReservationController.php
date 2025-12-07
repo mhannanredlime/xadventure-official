@@ -22,7 +22,6 @@ class ReservationController extends Controller
      */
     public function index(Request $request)
     {
-
         $query = Reservation::with(['customer', 'packageVariant.package', 'scheduleSlot']);
 
         // Date range filtering
@@ -87,7 +86,7 @@ class ReservationController extends Controller
         $packageVariants = PackageVariant::with('package')->where('is_active', true)->get();
         $scheduleSlots = ScheduleSlot::orderBy('sort_order')->get();
         $vehicleTypes = \App\Models\VehicleType::where('is_active', true)->orderBy('name')->get();
-        
+
         return view('admin.reservation-dashboard', compact('reservations', 'groupedReservations', 'customers', 'packageVariants', 'scheduleSlots', 'vehicleTypes'));
     }
 
