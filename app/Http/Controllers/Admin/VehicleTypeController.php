@@ -47,7 +47,7 @@ class VehicleTypeController extends Controller
 
                     // Add image validation - support all common image formats including WebP
             $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
             ]);
 
         $vehicleType = VehicleType::create($validated);
@@ -112,7 +112,7 @@ class VehicleTypeController extends Controller
 
             // Add image validation - support all common image formats including WebP
             $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
             ]);
 
             Log::info('Validation passed, updating vehicle type');

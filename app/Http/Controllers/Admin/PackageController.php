@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AtvUtvPackageRequest;
+use App\Http\Requests\PackageStoreRequest;
+use App\Http\Requests\PackageUpdateRequest;
 use App\Http\Requests\RegularPackageStoreUpdateRequest;
 use App\Models\Package;
 use App\Models\PackagePrice;
@@ -63,20 +65,9 @@ class PackageController extends Controller
         return view('admin.add-packege-management', compact('packages', 'vehicleTypes'));
     }
 
-    public function store(Request $request)
+    public function store(PackageStoreRequest $request)
     {
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'type' => 'required|in:regular,atv,utv',
-            'min_participants' => 'required|integer|min:1',
-            'max_participants' => 'required|integer|min:1|gte:min_participants',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'boolean',
-            'vehicle_type_ids' => 'array',
-            'vehicle_type_ids.*' => 'exists:vehicle_types,id',
-        ]);
+        $validated = $request->validated();
 
         $vehicleTypeIds = $validated['vehicle_type_ids'] ?? [];
         unset($validated['vehicle_type_ids']);
@@ -85,7 +76,7 @@ class PackageController extends Controller
 
         if ($request->hasFile('images')) {
             $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120',
+                'images.*' => 'nullable|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120',
             ]);
 
             $imageService = new ImageService;
@@ -358,19 +349,9 @@ class PackageController extends Controller
         return view('admin.regular-packege-management', compact('package'));
     }
 
-    public function update(Request $request, Package $package)
+    public function update(PackageUpdateRequest $request, Package $package)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'subtitle' => 'nullable|string|max:255',
-            'type' => 'required|in:regular,atv,utv',
-            'min_participants' => 'required|integer|min:1',
-            'max_participants' => 'required|integer|min:1|gte:min_participants',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'is_active' => 'boolean',
-            'vehicle_type_ids' => 'array',
-            'vehicle_type_ids.*' => 'exists:vehicle_types,id',
-        ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('image')) {
             if ($package->image_path) {

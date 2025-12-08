@@ -69,7 +69,7 @@ class VehicleController extends Controller
             if ($request->hasFile('images')) {
                 // Validate image formats
                 $request->validate([
-                    'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
+                    'images.*' => 'nullable|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
                 ]);
                 
                 $imageService = new ImageService();
@@ -139,7 +139,7 @@ class VehicleController extends Controller
             if ($request->hasFile('images')) {
                 // Validate image formats
                 $request->validate([
-                    'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
+                    'images.*' => 'nullable|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
                 ]);
                 
                 $imageService = new ImageService();

@@ -76,7 +76,7 @@ class Vehicle extends Model
             'details' => 'nullable|string',
             'op_start_date' => 'nullable|date_format:Y-m-d',
             'is_active' => 'boolean',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg |max:2048'
         ];
     }
 

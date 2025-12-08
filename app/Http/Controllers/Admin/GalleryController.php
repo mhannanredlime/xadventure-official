@@ -38,7 +38,7 @@ class GalleryController extends Controller
     public function upload(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120', // 5MB max
+            'images.*' => 'required|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120', // 5MB max
         ]);
 
         if ($validator->fails()) {

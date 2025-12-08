@@ -33,7 +33,7 @@
                     <a class="nav-link {{ request()->is('admin/reservation-dashboard') ? 'active' : '' }}"
                         href="{{ url('/admin/reservation-dashboard') }}">
                         <i class="bi bi-clipboard-check"></i>
-                        <span class="menu-text">Reservation Dashboard</span>
+                        <span class="menu-text">Reservations Dashboard</span>
                     </a>
                 </li>
             @endcan
@@ -43,7 +43,7 @@
                     <a class="nav-link {{ request()->is('admin/view-reservation-dashboard') ? 'active' : '' }}"
                         href="{{ url('/admin/view-reservation-dashboard') }}">
                         <i class="bi bi-clock-history"></i>
-                        <span class="menu-text">Reservation History</span>
+                        <span class="menu-text">Reservations</span>
                     </a>
                 </li>
             @endcan
@@ -53,7 +53,7 @@
                     <a class="nav-link {{ request()->is('admin/customer/contacts') ? 'active' : '' }}"
                         href="{{ url('/admin/customer/contacts') }}">
                         <i class="bi bi-clock-history"></i>
-                        <span class="menu-text">Contact Messages</span>
+                        <span class="menu-text">Messages</span>
                     </a>
                 </li>
             @endcan
@@ -63,7 +63,7 @@
                     <a class="nav-link {{ request()->is('admin/calendar*') ? 'active' : '' }}"
                         href="{{ url('/admin/calendar') }}">
                         <i class="bi bi-calendar-event"></i>
-                        <span class="menu-text">Availability & Pricing Setup</span>
+                        <span class="menu-text">Calendar</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -75,51 +75,51 @@
                 </li>
             @endcan
             {{-- Package Management --}}
-           @can('packages.view')
-    <li class="nav-item">
-        <a href="#sampleSubmenu"
-            class="nav-link d-flex justify-content-between align-items-center 
+            @can('packages.view')
+                <li class="nav-item">
+                    <a href="#sampleSubmenu"
+                        class="nav-link d-flex justify-content-between align-items-center 
             {{ request()->is('admin/packege/list') || request()->is('admin/regular-packege-management') || request()->is('admin/atvutv-packege-management') ? 'active' : '' }}"
-            data-bs-toggle="collapse"
-            aria-expanded="{{ request()->is('admin/packege/list') || request()->is('admin/regular-packege-management') || request()->is('admin/atvutv-packege-management') ? 'true' : 'false' }}">
-            <div>
-                <i class="bi bi-menu-button-wide me-2"></i>
-                <span>Package Management</span>
-            </div>
-            <i class="bi bi-chevron-down"></i>
-        </a>
+                        data-bs-toggle="collapse"
+                        aria-expanded="{{ request()->is('admin/packege/list') || request()->is('admin/regular-packege-management') || request()->is('admin/atvutv-packege-management') ? 'true' : 'false' }}">
+                        <div>
+                            <i class="bi bi-menu-button-wide me-2"></i>
+                            <span>Package Management</span>
+                        </div>
+                        <i class="bi bi-chevron-down"></i>
+                    </a>
 
-        <ul class="collapse list-unstyled ps-3 
+                    <ul class="collapse list-unstyled ps-3 
             {{ request()->is('admin/packege/list') || request()->is('admin/regular-packege-management') || request()->is('admin/atvutv-packege-management') ? 'show' : '' }}"
-            id="sampleSubmenu">
+                        id="sampleSubmenu">
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('admin.packege.list') }}">
-                    <i class="bi bi-circle me-2"></i>All Packages
-                </a>
-            </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.packege.list') }}">
+                                <i class="bi bi-circle me-2"></i>All Packages
+                            </a>
+                        </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('/admin/regular-packege-management') }}">
-                    <i class="bi bi-circle me-2"></i>Regular Package
-                </a>
-            </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url('/admin/regular-packege-management') }}">
+                                <i class="bi bi-circle me-2"></i>Regular Package
+                            </a>
+                        </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url('admin/atvutv-packege-management') }}">
-                    <i class="bi bi-circle me-2"></i>Add ATV/UTV Package
-                </a>
-            </li>
-        </ul>
-    </li>
-@endcan
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url('admin/atvutv-packege-management') }}">
+                                <i class="bi bi-circle me-2"></i>Add ATV/UTV Package
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endcan
 
 
             {{-- Vehicle Management --}}
             @can('vehicle-types.view')
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('admin/vehical-setup*') || request()->is('admin/vehicle-types*') ? 'active' : '' }}"
-                        href="{{ url('/admin/vehical-setup') }}">
+                    <a class="nav-link {{ request()->is('admin/vehicle-setup*') || request()->is('admin/vehicle-types*') ? 'active' : '' }}"
+                        href="{{ url('/admin/vehicle-setup') }}">
                         <i class="bi bi-truck"></i>
                         <span class="menu-text">Vehicle Type Setup</span>
                     </a>
@@ -127,8 +127,8 @@
             @endcan
             @can('vehicles.view')
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('admin/vehical-management*') || request()->is('admin/vehicles*') ? 'active' : '' }}"
-                        href="{{ url('/admin/vehical-management') }}">
+                    <a class="nav-link {{ request()->is('admin/vehicle-management*') || request()->is('admin/vehicles*') ? 'active' : '' }}"
+                        href="{{ url('/admin/vehicle-management') }}">
                         <i class="bi bi-gear"></i>
                         <span class="menu-text">Vehicle Management</span>
                     </a>
