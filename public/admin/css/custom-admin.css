@@ -2249,3 +2249,291 @@ form.filter-controls {
     max-width: 120px;
     height: auto;
 }
+
+.hover-scale {
+    transition: transform 0.2s;
+}
+.hover-scale:hover {
+    transform: scale(1.1);
+}
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.role-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.permission-module {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+.module-title {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #007bff;
+}
+.form-check {
+    margin-bottom: 0.5rem;
+}
+.form-check-label {
+    cursor: pointer;
+}
+
+.permission-item {
+    padding: 0.5rem 0;
+}
+
+/* 
+===========================
+Professional Dashboard Styles 
+(Ported from Vehicle Management)
+=========================== */
+
+/* Dashboard Headers & Actions */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-header h1, 
+.dashboard-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-add-new {
+    background-color: var(--orange-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-add-new:hover {
+    background-color: #e55c19;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-filter {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    color: var(--text-color);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+}
+
+/* Professional Table Container */
+.table-container {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    margin-bottom: 2rem;
+}
+
+.table-responsive {
+    margin: 0;
+}
+
+/* Table Styling */
+.table thead th {
+    border-bottom: 2px solid #f1f3f5;
+    color: var(--secondary-text-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #f1f3f5;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Action Icons */
+.action-icons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.action-icons .btn-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: var(--secondary-text-color);
+    transition: all 0.2s ease;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+.action-icons .btn-icon:hover {
+    background-color: #f1f3f5;
+    color: var(--orange-color);
+    transform: translateY(-2px);
+}
+
+.action-icons .btn-icon.text-danger:hover {
+    color: #dc3545;
+    background-color: #ffe6e6;
+}
+
+.action-icons .btn-icon.text-info:hover {
+    color: #0dcaf0;
+    background-color: #e0faff;
+}
+
+.action-icons i {
+    font-size: 1.1rem;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.35em 0.8em;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active, 
+.badge-success {
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+}
+
+.status-inactive, 
+.badge-danger {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+}
+
+.badge-info {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+}
+
+.badge-warning {
+    background-color: #ffedd5 !important;
+    color: #9a3412 !important;
+}
+
+.badge-secondary {
+    background-color: #f3f4f6 !important;
+    color: #4b5563 !important;
+}
+
+/* Responsive Stacked Table (Mobile) */
+@media (max-width: 767.98px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .table-container {
+        padding: 1rem;
+    }
+
+    table.responsive-stacked thead { 
+        display: none; 
+    }
+    
+    table.responsive-stacked tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    table.responsive-stacked tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem !important;
+        border-bottom: 1px solid #f1f3f5;
+        text-align: right;
+    }
+    
+    table.responsive-stacked tbody td:last-child { 
+        border-bottom: none; 
+        justify-content: flex-end;
+    }
+    
+    table.responsive-stacked tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--secondary-text-color);
+        margin-right: 1rem;
+        text-align: left;
+        flex-shrink: 0;
+    }
+
+    .action-icons {
+        justify-content: flex-end;
+    }
+}

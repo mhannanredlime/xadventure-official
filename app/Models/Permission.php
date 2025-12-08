@@ -14,6 +14,7 @@ class Permission extends SpatiePermission
         'slug',
         'description',
         'module',
+        'guard_name',
     ];
 
     // roles() is provided by Spatie

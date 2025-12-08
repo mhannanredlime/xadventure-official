@@ -63,7 +63,7 @@ class PackageController extends Controller
 
     public function create()
     {
-        $packages = Package::with(['variants.prices', 'vehicleTypes.images', 'images'])->orderBy('name')->get();
+        $packages = Package::with(['vehicleTypes.images', 'images'])->orderBy('name')->get();
         
         $vehicleTypes = Cache::remember('active_vehicle_types', 120, function () {
             return VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
@@ -229,12 +229,12 @@ class PackageController extends Controller
         $data['page_title'] = 'Create ATV/UTV Package';
         $data['page_desc'] = 'Create ATV/UTV Package';
 
-        $data['vehicleTypes'] = \Illuminate\Support\Facades\Cache::remember('active_vehicle_types', 3600, function () {
+        $data['vehicleTypes'] = Cache::remember('active_vehicle_types', 3600, function () {
             return VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
         });
 
         $data['package'] = null;
-        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types_atv', 3600, function () {
+        $data['packageTypes'] = Cache::remember('parent_package_types_atv', 3600, function () {
             return PackageType::whereNotNull('parent_id')->active()->get();
         });
         $data['days'] = weekDays();
@@ -252,7 +252,7 @@ class PackageController extends Controller
         $data['page_title'] = 'Edit ATV/UTV Package';
         $data['page_desc'] = 'Edit ATV/UTV Package';
 
-        $data['vehicleTypes'] = \Illuminate\Support\Facades\Cache::remember('active_vehicle_types', 3600, function () {
+        $data['vehicleTypes'] = Cache::remember('active_vehicle_types', 3600, function () {
             return VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
         });
 
@@ -359,9 +359,32 @@ class PackageController extends Controller
 
     public function editRegular(Package $package)
     {
-        $package->load(['variants.prices', 'images']);
+        $data['package'] = $package;
+        $data['page_title'] = 'Edit Regular Package';
+        $data['page_desc'] = 'Update Package Details';
 
-        return view('admin.regular-packege-management', compact('package'));
+        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types', 3600, function () {
+            return PackageType::whereNotNull('parent_id')->active()->get();
+        });
+        
+        $data['days'] = weekDays();
+
+        // Build array of existing prices
+        $existingPrices = [];
+        foreach ($package->packagePrices as $price) {
+            $existingPrices[$price->day] = $price->price;
+        }
+
+        // Ensure all days have at least null values
+        foreach ($data['days'] as $day) {
+            if (! isset($existingPrices[$day])) {
+                $existingPrices[$day] = null;
+            }
+        }
+
+        $data['dayPrices'] = $existingPrices; // Pass as array
+
+        return view('admin.package.regular.regular-edit', $data);
     }
 
     public function update(PackageUpdateRequest $request, Package $package)
@@ -394,7 +417,7 @@ class PackageController extends Controller
             Storage::disk('public_storage')->delete($package->image_path);
         }
         $package->packagePrices()->delete();
-        $package->variants()->delete();
+        // $package->variants()->delete();
         $package->delete();
         ToastMagic::success('Package deleted successfully!');
 

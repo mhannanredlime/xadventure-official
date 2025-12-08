@@ -209,12 +209,14 @@
                         <a class="nav-link " href="/#" id="packagesDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">Package</a>
                         <ul class="dropdown-menu" aria-labelledby="packagesDropdown">
-                            <li><a class="dropdown-item" href="{{ route('custom-packages') }}">Regular Package</a></li>
-                            <li><a class="dropdown-item" href="{{ route('frontend.atv-utv-landing-page') }}">ATV-UTV Package</a>
+                            <li><a class="dropdown-item" href="{{ route('packages.custom.index') }}">Regular
+                                    Package</a></li>
+                            <li><a class="dropdown-item" href="{{ route('packages.atv-utv.landing') }}">ATV-UTV
+                                    Package</a>
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('contact') }}">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('contact.index') }}">Contact</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-1 gap-md-3">
                     {{-- <a href="{{ url('/shopping-cart') }}"
@@ -228,7 +230,7 @@
                             </span>
                         @endif
                     </a> --}}
-                    <a href="{{ url('/regular-packages-booking') }}"
+                    <a href="{{ route('packages.regular.index') }}"
                         style="color: white; text-decoration: none; position: relative;">
                         <i class="fa-solid fa-cart-arrow-down"></i>
                         @if ($cartCount > 0)
@@ -273,7 +275,7 @@
                                 <i class="bi  bi-user-shield"></i> {{ Auth::user()->name }}
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="accountDropdown">
-                                <li><a class="dropdown-item" href="{{ route('admin.reservation-dashboard') }}"><i
+                                <li><a class="dropdown-item" href="{{ route('admin.reservations.index') }}"><i
                                             class="bi  bi-clipboard-check"></i> Admin Dashboard</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.profile.index') }}"><i
                                             class="bi  bi-user-edit"></i> Profile</a></li>
@@ -351,7 +353,7 @@
                         <li><a href="{{ url('/about') }}">About Us</a></li>
                         <li><a href="{{ url('/adventure') }}">Services</a></li>
                         <li><a href="#">Our Team</a></li>
-                        <li><a href="{{ route('contact') }}">Contact</a></li>
+                        <li><a href="{{ route('contact.index') }}">Contact</a></li>
                     </ul>
                 </div>
 
@@ -397,9 +399,10 @@
     </footer>
 
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="{{ versioned_asset('frontEnd/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ versioned_asset('frontEnd/js/custom.js') }}"></script>f
+    <script src="{{ asset('frontEnd/js/alpine-frontend.js') }}"></script>
     <script src="{{ versioned_asset('admin/js/toast-notifications.js') }}"></script>
     <script src="{{ versioned_asset('admin/js/modal-system.js') }}"></script>
 
@@ -469,7 +472,7 @@
 
         // Global function to update cart count
         function updateCartCount() {
-            fetch('{{ route('frontend.cart.count') }}')
+            fetch('{{ route('api.cart.count') }}')
                 .then(response => response.json())
                 .then(data => {
                     // Update navigation cart badge
@@ -540,9 +543,9 @@
 
             // Navigate to the appropriate page based on package type
             if (packageType === 'atv-utv') {
-                window.location.href = '{{ route('frontend.atv-utv-landing-page') }}';
+                window.location.href = '{{ route('packages.atv-utv.landing') }}';
             } else if (packageType === 'regular') {
-                window.location.href = '{{ route('custom-packages') }}';
+                window.location.href = '{{ route('packages.custom.index') }}';
             }
         }
 
@@ -613,13 +616,9 @@
             });
         });
     </script>
-
-
     @stack('scripts')
     {!! ToastMagic::scripts() !!}
 
-
 </body>
-
 
 </html>

@@ -14,6 +14,7 @@ class Role extends SpatieRole
         'slug',
         'description',
         'is_system',
+        'guard_name',
     ];
 
     protected $casts = [

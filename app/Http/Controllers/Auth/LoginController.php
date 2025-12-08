@@ -16,12 +16,12 @@ class LoginController extends Controller
         if (Auth::check()) {
             // Check if user is admin (new system)
             if (Auth::user()->user_type === 'admin') {
-                return redirect()->route('admin.reservation-dashboard')
+                return redirect()->route('admin.reservations.index')
                     ->with('info', 'You are already logged in.');
             }
             // Fallback: Check old is_admin field
             if (Auth::user()->is_admin) {
-                return redirect()->route('admin.reservation-dashboard')
+                return redirect()->route('admin.reservations.index')
                     ->with('info', 'You are already logged in.');
             }
         }
@@ -72,7 +72,7 @@ class LoginController extends Controller
                     'email' => $user->email,
                 ]);
 
-                return redirect()->intended('/admin/reservation-dashboard')->with('success', 'Welcome back, ' . $user->name . '!');
+                return redirect()->intended(route('admin.reservations.index'))->with('success', 'Welcome back, ' . $user->name . '!');
             }
 
             // Failed authentication

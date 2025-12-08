@@ -9,7 +9,6 @@ use App\Models\PriceType;
 use App\Models\VehicleType;
 use App\Models\Image;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class PackageSeeder extends Seeder
@@ -19,13 +18,28 @@ class PackageSeeder extends Seeder
         $this->command->info('Seeding packages...');
 
         try {
-            // Get vehicle types to ensure we use correct IDs
+            // Get vehicle types
             $atvType = VehicleType::where('name', 'ATV')->first();
             $utvType = VehicleType::where('name', 'UTV')->first();
             $regularType = VehicleType::where('name', 'Regular')->first();
 
             if (!$atvType || !$utvType || !$regularType) {
                 throw new \Exception('Vehicle types not found. Please run VehicleTypeSeeder first.');
+            }
+
+            // Get rider types (assuming they're pre-seeded)
+            $singleRider = RiderType::where('slug', 'single-rider')->first();
+            $doubleRider = RiderType::where('slug', 'double-rider')->first();
+            $adventureTour = RiderType::where('slug', 'adventure-tour')->first();
+            $premiumSingle = RiderType::where('slug', 'premium-single')->first();
+            $premiumDouble = RiderType::where('slug', 'premium-double')->first();
+
+            // Get price types
+            $weekdayPriceType = PriceType::where('slug', 'weekday')->first();
+            $weekendPriceType = PriceType::where('slug', 'weekend')->first();
+
+            if (!$weekdayPriceType || !$weekendPriceType) {
+                throw new \Exception('Price types not found. Please run PriceTypeSeeder first.');
             }
 
             $packages = [
@@ -35,26 +49,25 @@ class PackageSeeder extends Seeder
                     'type' => 'atv',
                     'min_participants' => 1,
                     'max_participants' => 10,
+                    'duration_minutes' => 120,
                     'display_starting_price' => 1200.00,
                     'is_active' => true,
-                    // 'selected_weekday' => true,
-                    // 'selected_weekend' => true,
                     'notes' => 'Perfect for adventure seekers looking for an exciting off-road experience.',
                     'details' => 'Our ATV/UTV trail rides offer an unforgettable adventure through scenic trails and challenging terrain.',
                     'vehicle_type_ids' => [$atvType->id, $utvType->id],
-                    'pricing_options' => [
+                    'pricing' => [ // Changed from pricing_options to pricing for clarity
                         [
-                            'rider_type_name' => 'Single Rider',
+                            'rider_type_id' => $singleRider->id,
                             'prices' => [
-                                ['price_type_slug' => 'weekday', 'amount' => 1200.00],
-                                ['price_type_slug' => 'weekend', 'amount' => 1500.00],
+                                ['price_type_id' => $weekdayPriceType->id, 'amount' => 1200.00],
+                                ['price_type_id' => $weekendPriceType->id, 'amount' => 1500.00],
                             ]
                         ],
                         [
-                            'rider_type_name' => 'Double Rider',
+                            'rider_type_id' => $doubleRider->id,
                             'prices' => [
-                                ['price_type_slug' => 'weekday', 'amount' => 1500.00],
-                                ['price_type_slug' => 'weekend', 'amount' => 1800.00],
+                                ['price_type_id' => $weekdayPriceType->id, 'amount' => 1500.00],
+                                ['price_type_id' => $weekendPriceType->id, 'amount' => 1800.00],
                             ]
                         ]
                     ]
@@ -65,10 +78,9 @@ class PackageSeeder extends Seeder
                     'type' => 'regular',
                     'min_participants' => 1,
                     'max_participants' => 10,
+                    'duration_minutes' => 90,
                     'display_starting_price' => 800.00,
                     'is_active' => true,
-                    // 'selected_weekday' => true,
-                    // 'selected_weekend' => true,
                     'notes' => 'Our standard package for regular adventure tours.',
                     'details' => 'Enjoy a standard adventure tour with our regular vehicles.',
                     'vehicle_type_ids' => [$regularType->id],
@@ -83,12 +95,12 @@ class PackageSeeder extends Seeder
                             'alt_text' => 'Regular Package - Main Image',
                         ],
                     ],
-                    'pricing_options' => [
+                    'pricing' => [
                         [
-                            'rider_type_name' => 'Adventure Tour',
+                            'rider_type_id' => $adventureTour->id,
                             'prices' => [
-                                ['price_type_slug' => 'weekday', 'amount' => 800.00],
-                                ['price_type_slug' => 'weekend', 'amount' => 1000.00],
+                                ['price_type_id' => $weekdayPriceType->id, 'amount' => 800.00],
+                                ['price_type_id' => $weekendPriceType->id, 'amount' => 1000.00],
                             ]
                         ]
                     ]
@@ -99,6 +111,7 @@ class PackageSeeder extends Seeder
                     'type' => 'atv',
                     'min_participants' => 1,
                     'max_participants' => 6,
+                    'duration_minutes' => 180,
                     'display_starting_price' => 2000.00,
                     'is_active' => true,
                     'selected_weekday' => true,
@@ -106,19 +119,19 @@ class PackageSeeder extends Seeder
                     'notes' => 'Premium ATV experience with additional features and longer duration.',
                     'details' => 'Experience the ultimate ATV adventure with premium vehicles and extended trail access.',
                     'vehicle_type_ids' => [$atvType->id],
-                    'pricing_options' => [
+                    'pricing' => [
                         [
-                            'rider_type_name' => 'Premium Single',
+                            'rider_type_id' => $premiumSingle->id,
                             'prices' => [
-                                ['price_type_slug' => 'weekday', 'amount' => 2000.00],
-                                ['price_type_slug' => 'weekend', 'amount' => 2500.00],
+                                ['price_type_id' => $weekdayPriceType->id, 'amount' => 2000.00],
+                                ['price_type_id' => $weekendPriceType->id, 'amount' => 2500.00],
                             ]
                         ],
                         [
-                            'rider_type_name' => 'Premium Double',
+                            'rider_type_id' => $premiumDouble->id,
                             'prices' => [
-                                ['price_type_slug' => 'weekday', 'amount' => 2500.00],
-                                ['price_type_slug' => 'weekend', 'amount' => 3000.00],
+                                ['price_type_id' => $weekdayPriceType->id, 'amount' => 2500.00],
+                                ['price_type_id' => $weekendPriceType->id, 'amount' => 3000.00],
                             ]
                         ]
                     ]
@@ -129,10 +142,11 @@ class PackageSeeder extends Seeder
             $updatedPackages = 0;
 
             foreach ($packages as $packageData) {
-                $pricingOptions = $packageData['pricing_options'];
+                $pricing = $packageData['pricing'] ?? [];
                 $vehicleTypeIds = $packageData['vehicle_type_ids'] ?? [];
                 $images = $packageData['images'] ?? [];
-                unset($packageData['pricing_options'], $packageData['vehicle_type_ids'], $packageData['images']);
+                
+                unset($packageData['pricing'], $packageData['vehicle_type_ids'], $packageData['images']);
                 
                 $package = Package::updateOrCreate(
                     ['name' => $packageData['name']],
@@ -165,25 +179,15 @@ class PackageSeeder extends Seeder
                     );
                 }
                 
-                // Create prices (replacing variants)
-                $package->packagePrices()->delete(); // Clear existing prices
+                // Clear existing prices and create new ones
+                $package->packagePrices()->delete();
 
-                foreach ($pricingOptions as $option) {
-                    $riderTypeName = $option['rider_type_name'];
-                    $riderTypeSlug = \Illuminate\Support\Str::slug($riderTypeName);
-                    
-                    $riderType = RiderType::firstOrCreate(
-                        ['slug' => $riderTypeSlug],
-                        ['name' => $riderTypeName]
-                    );
-
-                    foreach ($option['prices'] as $priceData) {
-                        $pt = PriceType::where('slug', $priceData['price_type_slug'])->first();
-                        if (!$pt) continue;
-
-                        $package->packagePrices()->create([
-                            'rider_type_id' => $riderType->id,
-                            'price_type_id' => $pt->id,
+                foreach ($pricing as $pricingOption) {
+                    foreach ($pricingOption['prices'] as $priceData) {
+                        PackagePrice::create([
+                            'package_id' => $package->id,
+                            'rider_type_id' => $pricingOption['rider_type_id'],
+                            'price_type_id' => $priceData['price_type_id'],
                             'price' => $priceData['amount'],
                             'is_active' => true,
                         ]);

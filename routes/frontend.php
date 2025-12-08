@@ -1,20 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Frontend\HomeController;
-use App\Http\Controllers\Frontend\CustomPackageController;
-use App\Http\Controllers\Frontend\RegularPackageBookingController;
-use App\Http\Controllers\Frontend\ContactController;
-use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
-use App\Http\Controllers\Frontend\AutvPackageNewController;
-use App\Http\Controllers\Frontend\BookingController;
-use App\Http\Controllers\Frontend\CartController;
-use App\Http\Controllers\Frontend\BookingReceiptController;
-use App\Http\Controllers\Frontend\CheckoutReceiptController;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Auth\CustomerAuthController;
+use App\Http\Controllers\Frontend\BookingController;
 use App\Http\Controllers\Customer\DashboardController;
+use App\Http\Controllers\Frontend\CustomPackageController;
+use App\Http\Controllers\Frontend\BookingReceiptController;
+use App\Http\Controllers\Frontend\CheckoutReceiptController;
+use App\Http\Controllers\Frontend\AutvPackageNewController; // Consider renaming class to AtvUtvPackageNewController
+use App\Http\Controllers\Frontend\RegularPackageBookingController;
+use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,185 +23,189 @@ use App\Http\Controllers\Customer\DashboardController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [HomeController::class, 'home'])->name('home');
+// --- Static & Home Pages ---
+Route::controller(HomeController::class)->group(function () {
+    Route::get('/', 'home')->name('home');
+});
 
-Route::get('/about', function () {
-    return view('frontend.about');
-})->name('about');
-
-Route::get('/privacy-policy', function () {
-    return view('frontend.privacy-policy');
-})->name('frontend.privacy-policy');
-
-Route::get('/terms-conditions', function () {
-    return view('frontend.terms-conditions');
-})->name('frontend.terms-conditions');
-
-Route::get('/faq', function () {
-    return view('frontend.faq');
-})->name('frontend.faq');
-
-Route::get('/adventure', function () {
-    return view('frontend.adventure');
-})->name('adventure');
-
-Route::get('/advanture-2', function () {
+Route::view('/about', 'frontend.about')->name('about');
+Route::view('/privacy-policy', 'frontend.privacy-policy')->name('frontend.privacy-policy');
+Route::view('/terms-conditions', 'frontend.terms-conditions')->name('frontend.terms-conditions');
+Route::view('/faq', 'frontend.faq')->name('frontend.faq');
+Route::view('/adventure', 'frontend.adventure')->name('adventure');
+Route::get('/adventure-packages', function () { // Fixed typo: advanture -> adventure
     $cartService = app(\App\Services\CartService::class);
     $cartCount = $cartService->getCartTotalItems();
     return view('frontend.advanture-2', compact('cartCount'));
-})->name('advanture-2');
+})->name('adventure.packages'); 
+Route::view('/archery', 'frontend.archery')->name('archery');
+Route::view('/payment-failed', 'frontend.payment-failed')->name('payment.failed');
 
-Route::get('/custom-packages', [CustomPackageController::class, 'index'])->name('custom-packages');
-Route::get('/regular-packages-booking', [RegularPackageBookingController::class, 'index'])->name('regular-packages-booking');
 
-Route::get('/archery', function () {
-    return view('frontend.archery');
-})->name('archery');
+// --- Package Routes ---
 
-// Contact routes
-Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+// Custom Packages
+Route::get('/custom-packages', [CustomPackageController::class, 'index'])->name('packages.custom.index'); // Renamed: custom-packages -> packages.custom.index
 
-// Package routes
-Route::get('atv-utv-landing-page', [FrontendPackageController::class, 'atvUtvLandingPage'])->name('frontend.atv-utv-landing-page');
-Route::get('atv-utv-package-bookings', [FrontendPackageController::class, 'atvUtvPackBookings'])->name('frontend.atv-utv-package-bookings');
-Route::get('atv-utv-package-bookings/{package}', [FrontendPackageController::class, 'show'])->name('frontend.atv-utv-package-bookings.show');
-Route::get('atv-utv-package-bookings/api/variants', [FrontendPackageController::class, 'getVariants'])->name('frontend.atv-utv-package-bookings.variants');
-Route::get('atv-utv-package-bookings/api/availability', [FrontendPackageController::class, 'getAvailability'])->name('frontend.atv-utv-package-bookings.availability');
-Route::get('atv-utv-package-bookings/api/availability/date', [FrontendPackageController::class, 'getAvailabilityForDate'])->name('frontend.atv-utv-package-bookings.availability.date');
-Route::get('atv-utv-package-bookings/api/package/details', [FrontendPackageController::class, 'getPackageDetails'])->name('frontend.atv-utv-package-bookings.details');
-Route::get('api/vehicle-type/details', [FrontendPackageController::class, 'getVehicleTypeDetails'])->name('frontend.vehicle-type.details');
-Route::get('api/pricing/date', [FrontendPackageController::class, 'getPricingForDate'])->name('frontend.pricing.date');
-Route::get('api/availability/check', [FrontendPackageController::class, 'checkAvailability'])->name('frontend.availability.check');
-Route::get('api/schedule-slots/availability', [FrontendPackageController::class, 'getSlotsAvailability'])->name('frontend.schedule-slots.availability');
+// Regular Packages
+Route::get('/regular-packages-booking', [RegularPackageBookingController::class, 'index'])->name('packages.regular.index'); // Renamed: regular-packages-booking -> packages.regular.index
 
-// Package price calculation route (no API, regular web route)
-Route::post('/calculate-package-price', [AutvPackageNewController::class, 'calculatePrice'])->name('calculate.package.price');
-
-// Check availability route
-Route::post('/check-package-availability', [AutvPackageNewController::class, 'checkAvailability'])->name('check.package.availability');
-
-// Add to cart route
-Route::post('/cart/add-packages', [AutvPackageNewController::class, 'addPackagesToCart'])->name('cart.add.packages');
-
-// Booking routes
-Route::match(['post'], '/process-to-checkout', [BookingController::class, 'processToCheckout'])->name('frontend.process-to-checkout');
-
-Route::post('cart/add', [BookingController::class, 'addToCart'])->name('frontend.cart.add');
-Route::post('cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update');
-Route::get('cart/update', [BookingController::class, 'updateCart'])->name('frontend.cart.update.get');
-Route::get('cart/availability', [BookingController::class, 'getCartItemAvailability'])->name('frontend.cart.availability');
-Route::post('cart/remove/{cart_uuid}', [BookingController::class, 'removeFromCart'])->name('frontend.cart.remove');
-Route::post('cart/update-datetime', [BookingController::class, 'updateCartDateTime'])->name('frontend.cart.updateDateTime');
-Route::post('cart/validate-promo', [BookingController::class, 'validatePromoCode'])->name('frontend.cart.validate-promo');
-Route::post('cart/remove-promo', [BookingController::class, 'removePromoCode'])->name('frontend.cart.remove-promo');
-
-// Cart API routes
-Route::get('/api/cart/count', [CartController::class, 'getCartCount'])->name('frontend.cart.count');
-Route::get('/api/cart/items', [CartController::class, 'getCartItems'])->name('frontend.cart.items');
-Route::get('/api/cart/status', [CartController::class, 'getCartStatus'])->name('frontend.cart.status');
-
-// Booking Receipt routes
-Route::get('/receipt/{bookingCode}', [BookingReceiptController::class, 'show'])->name('frontend.receipt.show');
-Route::get('/r/{shortlinkId}', [BookingReceiptController::class, 'showByShortlink'])->name('frontend.receipt.shortlink');
-
-// Checkout Receipt routes
-Route::get('/checkout/{checkoutId}', [CheckoutReceiptController::class, 'show'])->name('frontend.checkout.receipt');
-
-Route::get('/checkout', [BookingController::class, 'checkout'])->name('frontend.checkout.index');
-Route::post('/checkout/process', [BookingController::class, 'processBooking'])->name('frontend.checkout.process');
-
-// Payment routes
-Route::get('/payment', [PaymentController::class, 'index'])->name('frontend.payment.index');
-Route::post('/payment/initiate', [PaymentController::class, 'initiate'])->name('payment.initiate');
-Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
-Route::get('/payment/fail', [PaymentController::class, 'fail'])->name('payment.fail');
-Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
-Route::post('/payment/ipn', [PaymentController::class, 'ipn'])->name('payment.ipn');
-
-// Amar Pay specific routes (accept both GET and POST for callbacks, exclude CSRF)
-Route::withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])->group(function () {
-    Route::match(['get', 'post'], '/payment/amarpay/success', [PaymentController::class, 'amarpaySuccess'])->name('payment.amarpay.success');
-    Route::match(['get', 'post'], '/payment/amarpay/fail', [PaymentController::class, 'amarpayFail'])->name('payment.amarpay.fail');
-    Route::match(['get', 'post'], '/payment/amarpay/cancel', [PaymentController::class, 'amarpayCancel'])->name('payment.amarpay.cancel');
-    Route::post('/payment/amarpay/ipn', [PaymentController::class, 'amarpayIPN'])->name('payment.amarpay.ipn');
+// ATV/UTV Packages
+Route::controller(FrontendPackageController::class)->prefix('atv-utv-bookings')->name('packages.atv-utv.')->group(function () {
+    Route::get('/', 'atvUtvLandingPage')->name('landing'); // frontend.atv-utv-landing-page -> packages.atv-utv.landing
+    Route::get('/list', 'atvUtvPackBookings')->name('list'); // frontend.atv-utv-package-bookings -> packages.atv-utv.list
+    Route::get('/details/{package}', 'show')->name('show'); // frontend.atv-utv-package-bookings.show -> packages.atv-utv.show
+    
+    // API Endpoints for ATV/UTV
+    Route::prefix('api')->group(function () {
+        Route::get('variants', 'getVariants')->name('api.variants');
+        Route::get('availability', 'getAvailability')->name('api.availability');
+        Route::get('availability/date', 'getAvailabilityForDate')->name('api.availability.date');
+        Route::get('package/details', 'getPackageDetails')->name('api.details');
+        Route::get('vehicle-type/details', 'getVehicleTypeDetails')->name('api.vehicle-type.details');
+        Route::get('pricing/date', 'getPricingForDate')->name('api.pricing.date');
+        Route::get('availability/check', 'checkAvailability')->name('api.availability.check');
+        Route::get('schedule-slots/availability', 'getSlotsAvailability')->name('api.slots.availability');
+    });
 });
 
-Route::get('/booking-confirmation', [BookingController::class, 'showConfirmation'])->name('booking.confirmation');
-Route::get('/booking-confirmation/{booking_code}', [BookingController::class, 'showConfirmation'])->name('booking.confirmation.code');
+// Package Logic (Price & Availability - POST)
+Route::controller(AutvPackageNewController::class)->group(function () {
+    Route::post('/calculate-package-price', 'calculatePrice')->name('packages.calculate-price');
+    Route::post('/check-package-availability', 'checkAvailability')->name('packages.check-availability');
+    Route::post('/cart/add-packages', 'addPackagesToCart')->name('cart.add-packages');
+});
 
-// Payment Failed Page
-Route::get('/payment-failed', function () {
-    return view('frontend.payment-failed');
-})->name('payment.failed');
 
-// Test route for payment failed page (remove in production)
-Route::get('/test-payment-failed', function () {
-    return redirect()->route('payment.failed')
-        ->with('error', 'This is a test payment failure message.')
-        ->with('payment_details', [
-            'reason' => 'Test failure',
-            'transaction_id' => 'TEST_TXN_123456',
-            'amount' => '1000.00',
-            'currency' => 'BDT',
-            'pg_error_code' => 'TEST_ERROR_001'
-        ]);
-})->name('test.payment.failed');
+// --- Cart & Booking Routes ---
 
-// Authentication Routes
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'store']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::controller(BookingController::class)->group(function () {
+    // Booking Flow
+    Route::match(['post'], '/process-to-checkout', 'processToCheckout')->name('booking.process-checkout');
+    Route::get('/checkout', 'checkout')->name('checkout.index');
+    Route::post('/checkout/process', 'processBooking')->name('checkout.process');
+    Route::get('/booking-confirmation', 'showConfirmation')->name('booking.confirmation');
+    Route::get('/booking-confirmation/{booking_code}', 'showConfirmation')->name('booking.confirmation.code');
 
-// Customer Authentication Routes
-Route::get('/customer/login', [CustomerAuthController::class, 'showLoginForm'])->name('customer.login');
-Route::post('/customer/login', [CustomerAuthController::class, 'login'])->name('customer.login.post');
+    // Cart Actions
+    Route::prefix('cart')->name('cart.')->group(function () {
+        Route::post('add', 'addToCart')->name('add'); // frontend.cart.add -> cart.add
+        Route::match(['get', 'post'], 'update', 'updateCart')->name('update'); // Combined update
+        Route::get('availability', 'getCartItemAvailability')->name('availability');
+        Route::post('remove/{cart_uuid}', 'removeFromCart')->name('remove');
+        Route::post('update-datetime', 'updateCartDateTime')->name('update-datetime');
+        Route::post('validate-promo', 'validatePromoCode')->name('validate-promo');
+        Route::post('remove-promo', 'removePromoCode')->name('remove-promo');
+    });
+});
 
-// Storage link command route (for development/deployment)
+// Cart API (Visual/Floater)
+Route::controller(CartController::class)->prefix('api/cart')->name('api.cart.')->group(function () {
+    Route::get('count', 'getCartCount')->name('count');
+    Route::get('items', 'getCartItems')->name('items');
+    Route::get('status', 'getCartStatus')->name('status');
+});
+
+
+// --- Receipts ---
+
+Route::get('/receipt/{bookingCode}', [BookingReceiptController::class, 'show'])->name('receipt.show');
+Route::get('/r/{shortlinkId}', [BookingReceiptController::class, 'showByShortlink'])->name('receipt.shortlink');
+Route::get('/checkout/receipt/{checkoutId}', [CheckoutReceiptController::class, 'show'])->name('checkout.receipt');
+
+
+// --- Contact ---
+
+Route::controller(ContactController::class)->prefix('contact')->name('contact.')->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('/', 'store')->name('store');
+});
+
+
+// --- Payment Routes ---
+
+Route::controller(PaymentController::class)->prefix('payment')->name('payment.')->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('/initiate', 'initiate')->name('initiate');
+    Route::get('/success', 'success')->name('success');
+    Route::get('/fail', 'fail')->name('fail');
+    Route::get('/cancel', 'cancel')->name('cancel');
+    Route::post('/ipn', 'ipn')->name('ipn');
+    
+    // AmarPay Callbacks (No CSRF)
+    Route::withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])->group(function () {
+        Route::match(['get', 'post'], '/amarpay/success', 'amarpaySuccess')->name('amarpay.success');
+        Route::match(['get', 'post'], '/amarpay/fail', 'amarpayFail')->name('amarpay.fail');
+        Route::match(['get', 'post'], '/amarpay/cancel', 'amarpayCancel')->name('amarpay.cancel');
+        Route::post('/amarpay/ipn', 'amarpayIPN')->name('amarpay.ipn');
+    });
+});
+
+
+// --- Authentication (Admin/User) ---
+
+Route::controller(LoginController::class)->group(function () {
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'store');
+    Route::post('/logout', 'logout')->name('logout');
+});
+
+
+// --- Customer Authentication & Dashboard ---
+
+Route::prefix('customer')->name('customer.')->group(function () {
+    // Auth
+    Route::controller(CustomerAuthController::class)->group(function () {
+        Route::get('login', 'showLoginForm')->name('login');
+        Route::post('login', 'login')->name('login.post');
+        Route::get('register', 'showRegistrationForm')->name('register');
+        Route::post('register', 'register');
+        Route::post('logout', 'logout')->name('logout');
+    });
+
+    // Dashboard (Protected)
+    Route::middleware(['customer'])->controller(DashboardController::class)->group(function () {
+        Route::get('/dashboard', 'index')->name('dashboard');
+        Route::get('/profile', 'profile')->name('profile');
+        Route::put('/profile', 'updateProfile')->name('profile.update');
+        Route::get('/reservations', 'reservations')->name('reservations');
+        Route::get('/reservations/{id}', 'reservationDetails')->name('reservations.details');
+    });
+});
+
+
+// --- Development Utilities ---
+
+// Storage Link (Dev/Deployment only)
 Route::get('/setup/storage-link', function () {
+    if (app()->isProduction()) {
+        abort(404);
+    }
+    
     try {
-        // Check if the symbolic link already exists
         if (file_exists(public_path('storage'))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Storage link already exists',
-                'path' => public_path('storage')
-            ]);
+            return response()->json(['success' => false, 'message' => 'Storage link already exists']);
         }
-
-        // Run the storage:link command
-        $result = \Illuminate\Support\Facades\Artisan::call('storage:link');
-
-        if ($result === 0) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Storage link created successfully',
-                'path' => public_path('storage')
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create storage link',
-                'error_code' => $result
-            ], 500);
-        }
+        
+        Artisan::call('storage:link');
+        return response()->json(['success' => true, 'message' => 'Storage link created']);
+        
     } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error creating storage link: ' . $e->getMessage()
-        ], 500);
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
     }
 })->name('setup.storage-link');
 
-Route::get('/customer/register', [CustomerAuthController::class, 'showRegistrationForm'])->name('customer.register');
-Route::post('/customer/register', [CustomerAuthController::class, 'register']);
-Route::post('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+// Test Payment Fail (Dev only)
+if (!app()->isProduction()) {
+    Route::get('/test-payment-failed', function () {
+        return redirect()->route('payment.failed')
+            ->with('error', 'Test failure message')
+            ->with('payment_details', ['reason' => 'Test', 'amount' => '1000.00']);
+    })->name('test.payment.failed');
+}
 
-// Customer Dashboard Routes (Protected)
-Route::middleware(['customer'])->prefix('customer')->name('customer.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [DashboardController::class, 'profile'])->name('profile');
-    Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/reservations', [DashboardController::class, 'reservations'])->name('reservations');
-    Route::get('/reservations/{id}', [DashboardController::class, 'reservationDetails'])->name('reservations.details');
-});
+
+// --- Error Handling ---
+
+Route::fallback(fn () => response()->view('errors.404', [], 404));
+

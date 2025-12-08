@@ -103,21 +103,7 @@
             <p class="small">Sign in to access your dashboard</p>
         </div>
 
-        {{-- Success --}}
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show">
-                <i class="bi  bi-check-circle"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
 
-        {{-- Error --}}
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="bi  bi-exclamation-triangle"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
 
         {{-- Validation Errors --}}
         @if ($errors->any())

@@ -5,7 +5,7 @@
 
 @section('content')
     <!-- Hero Slider -->
-    <div class="hero-slider">
+    <div class="hero-slider" x-data="heroSlider">
         <section class="hero-section overlay-text-home-hero-slider">
             <div class="hero-overlay"></div>
 
@@ -24,7 +24,8 @@
                 </h1>
 
                 <div class="mt-4 d-flex align-items-center">
-                    <a href="{{ route('contact') }}" class="btn btn-orange jatio-bg-color primary-btn-border-radius">Contact
+                    <a href="{{ route('contact.index') }}"
+                        class="btn btn-orange jatio-bg-color primary-btn-border-radius">Contact
                         Us →</a>
                     <a href="#" id="playVideoBtn" class="play-btn" data-bs-toggle="modal"
                         data-bs-target="#videoModal"><i class="bi bi-play-fill"></i></a>
@@ -65,7 +66,7 @@
     <!-- Logo slider -->
     <div class="container py-5">
         <div class="slider1-container">
-            <div class="slider1-track" id="logoslider1">
+            <div class="slider1-track" id="logoslider1" x-data="logoSlider">
                 <div class="logo-item"><img src="images/Cleverland-Logo.png" alt="Logo 1"></div>
                 <div class="logo-item"><img src="images/north-carolina-Logo.png" alt="Logo 2"></div>
                 <div class="logo-item"><img src="images/riverside-Logo.png" alt="Logo 3"></div>
@@ -196,28 +197,28 @@
                 <div class="col-12 col-sm-6 col-lg-3">
                     <div class="counter-box">
                         <img src="https://img.icons8.com/ios-filled/50/thumb-up.png" alt="Service Guarantee">
-                        <h2><span class="counter" data-target="99">0</span>%</h2>
+                        <h2><span class="counter" x-data="counter(99)" x-text="count">0</span>%</h2>
                         <p>Service Guarantee</p>
                     </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3">
                     <div class="counter-box">
                         <img src="https://img.icons8.com/ios-filled/50/user.png" alt="Happy Customer">
-                        <h2><span class="counter" data-target="579">0</span>+</h2>
+                        <h2><span class="counter" x-data="counter(579)" x-text="count">0</span>+</h2>
                         <p>Happy Customer</p>
                     </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3">
                     <div class="counter-box">
                         <img src="https://img.icons8.com/ios-filled/50/certificate.png" alt="Certified">
-                        <h2><span class="counter" data-target="99">0</span>%</h2>
+                        <h2><span class="counter" x-data="counter(99)" x-text="count">0</span>%</h2>
                         <p>Certified</p>
                     </div>
                 </div>
                 <div class="col-12 col-sm-6 col-lg-3">
                     <div class="counter-box">
                         <img src="https://img.icons8.com/ios-filled/50/medal.png" alt="Professional Team">
-                        <h2><span class="counter" data-target="49">0</span>+</h2>
+                        <h2><span class="counter" x-data="counter(49)" x-text="count">0</span>+</h2>
                         <p>Professional Team</p>
                     </div>
                 </div>
@@ -312,20 +313,20 @@
 
     <!-- Special section images -->
     <section id="special-section" class="for-100vh">
-        <div class="container-full default-active" id="special-container">
-            <div class="panel panel-0" data-index="0">
+        <div class="container-full default-active" id="special-container" x-data="hoverPanels" :class="hoverClass">
+            <div class="panel panel-0" data-index="0" @mouseenter="setHover(0)" @mouseleave="resetHover()">
                 <div class="label-static">Adult Challenge Courses</div>
                 <div class="label-hover"></div>
             </div>
-            <div class="panel panel-1" data-index="1">
+            <div class="panel panel-1" data-index="1" @mouseenter="setHover(1)" @mouseleave="resetHover()">
                 <div class="label-static">ATV / UTV Trail Ride</div>
                 <div class="label-hover"></div>
             </div>
-            <div class="panel panel-2" data-index="2">
+            <div class="panel panel-2" data-index="2" @mouseenter="setHover(2)" @mouseleave="resetHover()">
                 <div class="label-static">Kids Fun Zone</div>
                 <div class="label-hover"></div>
             </div>
-            <div class="panel panel-3" data-index="3">
+            <div class="panel panel-3" data-index="3" @mouseenter="setHover(3)" @mouseleave="resetHover()">
                 <div class="label-static">Water Activities</div>
                 <div class="label-hover"></div>
             </div>
@@ -340,12 +341,13 @@
     <!-- CTA -->
     <section class="hero-section-down shadow">
         <div class="container my-5">
-            <h2>Feel The Adventure Experience With Us, <br>Don't Hesitate To <a href="{{ route('contact') }}"
+            <h2>Feel The Adventure Experience With Us, <br>Don't Hesitate To <a href="{{ route('contact.index') }}"
                     class="text-decoration-none jatio-color">Contact Us</a> !</h2>
             <p>Our team is ready to help you plan the perfect day —</p>
             <p>whether it’s a solo ride, family outing, or group event.</p>
             <p>Let’s make your adventure unforgettable!</p>
-            <a href="{{ url('contact') }}" class="btn btn-orange primary-btn-border-radius jatio-bg-color">Get Appointment
+            <a href="{{ route('contact.index') }}" class="btn btn-orange primary-btn-border-radius jatio-bg-color">Get
+                Appointment
                 →</a>
         </div>
     </section>

@@ -8,7 +8,7 @@ use App\Http\Requests\XCartUpdateRequest;
 use App\Models\Cart;
 use App\Models\Customer;
 use App\Models\Package;
-use App\Models\PackageVariant;
+
 use App\Models\Payment;
 use App\Models\PromoCode;
 use App\Models\Reservation;
@@ -538,12 +538,7 @@ class BookingController extends Controller
         }
     }
 
-    private function getPriceForDate(PackageVariant $variant, string $date): float
-    {
-        $priceService = app(\App\Services\PriceCalculationService::class);
 
-        return $priceService->getPriceForDate($variant, $date);
-    }
 
     private function generateBookingCode(): string
     {
@@ -559,7 +554,7 @@ class BookingController extends Controller
         $bookingCode = $request->query('booking_code');
         $reservation = Reservation::with([
             'customer',
-            'packageVariant.package.images',
+            'package.images',
             'scheduleSlot',
             'payments',
             'promoRedemptions.promoCode',
@@ -572,7 +567,7 @@ class BookingController extends Controller
         // Get all reservations in the same checkout (within 5 minutes of payment)
         $allReservations = Reservation::with([
             'customer',
-            'packageVariant.package.images',
+            'package.images',
             'scheduleSlot',
         ])
             ->when($paymentCreatedAt, function ($query) use ($reservation, $paymentCreatedAt) {
@@ -640,38 +635,4 @@ class BookingController extends Controller
         return $methods[$method] ?? ucfirst(str_replace('_', ' ', $method));
     }
 
-    private function isPromoCodeValid(PromoCode $promoCode, float $total): bool
-    {
-        if ($promoCode->min_spend > $total) {
-            return false;
-        }
-
-        if ($promoCode->usage_limit_total && $promoCode->redemptions()->count() >= $promoCode->usage_limit_total) {
-            return false;
-        }
-
-        if ($promoCode->starts_at && now() < $promoCode->starts_at) {
-            return false;
-        }
-
-        if ($promoCode->ends_at && now() > $promoCode->ends_at) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private function calculateDiscount(PromoCode $promoCode, float $total): float
-    {
-        if ($promoCode->discount_type === 'percentage') {
-            $discount = ($total * $promoCode->discount_value) / 100;
-            if ($promoCode->max_discount) {
-                $discount = min($discount, $promoCode->max_discount);
-            }
-        } else {
-            $discount = $promoCode->discount_value;
-        }
-
-        return $discount;
-    }
 }

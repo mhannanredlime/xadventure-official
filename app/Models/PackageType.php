@@ -20,7 +20,7 @@ class PackageType extends Model
         });
 
         static::updating(function ($model) {
-            if ($model->isDirty('name')) {
+        if ($model->isDirty('name')) {
                 $model->slug = Str::slug($model->name);
             }
         });

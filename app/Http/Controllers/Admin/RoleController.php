@@ -15,7 +15,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::with('permissions')->paginate(15);
+        $roles = Role::withCount(['permissions', 'users'])->paginate(15);
         return view('admin.roles.index', compact('roles'));
     }
 
@@ -60,7 +60,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        $role->load('permissions');
+        $role->load(['permissions', 'users']);
         return view('admin.roles.show', compact('role'));
     }
 

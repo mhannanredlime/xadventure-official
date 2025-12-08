@@ -12,7 +12,7 @@
             <label class="form-label">Upload Package Images (Max 4 images)</label>
             <input type="file" id="package_images_input" name="images[]" multiple accept="image/*" style="display:none;">
             <x-images-uploader modelType="Package" :modelId="$package->id ?? null"
-                uploadUrl="{{ route('admin.regular-packege-management.store') }}" :updateUrl="isset($package) ? route('admin.regular-packege-management.update', $package) : null"
+                uploadUrl="{{ route('admin.packages.regular.store') }}" :updateUrl="isset($package) ? route('admin.packages.regular.update', $package) : null"
                 imagesUrl="{{ route('admin.images.get', ['model_type' => 'Package', 'model_id' => $package->id ?? '']) }}"
                 primaryUrl="{{ url('admin/images') }}/:id/primary" reorderUrl="{{ route('admin.images.reorder') }}"
                 altTextUrl="{{ url('admin/images') }}/:id/alt-text" deleteUrl="{{ url('admin/images') }}/:id"
@@ -177,7 +177,7 @@
 </div>
 
 <div class="d-flex justify-content-end mt-4">
-    <button type="submit" class="btn btn-save" id="submitBtn">
+    <x-admin.button type="submit" id="submitBtn" color="save">
         {{ isset($package) ? 'Update Package' : 'Save Package' }}
-    </button>
+    </x-admin.button>
 </div>

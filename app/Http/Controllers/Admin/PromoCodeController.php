@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\PromoCode;
+use Exception;
 use App\Models\Package;
+use App\Models\PromoCode;
 use App\Models\VehicleType;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
 
 class PromoCodeController extends Controller
 {
@@ -17,14 +18,14 @@ class PromoCodeController extends Controller
         $packages = Package::where('is_active', true)->orderBy('name')->get();
         $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
         
-        return view('admin.promo', compact('promoCodes', 'packages', 'vehicleTypes'));
+        return view('admin.promo-code.index', compact('promoCodes', 'packages', 'vehicleTypes'));
     }
 
     public function create()
     {
         $packages = Package::where('is_active', true)->orderBy('name')->get();
         $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
-        return view('admin.promo', compact('packages', 'vehicleTypes'));
+        return view('admin.promo-code.create', compact('packages', 'vehicleTypes'));
     }
 
     public function store(Request $request): JsonResponse
@@ -198,7 +199,7 @@ class PromoCodeController extends Controller
                 'message' => 'Promo code status updated successfully.',
                 'new_status' => $newStatus
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error toggling promo code status: ' . $e->getMessage()
@@ -228,7 +229,7 @@ class PromoCodeController extends Controller
                 'success' => true,
                 'promoCodes' => $promoCodes
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching promo codes: ' . $e->getMessage()
@@ -254,7 +255,7 @@ class PromoCodeController extends Controller
                 'available' => !$exists,
                 'message' => $exists ? 'Promo code already exists' : 'Promo code is available'
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error validating promo code: ' . $e->getMessage()

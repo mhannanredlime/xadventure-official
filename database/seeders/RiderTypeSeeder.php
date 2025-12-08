@@ -10,8 +10,20 @@ class RiderTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['name' => 'Single Rider', 'slug' => 'single-rider'],
-            ['name' => 'Double Rider', 'slug' => 'double-rider']
+            [
+                'name' => 'Single Rider', 
+                'slug' => 'single-rider',
+                'description' => 'One person operating the vehicle',
+                'max_passengers' => 0,
+                'is_active' => true
+            ],
+            [
+                'name' => 'Double Rider', 
+                'slug' => 'double-rider',
+                'description' => 'Two passengers with one operator',
+                'max_passengers' => 1,
+                'is_active' => true
+            ]
         ];
 
         foreach ($types as $type) {
@@ -20,5 +32,7 @@ class RiderTypeSeeder extends Seeder
                 $type
             );
         }
+        
+        $this->command->info(count($types) . ' rider types seeded.');
     }
 }
