@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
             ]);
 
             $this->command->info('Database seeding completed successfully!');
-            
+
         } catch (\Exception $e) {
             $this->command->error('Error during seeding: ' . $e->getMessage());
             Log::error('Database seeding failed: ' . $e->getMessage(), [
@@ -66,7 +66,7 @@ class DatabaseSeeder extends Seeder
     private function createAdminUser(): void
     {
         $this->command->info('Creating admin user...');
-        
+
         User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -74,6 +74,7 @@ class DatabaseSeeder extends Seeder
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
                 'email_verified_at' => now(),
                 'is_admin' => true,
+                'user_type' => "admin",
             ]
         );
 
