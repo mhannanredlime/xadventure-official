@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
+            $table->string('guard_name')->default('web'); // Added for Spatie
             $table->text('description')->nullable();
-            $table->string('module');
+            $table->string('module')->nullable();
             $table->timestamps();
         });
     }

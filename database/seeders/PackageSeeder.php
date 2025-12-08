@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Package;
-use App\Models\PackageVariant;
-use App\Models\VariantPrice;
+use App\Models\PackagePrice;
+use App\Models\RiderType;
+use App\Models\PriceType;
 use App\Models\VehicleType;
 use App\Models\Image;
 use Illuminate\Database\Seeder;
@@ -41,23 +42,19 @@ class PackageSeeder extends Seeder
                     'notes' => 'Perfect for adventure seekers looking for an exciting off-road experience.',
                     'details' => 'Our ATV/UTV trail rides offer an unforgettable adventure through scenic trails and challenging terrain.',
                     'vehicle_type_ids' => [$atvType->id, $utvType->id],
-                    'variants' => [
+                    'pricing_options' => [
                         [
-                            'variant_name' => 'Single Rider',
-                            'capacity' => 1,
-                            'is_active' => true,
+                            'rider_type_name' => 'Single Rider',
                             'prices' => [
-                                ['price_type' => 'weekday', 'amount' => 1200.00, 'original_amount' => 1200.00],
-                                ['price_type' => 'weekend', 'amount' => 1500.00, 'original_amount' => 1500.00],
+                                ['price_type_slug' => 'weekday', 'amount' => 1200.00],
+                                ['price_type_slug' => 'weekend', 'amount' => 1500.00],
                             ]
                         ],
                         [
-                            'variant_name' => 'Double Rider',
-                            'capacity' => 2,
-                            'is_active' => true,
+                            'rider_type_name' => 'Double Rider',
                             'prices' => [
-                                ['price_type' => 'weekday', 'amount' => 1500.00, 'original_amount' => 1500.00],
-                                ['price_type' => 'weekend', 'amount' => 1800.00, 'original_amount' => 1800.00],
+                                ['price_type_slug' => 'weekday', 'amount' => 1500.00],
+                                ['price_type_slug' => 'weekend', 'amount' => 1800.00],
                             ]
                         ]
                     ]
@@ -86,14 +83,12 @@ class PackageSeeder extends Seeder
                             'alt_text' => 'Regular Package - Main Image',
                         ],
                     ],
-                    'variants' => [
+                    'pricing_options' => [
                         [
-                            'variant_name' => 'Adventure Tour',
-                            'capacity' => 4,
-                            'is_active' => true,
+                            'rider_type_name' => 'Adventure Tour',
                             'prices' => [
-                                ['price_type' => 'weekday', 'amount' => 800.00, 'original_amount' => 800.00],
-                                ['price_type' => 'weekend', 'amount' => 1000.00, 'original_amount' => 1000.00],
+                                ['price_type_slug' => 'weekday', 'amount' => 800.00],
+                                ['price_type_slug' => 'weekend', 'amount' => 1000.00],
                             ]
                         ]
                     ]
@@ -111,23 +106,19 @@ class PackageSeeder extends Seeder
                     'notes' => 'Premium ATV experience with additional features and longer duration.',
                     'details' => 'Experience the ultimate ATV adventure with premium vehicles and extended trail access.',
                     'vehicle_type_ids' => [$atvType->id],
-                    'variants' => [
+                    'pricing_options' => [
                         [
-                            'variant_name' => 'Premium Single',
-                            'capacity' => 1,
-                            'is_active' => true,
+                            'rider_type_name' => 'Premium Single',
                             'prices' => [
-                                ['price_type' => 'weekday', 'amount' => 2000.00, 'original_amount' => 2000.00],
-                                ['price_type' => 'weekend', 'amount' => 2500.00, 'original_amount' => 2500.00],
+                                ['price_type_slug' => 'weekday', 'amount' => 2000.00],
+                                ['price_type_slug' => 'weekend', 'amount' => 2500.00],
                             ]
                         ],
                         [
-                            'variant_name' => 'Premium Double',
-                            'capacity' => 2,
-                            'is_active' => true,
+                            'rider_type_name' => 'Premium Double',
                             'prices' => [
-                                ['price_type' => 'weekday', 'amount' => 2500.00, 'original_amount' => 2500.00],
-                                ['price_type' => 'weekend', 'amount' => 3000.00, 'original_amount' => 3000.00],
+                                ['price_type_slug' => 'weekday', 'amount' => 2500.00],
+                                ['price_type_slug' => 'weekend', 'amount' => 3000.00],
                             ]
                         ]
                     ]
@@ -138,10 +129,10 @@ class PackageSeeder extends Seeder
             $updatedPackages = 0;
 
             foreach ($packages as $packageData) {
-                $variants = $packageData['variants'];
+                $pricingOptions = $packageData['pricing_options'];
                 $vehicleTypeIds = $packageData['vehicle_type_ids'] ?? [];
                 $images = $packageData['images'] ?? [];
-                unset($packageData['variants'], $packageData['vehicle_type_ids'], $packageData['images']);
+                unset($packageData['pricing_options'], $packageData['vehicle_type_ids'], $packageData['images']);
                 
                 $package = Package::updateOrCreate(
                     ['name' => $packageData['name']],
@@ -174,28 +165,28 @@ class PackageSeeder extends Seeder
                     );
                 }
                 
-                // Create variants and prices
-                foreach ($variants as $variantData) {
-                    $prices = $variantData['prices'];
-                    unset($variantData['prices']);
+                // Create prices (replacing variants)
+                $package->packagePrices()->delete(); // Clear existing prices
+
+                foreach ($pricingOptions as $option) {
+                    $riderTypeName = $option['rider_type_name'];
+                    $riderTypeSlug = \Illuminate\Support\Str::slug($riderTypeName);
                     
-                    $variant = PackageVariant::updateOrCreate(
-                        [
-                            'package_id' => $package->id,
-                            'variant_name' => $variantData['variant_name']
-                        ],
-                        array_merge($variantData, ['package_id' => $package->id])
+                    $riderType = RiderType::firstOrCreate(
+                        ['slug' => $riderTypeSlug],
+                        ['name' => $riderTypeName]
                     );
-                    
-                    // Create prices for the variant
-                    foreach ($prices as $priceData) {
-                        VariantPrice::updateOrCreate(
-                            [
-                                'package_variant_id' => $variant->id,
-                                'price_type' => $priceData['price_type']
-                            ],
-                            array_merge($priceData, ['package_variant_id' => $variant->id])
-                        );
+
+                    foreach ($option['prices'] as $priceData) {
+                        $pt = PriceType::where('slug', $priceData['price_type_slug'])->first();
+                        if (!$pt) continue;
+
+                        $package->packagePrices()->create([
+                            'rider_type_id' => $riderType->id,
+                            'price_type_id' => $pt->id,
+                            'price' => $priceData['amount'],
+                            'is_active' => true,
+                        ]);
                     }
                 }
             }

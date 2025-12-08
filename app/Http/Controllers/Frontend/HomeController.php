@@ -15,11 +15,12 @@ class HomeController extends Controller
     public function index()
     {
         
-        $regularPackages = Package::with(['variants.prices'])
+        $regularPackages = Package::with(['packagePrices.riderType'])
             ->where('is_active', true)
             ->where('type', 'regular')
-            ->whereHas('variants', function($query) {
-                $query->where('capacity', '>', 1); // Only group packages (capacity > 1)
+            ->whereHas('packagePrices.riderType', function($query) {
+                // Approximate capacity > 1 check by excluding single rider types
+                $query->whereNotIn('slug', ['single-rider', '1-person']);
             })
             ->orderBy('name')
             ->get();

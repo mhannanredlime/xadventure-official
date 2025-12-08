@@ -31,6 +31,12 @@ class EnsureAdmin
             return $next($request);
         }
 
+        // Fallback: Check if user has any admin role (Master Admin, Admin, or Manager)
+        // This might trigger lazy loading, so we ensure it's last or we eagerly load roles if needed
+        if ($user->hasAnyRole(['master-admin', 'admin', 'manager'])) {
+            return $next($request);
+        }
+
         abort(403, 'Access denied. Admin privileges required.');
     }
 }

@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->uuid('cart_uuid')->unique();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('package_type');
             $table->unsignedBigInteger('package_id');
 
             // cart_amount min 200
-            $table->decimal('cart_amount', 10, 2)->default(200)->check('cart_amount >= 200');
+            $table->decimal('amount', 10, 2)->default(200)->check('amount >= 200');
 
             // quantity min 1
             $table->unsignedInteger('quantity')->default(1)->check('quantity >= 1');

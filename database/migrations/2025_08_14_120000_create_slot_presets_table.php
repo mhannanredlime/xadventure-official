@@ -27,11 +27,11 @@ return new class extends Migration
 
         Schema::create('slot_preset_overrides', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('package_variant_id')->constrained('package_variants')->onDelete('cascade');
+            $table->foreignId('package_id')->constrained('packages')->onDelete('cascade');
             $table->date('date');
             $table->foreignId('slot_preset_id')->constrained('slot_presets')->onDelete('cascade');
             $table->timestamps();
-            $table->unique(['package_variant_id', 'date']);
+            $table->unique(['package_id', 'date']);
         });
     }
 

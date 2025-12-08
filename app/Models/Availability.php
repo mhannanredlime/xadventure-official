@@ -12,7 +12,7 @@ class Availability extends Model
 
     protected $fillable = [
         'date',
-        'package_variant_id',
+        'package_id',
         'schedule_slot_id',
         'capacity_total',
         'capacity_reserved',
@@ -24,9 +24,9 @@ class Availability extends Model
         'is_day_off' => 'boolean'
     ];
 
-    public function packageVariant(): BelongsTo
+    public function package(): BelongsTo
     {
-        return $this->belongsTo(PackageVariant::class);
+        return $this->belongsTo(Package::class);
     }
 
     public function scheduleSlot(): BelongsTo

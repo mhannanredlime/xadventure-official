@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
-use App\Services\ImageService;
 use Illuminate\Http\Request;
+use App\Services\ImageService;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\VehicleUpdateRequest;
 
 class VehicleController extends Controller
 {
@@ -99,27 +100,15 @@ class VehicleController extends Controller
         return view('admin.vehicles.edit', compact('vehicle', 'vehicleTypes'));
     }
 
-    public function update(Request $request, Vehicle $vehicle)
+    public function update(VehicleUpdateRequest $request, Vehicle $vehicle)
     {
+        dd($request->all());
         // Handle both PUT and POST requests
         if ($request->method() === 'POST' && $request->has('_method') && $request->input('_method') === 'PUT') {
-            // This is a PUT request via method spoofing
             \Log::info('PUT request via method spoofing detected');
         }
+    
         
-        // Simple test to see if method is called
-        \Log::info('Update method called successfully');
-        
-        // Debug: Log the incoming request data
-        \Log::info('Update Request Data:', $request->all());
-        \Log::info('Update Request data keys:', array_keys($request->all()));
-        \Log::info('Update Request Method:', ['method' => $request->method()]);
-        \Log::info('Update Request Content Type:', ['content_type' => $request->header('Content-Type')]);
-        \Log::info('Update Request Raw Input:', ['raw' => $request->getContent()]);
-        \Log::info('Update Request POST data:', ['post' => $request->post()]);
-        \Log::info('Update Request Input data:', ['input' => $request->input()]);
-        
-        // Use Vehicle model validation rules
         $validator = Validator::make($request->all(), Vehicle::getValidationRules($vehicle->id), Vehicle::getValidationMessages());
 
         if ($validator->fails()) {

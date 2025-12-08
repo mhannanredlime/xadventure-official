@@ -21,6 +21,7 @@ class RoleSeeder extends Seeder
                 'name' => 'Master Admin',
                 'description' => 'Full control of everything including user and role management',
                 'is_system' => true,
+                'guard_name' => 'web',
             ]
         );
 
@@ -31,6 +32,7 @@ class RoleSeeder extends Seeder
                 'name' => 'Admin',
                 'description' => 'Full control of pricing, reservations, analytics, and vehicle/package management. No user/role management.',
                 'is_system' => true,
+                'guard_name' => 'web',
             ]
         );
 
@@ -41,6 +43,7 @@ class RoleSeeder extends Seeder
                 'name' => 'Manager',
                 'description' => 'Reservation view and edit only. No pricing, packages, analytics, or user management.',
                 'is_system' => true,
+                'guard_name' => 'web',
             ]
         );
 

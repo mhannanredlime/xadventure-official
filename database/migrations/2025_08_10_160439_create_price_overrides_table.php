@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('price_overrides', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('package_variant_id')->constrained()->onDelete('cascade');
+            $table->foreignId('package_price_id')->constrained()->onDelete('cascade');
             $table->date('date');
             $table->enum('price_tag', ['premium', 'discounted']);
             $table->decimal('price_amount', 10, 2);
@@ -21,10 +21,10 @@ return new class extends Migration
             $table->timestamps();
             
             // Ensure one override per variant per date
-            $table->unique(['package_variant_id', 'date']);
+            $table->unique(['package_price_id', 'date']);
             
             // Indexes for performance
-            $table->index(['date', 'package_variant_id']);
+            $table->index(['date', 'package_price_id']);
             $table->index('price_tag');
         });
     }

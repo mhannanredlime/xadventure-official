@@ -33,10 +33,10 @@ class Package extends Model
         'display_starting_price' => 'decimal:2',
     ];
 
-    public function variants(): HasMany
-    {
-        return $this->hasMany(PackageVariant::class);
-    }
+    // public function variants(): HasMany
+    // {
+    //     return $this->hasMany(PackageVariant::class);
+    // }
 
     public function vehicleTypes(): BelongsToMany
     {
@@ -85,10 +85,10 @@ class Package extends Model
     /**
      * Get all reservations for this package through variants
      */
-    public function reservations()
-    {
-        return $this->hasManyThrough(ReservationItem::class, PackageVariant::class);
-    }
+    // public function reservations()
+    // {
+    //     return $this->hasManyThrough(ReservationItem::class, PackageVariant::class);
+    // }
 
     /**
      * Get the display starting price for this package
@@ -101,14 +101,10 @@ class Package extends Model
             return $this->attributes['display_starting_price'];
         }
 
-        // Fallback to calculating from variants
-        $minPrice = $this->variants()
+        // Fallback to calculating from package prices
+        $minPrice = $this->packagePrices()
             ->where('is_active', true)
-            ->get()
-            ->flatMap(function ($variant) {
-                return $variant->prices()->pluck('amount');
-            })
-            ->min();
+            ->min('price');
 
         return $minPrice ?: 0;
     }
@@ -229,12 +225,12 @@ class Package extends Model
         static::deleting(function ($package) {
 
             // Delete variant prices first (because they depend on variants)
-            foreach ($package->variants as $variant) {
-                $variant->prices()->delete();
-            }
+            // foreach ($package->variants as $variant) {
+            //     $variant->prices()->delete();
+            // }
 
             // Delete variants
-            $package->variants()->delete();
+            // $package->variants()->delete();
 
             // Delete all promo codes
             $package->promoCodes()->delete();
@@ -259,10 +255,30 @@ class Package extends Model
 
     public function getAtvUtvPrice(string $dayType, int $riderCount): ?float
     {
+        // Map rider count to rider type slug
+        $slug = match($riderCount) {
+             1 => 'single-rider',
+             2 => 'double-rider',
+             default => null
+        };
+
+        if (!$slug) return null;
+
+        $riderType = \App\Models\RiderType::where('slug', $slug)->first();
+        if (!$riderType) return null;
+
         $price = $this->packagePrices()
-            ->where('day', $dayType)
-            ->where('rider_count', $riderCount)
+            ->where('rider_type_id', $riderType->id)
             ->where('is_active', true)
+            // Note: 'day' column in package_prices is enum('sun'...'sat'), 
+            // but the method receives $dayType which might be 'weekday'/'weekend'.
+            // If the Pricing structure uses PriceType (weekday/weekend) instead of 'day' enum column,
+            // we should check PriceType instead.
+            // In PackageSeeder, we used PriceType (weekday/weekend).
+            // So we should query PriceType.
+            ->whereHas('priceType', function($q) use ($dayType) {
+                 $q->where('slug', $dayType);
+            })
             ->first();
 
         return $price ? $price->price : null;

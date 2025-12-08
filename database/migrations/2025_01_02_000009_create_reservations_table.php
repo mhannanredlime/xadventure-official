@@ -12,7 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('booking_code')->unique();
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->foreignId('package_variant_id')->constrained()->onDelete('cascade');
+            $table->foreignId('package_price_id')->constrained()->onDelete('cascade');
+            $table->foreignId('package_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('schedule_slot_id')->constrained()->onDelete('cascade');
             $table->date('date');
             $table->time('report_time');

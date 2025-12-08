@@ -12,14 +12,14 @@ class Cart extends Model
 
     protected $fillable = [
         'package_type',
-        'cart_uuid',
+        'uuid',
         'user_id',
         'session_id',
         'package_id',
         'quantity',
         'selected_date',
         'time_slot_id',
-        'cart_amount',
+        'amount',
         'metadata',
         'expires_at',
     ];
@@ -38,7 +38,7 @@ class Cart extends Model
     protected static function booted()
     {
         static::creating(function ($cart) {
-            $cart->cart_uuid = (string) Str::uuid();
+            $cart->uuid = (string) Str::uuid();
         });
     }
 }

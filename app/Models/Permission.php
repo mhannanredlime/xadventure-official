@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Models\Permission as SpatiePermission;
 
-class Permission extends Model
+class Permission extends SpatiePermission
 {
     use HasFactory;
 
@@ -17,13 +16,11 @@ class Permission extends Model
         'module',
     ];
 
-    /**
-     * Get the roles that belong to the permission.
-     */
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'permission_role');
-    }
+    // roles() is provided by Spatie
+    // public function roles(): BelongsToMany
+    // {
+    //    return $this->belongsToMany(Role::class, 'permission_role');
+    // }
 
     /**
      * Scope to filter permissions by module.

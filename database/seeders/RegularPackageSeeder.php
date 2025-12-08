@@ -3,14 +3,19 @@
 namespace Database\Seeders;
 
 use App\Models\Package;
-use App\Models\PackageVariant;
-use App\Models\VariantPrice;
+use App\Models\PackagePrice;
+use App\Models\RiderType;
+use App\Models\PriceType;
 use Illuminate\Database\Seeder;
 
 class RegularPackageSeeder extends Seeder
 {
     public function run(): void
     {
+        // Ensure Price Types exist
+        $weekdayPriceType = \App\Models\PriceType::firstOrCreate(['slug' => 'weekday'], ['name' => 'Weekday']);
+        $weekendPriceType = \App\Models\PriceType::firstOrCreate(['slug' => 'weekend'], ['name' => 'Weekend']);
+
         $packages = [
             [
                 'name' => 'Person Package',
@@ -31,13 +36,12 @@ class RegularPackageSeeder extends Seeder
                         'alt_text' => 'Person Package - Small Group Adventure',
                     ],
                 ],
-                'variants' => [
+                'pricing_options' => [
                     [
-                        'variant_name' => 'Group of 2',
-                        'capacity' => 2,
+                        'rider_type_name' => 'Group of 2',
                         'prices' => [
-                            ['price_type' => 'weekday', 'amount' => 99.00],
-                            ['price_type' => 'weekend', 'amount' => 99.00],
+                            ['price_type_slug' => 'weekday', 'amount' => 99.00],
+                            ['price_type_slug' => 'weekend', 'amount' => 99.00],
                         ]
                     ]
                 ]
@@ -61,13 +65,12 @@ class RegularPackageSeeder extends Seeder
                         'alt_text' => 'Popular Package - Group Adventure',
                     ],
                 ],
-                'variants' => [
+                'pricing_options' => [
                     [
-                        'variant_name' => 'Group of 10',
-                        'capacity' => 10,
+                        'rider_type_name' => 'Group of 10',
                         'prices' => [
-                            ['price_type' => 'weekday', 'amount' => 179.00],
-                            ['price_type' => 'weekend', 'amount' => 179.00],
+                            ['price_type_slug' => 'weekday', 'amount' => 179.00],
+                            ['price_type_slug' => 'weekend', 'amount' => 179.00],
                         ]
                     ]
                 ]
@@ -91,13 +94,12 @@ class RegularPackageSeeder extends Seeder
                         'alt_text' => 'Basic Package - Premium Group Experience',
                     ],
                 ],
-                'variants' => [
+                'pricing_options' => [
                     [
-                        'variant_name' => 'Group of 5',
-                        'capacity' => 5,
+                        'rider_type_name' => 'Group of 5',
                         'prices' => [
-                            ['price_type' => 'weekday', 'amount' => 299.00],
-                            ['price_type' => 'weekend', 'amount' => 299.00],
+                            ['price_type_slug' => 'weekday', 'amount' => 299.00],
+                            ['price_type_slug' => 'weekend', 'amount' => 299.00],
                         ]
                     ]
                 ]
@@ -105,9 +107,9 @@ class RegularPackageSeeder extends Seeder
         ];
 
         foreach ($packages as $packageData) {
-            $variants = $packageData['variants'];
+            $pricingOptions = $packageData['pricing_options'];
             $images = $packageData['images'] ?? [];
-            unset($packageData['variants'], $packageData['images']);
+            unset($packageData['pricing_options'], $packageData['images']); // cleanup array for updateOrCreate
             
             $package = Package::updateOrCreate(
                 ['name' => $packageData['name']],
@@ -126,17 +128,34 @@ class RegularPackageSeeder extends Seeder
                 );
             }
             
-            foreach ($variants as $variantData) {
-                $prices = $variantData['prices'];
-                unset($variantData['prices']);
-                
-                // Delete existing variants and create new ones to ensure proper updates
-                $package->variants()->delete();
-                $variant = $package->variants()->create($variantData);
-                
-                // Create prices for the new variant
-                foreach ($prices as $priceData) {
-                    $variant->prices()->create($priceData);
+            // Handle Pricing Logic (Replacing Variants)
+            
+            // Important: Clear old prices to prevent duplication on re-seed
+            $package->packagePrices()->delete();
+
+            foreach ($pricingOptions as $option) {
+                // Ensure the "Group of X" Rider Type exists
+                // We assume slug is a normalized version of name
+                $riderTypeName = $option['rider_type_name'];
+                $riderTypeSlug = \Illuminate\Support\Str::slug($riderTypeName);
+
+                $riderType = \App\Models\RiderType::firstOrCreate(
+                    ['slug' => $riderTypeSlug],
+                    ['name' => $riderTypeName]
+                );
+
+                foreach ($option['prices'] as $priceData) {
+                     // Find the correct PriceType ID
+                     $pt = \App\Models\PriceType::where('slug', $priceData['price_type_slug'])->first();
+                     
+                     if (!$pt) continue;
+
+                     $package->packagePrices()->create([
+                         'rider_type_id' => $riderType->id,
+                         'price_type_id' => $pt->id,
+                         'price' => $priceData['amount'],
+                         'is_active' => true,
+                     ]);
                 }
             }
         }

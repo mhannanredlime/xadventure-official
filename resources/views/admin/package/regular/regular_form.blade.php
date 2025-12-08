@@ -6,50 +6,21 @@
 {{-- ---------- Image Upload Section ---------- --}}
 <div class="card p-4 mb-4">
     <h5 class="card-title"><i class="bi bi-images me-2"></i>Package Images</h5>
+
     <div class="row">
         <div class="col-12">
             <label class="form-label">Upload Package Images (Max 4 images)</label>
             <input type="file" id="package_images_input" name="images[]" multiple accept="image/*" style="display:none;">
-
-            <div id="multiple-image-upload" data-model-type="Package" data-model-id="{{ $package->id ?? '' }}"
-                data-upload-url="{{ route('admin.regular-packege-management.store') }}"
-                data-update-url="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : '' }}"
-                data-images-url="{{ route('admin.images.get', ['model_type' => 'Package', 'model_id' => $package->id ?? '']) }}"
-                data-primary-url="{{ url('admin/images') }}/:id/primary"
-                data-reorder-url="{{ route('admin.images.reorder') }}"
-                data-alt-text-url="{{ url('admin/images') }}/:id/alt-text"
-                data-delete-url="{{ url('admin/images') }}/:id"
-                data-existing-images="{{ isset($package) ? $package->images->toJson() : '[]' }}" data-max-files="4"
-                data-max-file-size="{{ 5 * 1024 * 1024 }}">
-            </div>
-
-            @if (isset($package) && $package->images->count() > 0)
-                <div class="mt-3">
-                    <p class="text-success mb-2">
-                        <i class="bi bi-check-circle me-1"></i>
-                        {{ $package->images->count() }} existing image(s) found
-                    </p>
-                    <div class="image-preview-container">
-                        @foreach ($package->images as $image)
-                            {{-- @dd($image); --}}
-                            <div class="existing-image">
-                                <img src="{{ asset('storage/' . $image->image_path) }}"
-                                    alt="Package Image {{ $loop->iteration }}"
-                                    title="{{ $image->alt_text ?? 'Package Image' }}">
-                                <span class="image-number">{{ $loop->iteration }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <small class="text-muted mt-2 d-block">
-                <i class="bi bi-info-circle me-1"></i>
-                Upload new images or manage existing ones. First image is the main display image.
-            </small>
+            <x-images-uploader modelType="Package" :modelId="$package->id ?? null"
+                uploadUrl="{{ route('admin.regular-packege-management.store') }}" :updateUrl="isset($package) ? route('admin.regular-packege-management.update', $package) : null"
+                imagesUrl="{{ route('admin.images.get', ['model_type' => 'Package', 'model_id' => $package->id ?? '']) }}"
+                primaryUrl="{{ url('admin/images') }}/:id/primary" reorderUrl="{{ route('admin.images.reorder') }}"
+                altTextUrl="{{ url('admin/images') }}/:id/alt-text" deleteUrl="{{ url('admin/images') }}/:id"
+                :existingImages="isset($package) ? $package->images->toJson() : '[]'" maxFiles="4" :maxFileSize="5 * 1024 * 1024" />
         </div>
     </div>
 </div>
+
 
 {{-- Package Details --}}
 <div class="card p-4 mb-4">
@@ -186,16 +157,16 @@
                         </td>
                         <td>
                             <input type="number" class="form-control day-price-input text-center"
-                                data-day="{{ $day }}" value="{{ $val }}" placeholder="100" maxlength="8"
-                                min="0" step="0.01">
+                                data-day="{{ $day }}" value="{{ $val }}" placeholder="100"
+                                maxlength="8" min="0" step="0.01">
                         </td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-danger remove-day-row" data-day="{{ $day }}">
+                            <button type="button" class="btn btn-sm btn-danger remove-day-row"
+                                data-day="{{ $day }}">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
                     </tr>
-                   
                 @endforeach
             </tbody>
         </table>

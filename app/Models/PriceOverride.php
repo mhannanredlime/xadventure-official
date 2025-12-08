@@ -11,7 +11,7 @@ class PriceOverride extends Model
     use HasFactory;
 
     protected $fillable = [
-        'package_variant_id',
+        'package_price_id',
         'date',
         'price_tag',
         'price_amount',
@@ -23,9 +23,9 @@ class PriceOverride extends Model
         'price_amount' => 'decimal:2'
     ];
 
-    public function packageVariant(): BelongsTo
+    public function packagePrice(): BelongsTo
     {
-        return $this->belongsTo(PackageVariant::class);
+        return $this->belongsTo(PackagePrice::class);
     }
 
     public function getColorAttribute(): string

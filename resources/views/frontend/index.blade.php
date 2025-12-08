@@ -24,7 +24,8 @@
                 </h1>
 
                 <div class="mt-4 d-flex align-items-center">
-                    <a href="{{ route('contact') }}" class="btn btn-orange jatio-bg-color primary-btn-border-radius">Contact Us →</a>
+                    <a href="{{ route('contact') }}" class="btn btn-orange jatio-bg-color primary-btn-border-radius">Contact
+                        Us →</a>
                     <a href="#" id="playVideoBtn" class="play-btn" data-bs-toggle="modal"
                         data-bs-target="#videoModal"><i class="bi bi-play-fill"></i></a>
                     <span class="ms-2">Play Video</span>
@@ -80,10 +81,18 @@
             <div class="row justify-content-center">
                 @forelse($regularPackages as $package)
                     @php
-                        $firstVariant = $package->variants->first();
-                        $firstPrice = $firstVariant ? $firstVariant->prices->first() : null;
-                        $price = $package->display_starting_price ?? ($firstPrice ? $firstPrice->amount : 0);
-                        $capacity = $firstVariant ? $firstVariant->capacity : 1;
+                        // Refactored to use packagePrices instead of variants
+                        $firstPrice = $package->packagePrices->first();
+                        $price = $package->display_starting_price ?? ($firstPrice ? $firstPrice->price : 0);
+
+                        // Determine capacity from RiderType name if possible
+                        $capacity = 1;
+                        if ($firstPrice && $firstPrice->riderType) {
+                            if (preg_match('/(\d+)/', $firstPrice->riderType->name, $matches)) {
+                                $capacity = (int) $matches[1];
+                            }
+                        }
+
                         $priceType = $capacity > 1 ? 'group' : 'person';
 
                         // Define features dynamically based on capacity
@@ -121,7 +130,8 @@
                                         <li><i class="bi  bi-check"></i> {{ $feature }}</li>
                                     @endforeach
                                 </ul>
-                                <a href="{{ route('custom-packages') }}" class="btn btn-pricing primary-btn-border-radius">Learn More</a>
+                                <a href="{{ route('custom-packages') }}"
+                                    class="btn btn-pricing primary-btn-border-radius">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -335,7 +345,8 @@
             <p>Our team is ready to help you plan the perfect day —</p>
             <p>whether it’s a solo ride, family outing, or group event.</p>
             <p>Let’s make your adventure unforgettable!</p>
-            <a href="{{ url('contact') }}" class="btn btn-orange primary-btn-border-radius jatio-bg-color">Get Appointment →</a>
+            <a href="{{ url('contact') }}" class="btn btn-orange primary-btn-border-radius jatio-bg-color">Get Appointment
+                →</a>
         </div>
     </section>
 @endsection

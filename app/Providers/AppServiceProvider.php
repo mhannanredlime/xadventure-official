@@ -22,11 +22,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register custom asset helper with versioning
-        Blade::directive('versionedAsset', function ($expression) {
-            return "<?php echo App\Helpers\AssetHelper::versioned($expression); ?>";
-        });
-        Reservation::observe(ReservationObserver::class);
+        \Illuminate\Database\Eloquent\Model::shouldBeStrict(! $this->app->isProduction());
 
+        // 1. Blade Directive: Only register this when not running in the console (during cache clearing)
+        if (! $this->app->runningInConsole()) { // <--- ADD THIS LINE
+            // Register custom asset helper with versioning
+            Blade::directive('versionedAsset', function ($expression) {
+                return "<?php echo App\Helpers\AssetHelper::versioned($expression); ?>";
+            });
+        }
+        
+        // 2. Observer: This is fine to run always
+        Reservation::observe(ReservationObserver::class);
     }
 }
