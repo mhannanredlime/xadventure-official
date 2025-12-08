@@ -88,19 +88,63 @@ if (! function_exists('get_package_price')) {
             return $package->display_starting_price;
         }
 
-        // Step 2: Get active prices for the given day
-        $query = $package->packagePrices()->active()->where('day', $day);
+        // Step 2: Prepare query
+        $query = $package->packagePrices()->active();
+
+        // Check if $day is a generic type (weekday/weekend) or specific day (mon/tue)
+        $lowerDay = strtolower($day);
+        $isGenericType = in_array($lowerDay, ['weekday', 'weekend']);
+
+        if ($isGenericType) {
+            // Query by PriceType slug
+            $query->whereHas('priceType', function($q) use ($lowerDay) {
+                $q->where('slug', $lowerDay);
+            });
+        } else {
+            // It's a specific day, try exact match first
+            // But we need to handle fallback if no exact day price exists
+            // Since we can't easily do "try this OR that" with a single query builder chain without advanced logic,
+            // let's fetch matching records and filter in PHP or do two queries.
+            // Given the complexity and need for fallback, let's clone.
+            
+            $dayQuery = clone $query;
+            $priceByDay = $dayQuery->where('day', $lowerDay)
+                ->when($riderTypeId, function($q) use ($riderTypeId) {
+                    $q->where('rider_type_id', $riderTypeId);
+                })
+                ->first();
+                
+            if ($priceByDay) {
+                return $priceByDay->price;
+            }
+            
+            // Fallback to PriceType
+            // Map day to weekend/weekday. 
+            // Note: This relies on app-specific definition of weekend.
+            // Helper doesn't always have context, assuming standard Sat/Sun or Fri/Sat.
+            // Let's assume standard Carbon isWeekend() equivalent if we had a date.
+            // Since we only have day name string, we need a map.
+            $weekends = ['sat', 'sun', 'friday']; // Including Friday as it's common in some contexts, but let's be safe.
+            // Actually, best to check if the string implies weekend.
+            // If strictly 'sat', 'sun' -> weekend.
+            $isWeekendDay = in_array($lowerDay, ['sat', 'sun']); 
+            $typeSlug = $isWeekendDay ? 'weekend' : 'weekday';
+            
+            $query->whereHas('priceType', function($q) use ($typeSlug) {
+                $q->where('slug', $typeSlug);
+            });
+        }
 
         // Step 3: Filter by rider type if provided
         if ($riderTypeId) {
             $query->where('rider_type_id', $riderTypeId);
         }
 
-        // Step 4: Return first matching price or minimum if no riderTypeId
+        // Step 4: Return first matching price or minimum
         if ($riderTypeId) {
-            return $query->value('price'); // exact rider type
+            return $query->value('price');
         } else {
-            return $query->min('price'); // minimum price for the day
+            return $query->min('price');
         }
     }
 }
