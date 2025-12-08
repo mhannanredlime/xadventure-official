@@ -69,6 +69,7 @@ class BookingController extends Controller
             $packageId = $request->input('package_id');
             $riderTypeId = $request->input('rider_type_id'); // null if not provided
             $sessionId = session()->getId();
+            $userId = auth()->id();
 
             $package = Package::where('id', $packageId)
                 ->where('is_active', 1)
@@ -85,23 +86,35 @@ class BookingController extends Controller
 
             $price = get_package_price($package, $today, $riderTypeId);
 
-            if (! $price) {
+            if ($price === null) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Price not available for this package today.',
                 ]);
             }
 
-            $cartItem = Cart::firstOrNew([
+            // Match on package AND rider type to separate distinct items
+            $matchAttributes = [
                 'session_id' => $sessionId,
                 'package_id' => $packageId,
+                'rider_type_id' => $riderTypeId,
+            ];
+
+            if ($userId) {
+                $matchAttributes['user_id'] = $userId;
+            }
+
+            $cartItem = Cart::firstOrNew($matchAttributes, [
                 'package_type' => $package->type,
-            ], [
-                'cart_amount' => $price,
-                'rider_type_id' => $riderTypeId, // optional, can be null
+                'amount' => $price,
             ]);
 
             $cartItem->quantity = ($cartItem->quantity ?? 0) + 1;
+            // Ensure other fields are set if new
+            $cartItem->package_type = $package->type;
+            $cartItem->amount = $price; // Update price to current
+            if($userId && !$cartItem->user_id) $cartItem->user_id = $userId;
+            
             $cartItem->save();
 
             return response()->json([
@@ -123,7 +136,7 @@ class BookingController extends Controller
     {
         $validated = $request->validated();
         // Fetch cart item
-        $cartItem = Cart::where('cart_uuid', $validated['cart_uuid'])->firstOrFail();
+        $cartItem = Cart::where('uuid', $validated['cart_uuid'])->firstOrFail();
         switch ($validated['change']) {
             case 'addition':
                 $cartItem->quantity += 1;
@@ -154,48 +167,42 @@ class BookingController extends Controller
      */
     public function getCartItemAvailability(Request $request)
     {
-        $cartKey = $request->get('cart_key');
-        $cart = session()->get('cart', []);
+        $cartKey = $request->get('cart_key'); // UUID or ID
+        // Assuming cart_key is UUID from frontend
+        
+        $cartItem = Cart::where('uuid', $cartKey)->first();
 
-        if (! isset($cart[$cartKey])) {
+        if (! $cartItem) {
             return response()->json([
                 'success' => false,
                 'message' => 'Item not found in cart.',
             ], 404);
         }
 
-        $cartItem = $cart[$cartKey];
-        $variant = \App\Models\PackageVariant::find($cartItem['variant_id']);
-
-        if (! $variant) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Package variant not found.',
-            ], 404);
-        }
-
-        $package = $variant->package;
-
-        // Get real availability data
-        $priceService = app(\App\Services\PriceCalculationService::class);
-        $availability = $priceService->getPricingAndAvailabilityForDate(
-            $variant,
-            $cartItem['date'],
-            $cartItem['slot_id']
-        );
-
+        $package = $cartItem->package;
+        
+        // Simpler availability check without PackageVariant
+        // We need to resolve price for the selected date
+        $date = $cartItem->selected_date ?? $cartItem->date;
+        $day = $date ? strtolower(Carbon::parse($date)->format('D')) : strtolower(now()->format('D'));
+        
+        $price = get_package_price($package, $day, $cartItem->rider_type_id);
+        
+        // Mock availability for now or use real service if available
+        // $availability = ... 
+        
         return response()->json([
             'success' => true,
             'data' => [
-                'title' => $package->name.' - '.$variant->variant_name,
+                'title' => $package->name . ($cartItem->rider_type_id ? ' - Rider Type ' . $cartItem->rider_type_id : ''),
                 'image' => $package->display_image_url ?? asset('admin/images/pack-1.png'),
-                'unit_price' => $availability['final_price'],
-                'current_quantity' => $cartItem['quantity'],
-                'available_vehicles' => $availability['total_vehicles'], // Use total_vehicles like admin, not total_available
-                'available_capacity' => $availability['available_capacity'],
-                'price_tag' => $availability['price_tag'],
-                'has_discount' => $availability['has_discount'],
-                'default_price' => $availability['default_price'],
+                'unit_price' => $price,
+                'current_quantity' => $cartItem->quantity,
+                'available_vehicles' => 10, // Placeholder
+                'available_capacity' => 10, // Placeholder
+                'price_tag' => 'Standard',
+                'has_discount' => false,
+                'default_price' => $price,
             ],
         ]);
     }
@@ -203,7 +210,7 @@ class BookingController extends Controller
     public function removeFromCart(Request $request, $cart_uuid)
     {
         // dd($request->all());
-        $cartItem = Cart::where('cart_uuid', $cart_uuid)->first();
+        $cartItem = Cart::where('uuid', $cart_uuid)->first();
         if (! $cartItem) {
             return redirect()->route('frontend.process-to-checkout')
                 ->with('error', 'Item not found in cart.');
@@ -216,30 +223,23 @@ class BookingController extends Controller
     public function updateCartDateTime(Request $request)
     {
         $updates = $request->all();
-        $cart = session()->get('cart', []);
-
+        // $cart = session()->get('cart', []); // OLD
+        
         foreach ($updates as $update) {
-            $cartKey = $update['cart_key'] ?? null;
+            $cartKey = $update['cart_key'] ?? null; // UUID
             $date = $update['date'] ?? null;
             $timeSlot = $update['time_slot'] ?? null;
 
-            if ($cartKey && isset($cart[$cartKey])) {
-                $item = $cart[$cartKey];
-
-                // Create new cart key with updated slot_id
-                $newCartKey = $item['variant_id'].'_'.$date.'_'.$timeSlot;
-
-                // Update the item with new date and slot_id
-                $item['date'] = $date;
-                $item['slot_id'] = $timeSlot;
-
-                // Remove old cart item and add with new key
-                unset($cart[$cartKey]);
-                $cart[$newCartKey] = $item;
+            if ($cartKey) {
+                // Update DB cart
+                 Cart::where('uuid', $cartKey)->update([
+                     'date' => $date, // maps to date column
+                     'selected_date' => $date, // maps to selected_date alias if exists, keeping both or migrating
+                     'schedule_slot_id' => $timeSlot,
+                     'time_slot_id' => $timeSlot,
+                 ]);
             }
         }
-
-        session()->put('cart', $cart);
 
         return response()->json([
             'success' => true,
@@ -276,7 +276,9 @@ class BookingController extends Controller
             }
 
             // Convert reservation date to day name (sun, mon, tue...)
-            $day = strtolower(Carbon::parse($item->reservation_date)->format('D'));
+            // Use 'date' column or 'selected_date' or fallback to today
+            $resDate = $item->date ?? $item->selected_date ?? now();
+            $day = strtolower(Carbon::parse($resDate)->format('D'));
 
             // Fetch price from helper
             $price = get_package_price($package, $day, $item->rider_type_id);
@@ -342,7 +344,7 @@ class BookingController extends Controller
 
         $data['guestCartItems'] = Cart::with('package')
             ->where('session_id', session()->getId())
-            ->where('created_at', '>=', now()->subMinutes(env('SESSION_LIFETIME')))
+            ->where('created_at', '>=', now()->subMinutes(env('SESSION_LIFETIME', 120)))
             ->get();
 
         return view('frontend.checkout.index', $data);
@@ -403,7 +405,8 @@ class BookingController extends Controller
                 if (! $cartItem->package) {
                     continue;
                 }
-                $price = get_package_price($cartItem->package, now()->format('D'));
+                $resDate = $cartItem->date ?? $cartItem->selected_date ?? now();
+                $price = get_package_price($cartItem->package, Carbon::parse($resDate)->format('D'), $cartItem->rider_type_id);
                 $subtotal += $price * $cartItem->quantity;
             }
 
@@ -431,9 +434,19 @@ class BookingController extends Controller
                 if (! $cartItem->package) {
                     continue;
                 }
-
-                $price = get_package_price($cartItem->package, now()->format('D'));
+                
+                $resDate = $cartItem->date ?? $cartItem->selected_date ?? now();
+                $day = Carbon::parse($resDate)->format('D');
+                $price = get_package_price($cartItem->package, $day, $cartItem->rider_type_id);
                 $itemSubtotal = $price * $cartItem->quantity;
+                
+                // Resolve Package Price ID for Reference
+                $packagePriceId = \App\Models\PackagePrice::where('package_id', $cartItem->package_id)
+                    ->where('day', strtolower($day))
+                    ->when($cartItem->rider_type_id, function($q) use ($cartItem) {
+                        return $q->where('rider_type_id', $cartItem->rider_type_id);
+                    })
+                    ->value('id');
 
                 // Allocate promo & VAT proportionally
                 $itemDiscount = ($subtotal > 0) ? ($itemSubtotal / $subtotal) * $promoDiscount : 0;
@@ -446,10 +459,10 @@ class BookingController extends Controller
                     'customer_name' => $request->customer_name,
                     'customer_email' => $request->customer_email,
                     'customer_phone' => $formattedPhone,
-                    'package_variant_id' => null,
+                    'package_price_id' => $packagePriceId, // Use resolved ID
                     'package_id' => $cartItem->package_id,
-                    'schedule_slot_id' => $cartItem->time_slot_id,
-                    'date' => $cartItem->selected_date,
+                    'schedule_slot_id' => $cartItem->schedule_slot_id ?? $cartItem->time_slot_id,
+                    'date' => $resDate,
                     'report_time' => '09:00:00',
                     'party_size' => $cartItem->quantity ?? 0,
                     'subtotal' => $itemSubtotal,

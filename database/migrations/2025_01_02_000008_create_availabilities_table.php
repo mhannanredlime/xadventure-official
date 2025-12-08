@@ -11,16 +11,16 @@ return new class extends Migration
         Schema::create('availabilities', function (Blueprint $table) {
             $table->id();
             $table->date('date');
-            $table->foreignId('package_variant_id')->constrained()->onDelete('cascade');
+            $table->foreignId('package_id')->constrained()->onDelete('cascade');
             $table->foreignId('schedule_slot_id')->constrained()->onDelete('cascade');
             $table->integer('capacity_total')->default(10);
             $table->integer('capacity_reserved')->default(0);
             $table->boolean('is_day_off')->default(false);
             $table->decimal('price_override', 10, 2)->nullable();
-            $table->enum('price_tag', ['regular', 'premium', 'discounted'])->default('regular');
+            $table->enum('price_tag', ['regular', 'premium', 'discounted','date_range'])->default('regular');
             $table->timestamps();
             
-            $table->unique(['date', 'package_variant_id', 'schedule_slot_id']);
+            $table->unique(['date', 'package_id', 'schedule_slot_id']);
         });
     }
 

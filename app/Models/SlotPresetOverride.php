@@ -11,7 +11,7 @@ class SlotPresetOverride extends Model
     use HasFactory;
 
     protected $fillable = [
-        'package_variant_id',
+        'package_id',
         'date',
         'slot_preset_id',
     ];
@@ -25,9 +25,9 @@ class SlotPresetOverride extends Model
         return $this->belongsTo(SlotPreset::class, 'slot_preset_id');
     }
 
-    public function packageVariant(): BelongsTo
+    public function package(): BelongsTo
     {
-        return $this->belongsTo(PackageVariant::class);
+        return $this->belongsTo(Package::class);
     }
 }
 

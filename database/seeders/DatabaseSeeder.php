@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,7 +21,6 @@ class DatabaseSeeder extends Seeder
             $this->call([
                 VehicleTypeSeeder::class,
                 VehicleTypeImageSeeder::class,
-                VehicleSeeder::class,
                 VehicleSeeder::class,
                 CreateSampleVehiclesSeeder::class,
                 // Core ACL Seeders (Must run before Users/Customers to ensure roles/permissions exist)
@@ -75,9 +75,10 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'is_admin' => true,
+                'user_type' => 'admin',
             ]
         );
 

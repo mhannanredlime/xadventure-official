@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\Reservation;
 use App\Models\ReservationItem;
 use App\Models\Customer;
-use App\Models\PackageVariant;
+use App\Models\Package;
+use App\Models\PackagePrice;
 use App\Models\ScheduleSlot;
 use App\Models\Availability;
 use App\Models\Payment;
@@ -26,11 +27,12 @@ class ReservationSeeder extends Seeder
 
             // Get required data
             $customers = Customer::all();
-            $variants = PackageVariant::where('is_active', true)->get();
+            $customers = Customer::all();
+            $packages = Package::where('is_active', true)->with('packagePrices')->get();
             $slots = ScheduleSlot::where('is_active', true)->get();
             $promoCodes = PromoCode::where('status', 'active')->get();
 
-            if ($customers->isEmpty() || $variants->isEmpty() || $slots->isEmpty()) {
+            if ($customers->isEmpty() || $packages->isEmpty() || $slots->isEmpty()) {
                 $this->command->warn('Missing required data for reservations. Skipping reservation seeding.');
                 return;
             }
@@ -114,7 +116,16 @@ class ReservationSeeder extends Seeder
             foreach ($reservations as $reservationData) {
                 // Add required fields for reservation
                 $reservationData['booking_code'] = 'BK' . date('Ymd') . str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT);
-                $reservationData['package_variant_id'] = $variants->random()->id;
+                
+                $randomPackage = $packages->random();
+                $randomPrice = $randomPackage->packagePrices->isNotEmpty() ? $randomPackage->packagePrices->random() : null;
+                
+                if (!$randomPrice) {
+                     continue; // Skip if no price found
+                }
+
+                $reservationData['package_id'] = $randomPackage->id;
+                $reservationData['package_price_id'] = $randomPrice->id;
                 $reservationData['schedule_slot_id'] = $slots->random()->id;
                 $reservationData['date'] = Carbon::now()->addDays(rand(1, 30))->format('Y-m-d');
                 $reservationData['report_time'] = '08:00:00';
@@ -132,13 +143,11 @@ class ReservationSeeder extends Seeder
                     $createdReservations++;
                     
                     // Create reservation items
-                    $this->createReservationItems($reservation, $variants, $slots, $faker);
+                    $this->createReservationItems($reservation, $randomPackage, $randomPrice, $slots, $faker);
                     
                     // Create payment record
                     $this->createPaymentRecord($reservation, $faker);
-                    
-                    // Note: Promo code relationship not implemented in reservations table
-                    // Promo codes are handled separately through promo_redemptions table
+                
                 } else {
                     $updatedReservations++;
                 }
@@ -148,11 +157,15 @@ class ReservationSeeder extends Seeder
             $additionalReservations = 8;
             for ($i = 0; $i < $additionalReservations; $i++) {
                 $customer = $customers->random();
-                $variant = $variants->random();
+                $package = $packages->random();
+                $price = $package->packagePrices->first(); // Simplification: just take first price
+
+                if (!$price) continue; 
+
                 $slot = $slots->random();
                 
                 // Calculate amounts
-                $basePrice = $variant->prices->where('price_type', 'weekday')->first()->amount ?? 1000.00;
+                $basePrice = $price->price;
                 $totalAmount = $basePrice;
                 $discountAmount = 0;
                 
@@ -176,7 +189,8 @@ class ReservationSeeder extends Seeder
                 $reservation = Reservation::create([
                     'customer_id' => $customer->id,
                     'booking_code' => 'BK' . date('Ymd') . str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT),
-                    'package_variant_id' => $variant->id,
+                    'package_id' => $package->id,
+                    'package_price_id' => $price->id,
                     'schedule_slot_id' => $slot->id,
                     'date' => Carbon::now()->addDays(rand(1, 30))->format('Y-m-d'),
                     'report_time' => '08:00:00',
@@ -197,7 +211,7 @@ class ReservationSeeder extends Seeder
                 $createdReservations++;
                 
                 // Create reservation items
-                $this->createReservationItems($reservation, collect([$variant]), collect([$slot]), $faker);
+                $this->createReservationItems($reservation, $package, $price, collect([$slot]), $faker);
                 
                 // Create payment record
                 $this->createPaymentRecord($reservation, $faker);
@@ -215,17 +229,18 @@ class ReservationSeeder extends Seeder
         }
     }
 
-    private function createReservationItems($reservation, $variants, $slots, $faker)
+    private function createReservationItems($reservation, $package, $price, $slots, $faker)
     {
-        $variant = $variants->random();
-        $slot = $slots->random();
+        $slot = $slots instanceof \Illuminate\Database\Eloquent\Collection ? $slots->random() : $slots->first();
+        if (!$slot) $slot = ScheduleSlot::first(); // Fallback
+
         $date = Carbon::now()->addDays(rand(1, 30));
         
         // Create availability if it doesn't exist
         $availability = Availability::firstOrCreate(
             [
                 'date' => $date->format('Y-m-d'),
-                'package_variant_id' => $variant->id,
+                'package_id' => $package->id,
                 'schedule_slot_id' => $slot->id,
             ],
             [
@@ -240,9 +255,9 @@ class ReservationSeeder extends Seeder
 
         ReservationItem::create([
             'reservation_id' => $reservation->id,
-            'package_variant_id' => $variant->id,
+            'package_price_id' => $price->id,
             'qty' => rand(1, 3),
-            'unit_price' => $variant->prices->where('price_type', 'weekday')->first()->amount ?? 1000.00,
+            'unit_price' => $price->price,
             'line_total' => $reservation->total_amount,
         ]);
     }

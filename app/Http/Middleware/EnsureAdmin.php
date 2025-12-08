@@ -21,13 +21,14 @@ class EnsureAdmin
             return $next($request);
         }
         
-        // Fallback: Check if user has any admin role (Master Admin, Admin, or Manager)
-        if ($user->hasAnyRole(['master-admin', 'admin', 'manager'])) {
-            return $next($request);
-        }
-        
         // Legacy fallback: Check old is_admin field
         if ($user->is_admin == 1) {
+            return $next($request);
+        }
+
+        // Fallback: Check if user has any admin role (Master Admin, Admin, or Manager)
+        // This might trigger lazy loading, so we ensure it's last or we eagerly load roles if needed
+        if ($user->hasAnyRole(['master-admin', 'admin', 'manager'])) {
             return $next($request);
         }
 

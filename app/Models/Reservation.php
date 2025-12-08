@@ -16,7 +16,7 @@ class Reservation extends Model
         'user_id',
         'customer_id',
         'package_id',
-        'package_variant_id',
+        'package_price_id',
         'schedule_slot_id',
         'date',
         'report_time',
@@ -60,9 +60,9 @@ class Reservation extends Model
         return $this->belongsTo(Package::class, 'package_id');
     }
 
-    public function packageVariant(): BelongsTo
+    public function packagePrice(): BelongsTo
     {
-        return $this->belongsTo(PackageVariant::class);
+        return $this->belongsTo(PackagePrice::class);
     }
 
     public function scheduleSlot(): BelongsTo

@@ -15,11 +15,27 @@ class PriceCalculationService
         $this->vehicleAvailabilityService = $vehicleAvailabilityService;
     }
 
-    public function getPriceForDate(PackageVariant $variant, $date): float
+    public function getPriceForDate(\App\Models\Package $package, $date, $riderTypeId = null): float
     {
+        // Resolve PackagePrice for ID if possible, for overrides
+        // We need package_price_id for PriceOverride.
+        // So we must find the PackagePrice record first.
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+        $dayName = strtolower(Carbon::parse($date)->format('D')); // 'sun', 'mon' etc.
+        
+        // Find PackagePrice
+        $packagePrice = $package->packagePrices()
+            ->where('day', $dayName)
+            ->when($riderTypeId, function($q) use ($riderTypeId) {
+                return $q->where('rider_type_id', $riderTypeId);
+            })
+            ->first();
+            
+        if (!$packagePrice) return 0;
+
         // Check for price override
         $override = PriceOverride::where([
-            'package_variant_id' => $variant->id,
+            'package_price_id' => $packagePrice->id,
             'date' => $date
         ])->first();
 
@@ -27,53 +43,58 @@ class PriceCalculationService
             return $override->price_amount;
         }
 
-        // Use default pricing
-        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
-        $priceType = ($dayOfWeek >= 6) ? 'weekend' : 'weekday';
-
-        $defaultPrice = $variant->prices()
-            ->where('price_type', $priceType)
-            ->first();
-
-        return $defaultPrice ? $defaultPrice->amount : 0;
+        return $packagePrice->price;
     }
 
-    public function getPriceTagForDate(PackageVariant $variant, $date): ?string
+    public function getPriceTagForDate(\App\Models\Package $package, $date, $riderTypeId = null): ?string
     {
+        $dayName = strtolower(Carbon::parse($date)->format('D'));
+        $packagePrice = $package->packagePrices()
+            ->where('day', $dayName)
+            ->when($riderTypeId, function($q) use ($riderTypeId) {
+                return $q->where('rider_type_id', $riderTypeId);
+            })
+            ->first();
+            
+        if (!$packagePrice) return null;
+
         $override = PriceOverride::where([
-            'package_variant_id' => $variant->id,
+            'package_price_id' => $packagePrice->id,
             'date' => $date
         ])->first();
 
         return $override ? $override->price_tag : null;
     }
 
-    public function getDefaultPriceForDate(PackageVariant $variant, $date): float
+    public function getDefaultPriceForDate(\App\Models\Package $package, $date, $riderTypeId = null): float
     {
-        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
-        $priceType = ($dayOfWeek >= 6) ? 'weekend' : 'weekday';
-
-        $defaultPrice = $variant->prices()
-            ->where('price_type', $priceType)
+       // Default is the base price from PackagePrice table
+       $dayName = strtolower(Carbon::parse($date)->format('D'));
+       $packagePrice = $package->packagePrices()
+            ->where('day', $dayName)
+            ->when($riderTypeId, function($q) use ($riderTypeId) {
+                return $q->where('rider_type_id', $riderTypeId);
+            })
             ->first();
-
-        return $defaultPrice ? $defaultPrice->amount : 0;
+       
+       return $packagePrice ? $packagePrice->price : 0;
     }
 
     /**
-     * Get comprehensive pricing and availability data for a package variant
+     * Get comprehensive pricing and availability data for a package
      */
-    public function getPricingAndAvailabilityForDate(PackageVariant $variant, $date, $scheduleSlotId = null, array $excludeCartItems = []): array
+    public function getPricingAndAvailabilityForDate(\App\Models\Package $package, $date, $scheduleSlotId = null, $riderTypeId = null, array $excludeCartItems = []): array
     {
-        $finalPrice = $this->getPriceForDate($variant, $date);
-        $defaultPrice = $this->getDefaultPriceForDate($variant, $date);
-        $priceTag = $this->getPriceTagForDate($variant, $date);
+        $finalPrice = $this->getPriceForDate($package, $date, $riderTypeId);
+        $defaultPrice = $this->getDefaultPriceForDate($package, $date, $riderTypeId);
+        $priceTag = $this->getPriceTagForDate($package, $date, $riderTypeId);
         
         // Get vehicle availability
-        $availability = $this->vehicleAvailabilityService->calculateAvailabilityForPackageVariant(
-            $variant, 
+        $availability = $this->vehicleAvailabilityService->calculateAvailabilityForPackage(
+            $package, 
             $date, 
             $scheduleSlotId,
+            $riderTypeId,
             $excludeCartItems
         );
 
@@ -84,7 +105,7 @@ class PriceCalculationService
             'is_available' => $availability['is_available'],
             'available_capacity' => $availability['available_capacity'],
             'total_available' => $availability['total_available'],
-            'total_vehicles' => $availability['total_vehicles'], // Add missing total_vehicles key
+            'total_vehicles' => $availability['total_vehicles'], 
             'total_booked' => $availability['total_booked'],
             'vehicle_types' => $availability['vehicle_types'],
             'has_discount' => $finalPrice < $defaultPrice,

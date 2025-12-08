@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-// use App\Traits\HasPermissions;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -95,5 +94,20 @@ class User extends Authenticatable
     public function getUserTypeDisplayName(): string
     {
         return $this->user_type === 'admin' ? 'Admin' : 'Customer';
+    }
+
+    /**
+     * Check if the user has a permission.
+     * Wrapper for Spatie's hasPermissionTo.
+     */
+    public function hasPermission($permission): bool
+    {
+        return $this->can($permission); // using Gate capability or direct Spatie method
+        // Try/Catch because Spatie might throw PermissionDoesNotExist
+        try {
+            return $this->hasPermissionTo($permission);
+        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+            return false;
+        }
     }
 }

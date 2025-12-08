@@ -12,7 +12,7 @@ class ReservationItem extends Model
 
     protected $fillable = [
         'reservation_id',
-        'package_variant_id',
+        'package_price_id',
         'qty',
         'unit_price',
         'line_total',
@@ -28,8 +28,8 @@ class ReservationItem extends Model
         return $this->belongsTo(Reservation::class);
     }
 
-    public function packageVariant(): BelongsTo
+    public function packagePrice(): BelongsTo
     {
-        return $this->belongsTo(PackageVariant::class);
+        return $this->belongsTo(PackagePrice::class);
     }
 }

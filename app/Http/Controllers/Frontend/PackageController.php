@@ -27,20 +27,20 @@ class PackageController extends Controller
     public function atvUtvLandingPage(Request $request)
     {
         // Get ATV and UTV packages specifically
-        $atvPackages = Package::with(['packagePrices', 'vehicleTypes', 'images'])
+        $atvPackages = Package::with(['packagePrices.riderType', 'vehicleTypes', 'images'])
             ->where('is_active', true)
             ->where('name', 'like', '%ATV%')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $utvPackages = Package::with(['packagePrices', 'vehicleTypes', 'images'])
+        $utvPackages = Package::with(['packagePrices.riderType', 'vehicleTypes', 'images'])
             ->where('is_active', true)
             ->where('name', 'like', '%UTV%')
             ->orderBy('created_at', 'desc')
             ->get();
 
         // Get all packages for the booking functionality
-        $allPackages = Package::with(['packagePrices', 'vehicleTypes', 'images'])
+        $allPackages = Package::with(['packagePrices.riderType', 'vehicleTypes', 'images'])
             ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -50,27 +50,13 @@ class PackageController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        // Get all package variants with their relationships
-        $packageVariants = PackageVariant::with(['package', 'prices', 'availabilities.scheduleSlot'])
-            ->where('is_active', true)
-            ->get();
-
-        // Group variants by package for easier access in the view
-        $variantsByPackage = [];
-        foreach ($allPackages as $package) {
-            $variantsByPackage[$package->id] = $packageVariants->filter(function ($variant) use ($package) {
-                return $variant->package_id == $package->id;
-            });
-        }
         Log::info('ATV UTV Page');
 
         return view('frontend.adventure-details', compact(
             'atvPackages',
             'utvPackages',
             'allPackages',
-            'scheduleSlots',
-            'packageVariants',
-            'variantsByPackage'
+            'scheduleSlots'
         ));
     }
 
@@ -159,15 +145,17 @@ class PackageController extends Controller
 
     public function show(Package $package)
     {
-        $package->load(['variants.prices', 'vehicleTypes', 'images']);
+        $package->load(['packagePrices.riderType', 'vehicleTypes', 'images']);
 
         // Get schedule slots for time selection
         $scheduleSlots = ScheduleSlot::where('is_active', true)
             ->orderBy('start_time')
             ->get();
 
-        // Get availability data for this specific package
-        $availabilityData = $this->getAvailabilityDataForPackage($package);
+        // Availability Data strictly based on Package (not Variant)
+        // We can skip detailed availability grid per variant as it was
+        // or refactor it. For now, sending basic data.
+        $availabilityData = []; // $this->getAvailabilityDataForPackage($package); 
 
         return view('frontend.packages.show', compact('package', 'scheduleSlots', 'availabilityData'));
     }
@@ -205,19 +193,24 @@ class PackageController extends Controller
     /**
      * Public endpoint: Get all active schedule slots with availability for a variant and date
      */
+    /**
+     * Public endpoint: Get all active schedule slots with availability for a package and date
+     */
     public function getSlotsAvailability(Request $request)
     {
         $request->validate([
-            'variant_id' => 'required|exists:package_variants,id',
+            'package_id' => 'required|exists:packages,id',
             'date' => 'required|date',
+            'rider_type_id' => 'nullable|integer'
         ]);
 
-        $variant = PackageVariant::find($request->get('variant_id'));
+        $package = Package::find($request->get('package_id'));
         $date = $request->get('date');
+        $riderTypeId = $request->get('rider_type_id');
 
         // Determine which time slots to show using presets (default or per-day override)
         $presetOverride = SlotPresetOverride::where([
-            'package_variant_id' => $variant->id,
+            'package_id' => $package->id,
             'date' => $date,
         ])->first();
 
@@ -237,124 +230,55 @@ class PackageController extends Controller
 
         $result = [];
         foreach ($slots as $slot) {
-            // Check if this is a regular package - regular packages have unlimited availability
-            // Load the package relationship if not already loaded
-            if (! $variant->relationLoaded('package')) {
-                $variant->load('package');
-            }
-
-            $packageType = $variant->package->type ?? 'regular'; // Default to regular if type is null
+            // Check availability for this slot
+            $pricing = $this->priceService->getPricingAndAvailabilityForDate($package, $date, $slot->id, $riderTypeId);
+            
+            // Should be open if available capacity > 0 OR if it's a regular package with no capacity constraints?
+            // Existing logic checked if "regular" type and defaulted to open.
+            // New logic: Check available_capacity. Regular packages likely have high capacity seeded.
+            // Or we check Package Type.
+            
+            $packageType = $package->type ?? 'regular';
             $isRegularPackage = $packageType === 'regular';
-
-            if ($isRegularPackage) {
-                // For regular packages, return the variant's actual capacity
-                $pricing = $this->priceService->getPricingAndAvailabilityForDate($variant, $date, $slot->id);
-                $capacity = $variant->capacity ?? 6; // Default to 6 if capacity is not set
-
-                $result[] = [
-                    'id' => $slot->id,
-                    'name' => $slot->name,
-                    'label' => (string) (\Carbon\Carbon::parse($slot->start_time)->format('g A').' - '.\Carbon\Carbon::parse($slot->end_time)->format('g A')),
-                    'is_open' => true, // Always open for regular packages
-                    'available_total' => $capacity, // Use actual capacity
-                    'available_capacity' => $capacity, // Use actual capacity
-                    'total_booked' => 0,
-                    'final_price' => $pricing['final_price'],
-                    'price_tag' => $pricing['price_tag'],
-                ];
-            } else {
-                // For ATV/UTV packages, check actual availability
-                $pricing = $this->priceService->getPricingAndAvailabilityForDate($variant, $date, $slot->id);
-
-                $result[] = [
-                    'id' => $slot->id,
-                    'name' => $slot->name,
-                    'label' => (string) (\Carbon\Carbon::parse($slot->start_time)->format('g A').' - '.\Carbon\Carbon::parse($slot->end_time)->format('g A')),
-                    'is_open' => $pricing['available_capacity'] > 0,
-                    'available_total' => $pricing['total_available'], // vehicles left
-                    'available_capacity' => $pricing['available_capacity'], // seats/people left
-                    'total_booked' => $pricing['total_booked'],
-                    'final_price' => $pricing['final_price'],
-                    'price_tag' => $pricing['price_tag'],
-                ];
-            }
+            
+            // For UI display
+            $result[] = [
+                'id' => $slot->id,
+                'name' => $slot->name,
+                'label' => (string) (\Carbon\Carbon::parse($slot->start_time)->format('g A').' - '.\Carbon\Carbon::parse($slot->end_time)->format('g A')),
+                'is_open' => $pricing['is_available'],
+                'available_total' => $pricing['total_available'], 
+                'available_capacity' => $pricing['available_capacity'], 
+                'total_booked' => $pricing['total_booked'],
+                'final_price' => $pricing['final_price'],
+                'price_tag' => $pricing['price_tag'],
+            ];
         }
 
         return response()->json($result);
     }
 
-    public function getAvailabilityForDate(Request $request)
+    public function getPricingForDate(Request $request)
     {
         $date = $request->get('date');
         $packageId = $request->get('package_id');
+        $riderTypeId = $request->get('rider_type_id');
 
-        $availabilities = Availability::with(['packageVariant', 'scheduleSlot'])
-            ->where('date', $date)
-            ->when($packageId, function ($query) use ($packageId) {
-                return $query->whereHas('packageVariant', function ($q) use ($packageId) {
-                    $q->where('package_id', $packageId);
-                });
-            })
-            ->get();
-
-        return response()->json($availabilities);
-    }
-
-    public function getPackageDetails(Request $request)
-    {
-        $packageId = $request->get('package_id');
-
-        $package = Package::with(['variants.prices', 'vehicleTypes', 'images'])
-            ->where('id', $packageId)
-            ->where('is_active', true)
-            ->first();
+        $package = Package::find($packageId);
 
         if (! $package) {
             return response()->json(['error' => 'Package not found'], 404);
         }
 
-        return response()->json($package);
-    }
-
-    public function getVehicleTypeDetails(Request $request)
-    {
-        $vehicleTypeId = $request->get('vehicle_type_id');
-
-        $vehicleType = VehicleType::where('id', $vehicleTypeId)
-            ->where('is_active', true)
-            ->first();
-
-        if (! $vehicleType) {
-            return response()->json(['error' => 'Vehicle type not found'], 404);
-        }
-
-        return response()->json($vehicleType);
-    }
-
-    public function getPricingForDate(Request $request)
-    {
-        $date = $request->get('date');
-        $variantId = $request->get('variant_id');
-
-        $variant = PackageVariant::with(['prices'])
-            ->where('id', $variantId)
-            ->where('is_active', true)
-            ->first();
-
-        if (! $variant) {
-            return response()->json(['error' => 'Variant not found'], 404);
-        }
-
         // Get comprehensive pricing and availability data using the new integrated service
-        $pricingData = $this->priceService->getPricingAndAvailabilityForDate($variant, $date);
+        $pricingData = $this->priceService->getPricingAndAvailabilityForDate($package, $date, null, $riderTypeId);
 
         // Check if it's weekend
         $dayOfWeek = Carbon::parse($date)->dayOfWeek;
         $isWeekend = ($dayOfWeek == 0 || $dayOfWeek == 6);
 
         return response()->json(array_merge($pricingData, [
-            'variant' => $variant,
-            'variant_id' => $variant->id,
+            'package_id' => $package->id,
             'is_weekend' => $isWeekend,
         ]));
     }
@@ -362,20 +286,21 @@ class PackageController extends Controller
     public function checkAvailability(Request $request)
     {
         $date = $request->get('date');
-        $variantId = $request->get('variant_id');
+        $packageId = $request->get('package_id');
+        $riderTypeId = $request->get('rider_type_id');
         $slotId = $request->get('slot_id');
         $quantity = $request->get('quantity', 1);
 
-        $variant = PackageVariant::find($variantId);
-        if (! $variant) {
+        $package = Package::find($packageId);
+        if (! $package) {
             return response()->json([
                 'available' => false,
-                'message' => 'Variant not found',
+                'message' => 'Package not found',
             ]);
         }
 
         // Get comprehensive pricing and availability data using the new integrated service
-        $pricingData = $this->priceService->getPricingAndAvailabilityForDate($variant, $date, $slotId);
+        $pricingData = $this->priceService->getPricingAndAvailabilityForDate($package, $date, $slotId, $riderTypeId);
 
         $isAvailable = $pricingData['available_capacity'] >= $quantity;
 
@@ -393,72 +318,5 @@ class PackageController extends Controller
             'vehicle_types' => $pricingData['vehicle_types'],
             'total_booked' => $pricingData['total_booked'],
         ]);
-    }
-
-    private function getAvailabilityData()
-    {
-        $startDate = Carbon::today();
-        $endDate = Carbon::today()->addDays(30);
-
-        return Availability::with(['packagePrices.package', 'scheduleSlot'])
-            ->whereBetween('date', [$startDate, $endDate])
-            ->whereHas('packagePrices.package', function ($query) {
-                $query->where('is_active', true)
-                    ->where(function ($q) {
-                        $q->where('name', 'like', '%ATV%')
-                            ->orWhere('name', 'like', '%UTV%');
-                    });
-            })
-            ->get()
-            ->groupBy('date')
-            ->map(function ($dayAvailabilities) {
-                return $dayAvailabilities->groupBy('schedule_slot_id');
-            });
-    }
-
-    private function getAvailabilityDataForPackage(Package $package)
-    {
-        $startDate = Carbon::today();
-        $endDate = Carbon::today()->addDays(30);
-
-        return Availability::with(['packageVariant', 'scheduleSlot'])
-            ->whereBetween('date', [$startDate, $endDate])
-            ->whereHas('packageVariant', function ($query) use ($package) {
-                $query->where('package_id', $package->id);
-            })
-            ->get()
-            ->groupBy('date')
-            ->map(function ($dayAvailabilities) {
-                return $dayAvailabilities->groupBy('schedule_slot_id');
-            });
-    }
-
-    private function getPricingData()
-    {
-        $packages = Package::with(['variants.prices'])
-            ->where('is_active', true)
-            ->where(function ($query) {
-                $query->where('name', 'like', '%ATV%')
-                    ->orWhere('name', 'like', '%UTV%');
-            })
-            ->get();
-
-        $pricingData = [];
-
-        foreach ($packages as $package) {
-            foreach ($package->variants as $variant) {
-                $weekdayPrice = $variant->prices->where('price_type', 'weekday')->first();
-                $weekendPrice = $variant->prices->where('price_type', 'weekend')->first();
-
-                $pricingData[$package->id][$variant->id] = [
-                    'weekday' => $weekdayPrice ? $weekdayPrice->amount : 0,
-                    'weekend' => $weekendPrice ? $weekendPrice->amount : 0,
-                    'original_weekday' => $weekdayPrice ? $weekdayPrice->original_amount : 0,
-                    'original_weekend' => $weekendPrice ? $weekendPrice->original_amount : 0,
-                ];
-            }
-        }
-
-        return $pricingData;
     }
 }
