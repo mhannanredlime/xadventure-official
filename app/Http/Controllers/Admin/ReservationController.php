@@ -8,7 +8,9 @@ use App\Models\Reservation;
 use App\Models\VehicleType;
 use App\Models\ScheduleSlot;
 use Illuminate\Http\Request;
-use App\Models\PackageVariant;
+use App\Models\Package;
+use App\Models\RiderType;
+use App\Models\PackagePrice;
 use Illuminate\Support\Facades\Log;
 use App\Events\BookingStatusUpdated;
 use App\Http\Controllers\Controller;
@@ -72,7 +74,7 @@ class ReservationController extends Controller
                       $q->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                   })
-                  ->orWhereHas('packageVariant.package.vehicleTypes', function ($q) use ($search) {
+                  ->orWhereHas('package.vehicleTypes', function ($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%");
                   });
             });
@@ -85,29 +87,37 @@ class ReservationController extends Controller
         
         // Get data for edit modals
         $customers = Customer::orderBy('name')->get();
-        $packageVariants = PackageVariant::with('package')->where('is_active', true)->get();
+        $customers = Customer::orderBy('name')->get();
+        // $packageVariants = PackageVariant::with('package')->where('is_active', true)->get();
+        // Replaced with Packages and RiderTypes for new selection logic
+        $packages = Package::where('is_active', true)->orderBy('name')->get();
+        $riderTypes = RiderType::orderBy('id')->get();
         $scheduleSlots = ScheduleSlot::orderBy('sort_order')->get();
         $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
         
-        return view('admin.reservation-dashboard', compact('reservations', 'groupedReservations', 'customers', 'packageVariants', 'scheduleSlots', 'vehicleTypes'));
+        return view('admin.reservation-dashboard', compact('reservations', 'groupedReservations', 'customers', 'packages', 'riderTypes', 'scheduleSlots', 'vehicleTypes'));
     }
 
     public function create()
     {
         $customers = Customer::orderBy('name')->get();
-        $packageVariants = PackageVariant::with('package')->where('is_active', true)->get();
+        $customers = Customer::orderBy('name')->get();
+        $packages = Package::where('is_active', true)->orderBy('name')->get();
+        $riderTypes = RiderType::orderBy('id')->get();
         $scheduleSlots = ScheduleSlot::orderBy('sort_order')->get();
         $reservations = collect(); // Empty collection for create view
         $groupedReservations = collect(); // Empty collection for create view
         
-        return view('admin.reservation-dashboard', compact('customers', 'packageVariants', 'scheduleSlots', 'reservations', 'groupedReservations'));
+        return view('admin.reservation-dashboard', compact('customers', 'packages', 'riderTypes', 'scheduleSlots', 'reservations', 'groupedReservations'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'package_variant_id' => 'required|exists:package_variants,id',
+            'customer_id' => 'required|exists:customers,id',
+            'package_id' => 'required|exists:packages,id', // Replaces package_variant_id
+            // 'rider_type_id' => 'required|exists:rider_types,id', // Assuming added to form
             'schedule_slot_id' => 'required|exists:schedule_slots,id',
             'date' => 'required|date|after_or_equal:today',
             'party_size' => 'required|integer|min:1',
@@ -134,7 +144,7 @@ class ReservationController extends Controller
 
     public function show(Reservation $reservation)
     {
-        $reservation->load(['customer', 'packageVariant.package', 'scheduleSlot', 'items', 'payments', 'promoRedemptions.promoCode']);
+        $reservation->load(['customer', 'package', 'scheduleSlot', 'items', 'payments', 'promoRedemptions.promoCode']);
         $reservations = collect([$reservation]); // Single reservation for show view
         $groupedReservations = $this->groupReservationsByTransaction($reservations);
         
@@ -144,19 +154,22 @@ class ReservationController extends Controller
     public function edit(Reservation $reservation)
     {
         $customers = Customer::orderBy('name')->get();
-        $packageVariants = PackageVariant::with('package')->where('is_active', true)->get();
+        $customers = Customer::orderBy('name')->get();
+        $packages = Package::where('is_active', true)->orderBy('name')->get();
+        $riderTypes = RiderType::orderBy('id')->get();
         $scheduleSlots = ScheduleSlot::orderBy('sort_order')->get();
         $reservations = collect([$reservation]); // Single reservation for edit view
         $groupedReservations = $this->groupReservationsByTransaction($reservations);
         
-        return view('admin.reservation-dashboard', compact('reservation', 'customers', 'packageVariants', 'scheduleSlots', 'reservations', 'groupedReservations'));
+        return view('admin.reservation-dashboard', compact('reservation', 'customers', 'packages', 'riderTypes', 'scheduleSlots', 'reservations', 'groupedReservations'));
     }
 
     public function update(Request $request, Reservation $reservation)
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'package_variant_id' => 'required|exists:package_variants,id',
+            'customer_id' => 'required|exists:customers,id',
+            'package_id' => 'required|exists:packages,id', // Replaces package_variant_id
             'schedule_slot_id' => 'required|exists:schedule_slots,id',
             'date' => 'required|date',
             'party_size' => 'required|integer|min:1',
@@ -182,7 +195,7 @@ class ReservationController extends Controller
         // Check if booking status changed and dispatch event
         if ($oldBookingStatus !== $validated['booking_status']) {
             // Load the reservation with relationships for SMS
-            $reservationWithRelations = Reservation::with(['customer', 'packageVariant.package'])->find($reservation->id);
+            $reservationWithRelations = Reservation::with(['customer', 'package'])->find($reservation->id);
             event(new BookingStatusUpdated($reservationWithRelations, $oldBookingStatus, $validated['booking_status'], [
                 'updated_by' => 'Admin',
                 'update_time' => now()->toDateTimeString(),
@@ -229,7 +242,7 @@ class ReservationController extends Controller
      */
     public function history(Request $request)
     {
-        $query = Reservation::with(['customer', 'packageVariant.package.vehicleTypes', 'scheduleSlot']);
+        $query = Reservation::with(['customer', 'package.vehicleTypes', 'scheduleSlot']);
 
         // Date range filtering for history
         if ($request->filled('date_from') && $request->filled('date_to')) {
@@ -250,7 +263,7 @@ class ReservationController extends Controller
         // Filter by vehicle type
         if ($request->filled('vehicle_type')) {
             $vehicleType = $request->vehicle_type;
-            $query->whereHas('packageVariant.package.vehicleTypes', function ($q) use ($vehicleType) {
+            $query->whereHas('package.vehicleTypes', function ($q) use ($vehicleType) {
                 $q->where('name', $vehicleType);
             });
         }
@@ -277,7 +290,7 @@ class ReservationController extends Controller
                       $q->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                   })
-                  ->orWhereHas('packageVariant.package.vehicleTypes', function ($q) use ($search) {
+                  ->orWhereHas('package.vehicleTypes', function ($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%");
                   });
             });
@@ -383,7 +396,7 @@ class ReservationController extends Controller
     public function exportPending(Request $request)
     {
         try {
-            $query = Reservation::with(['customer', 'packageVariant.package.vehicleTypes', 'scheduleSlot']);
+            $query = Reservation::with(['customer', 'package.vehicleTypes', 'scheduleSlot']);
 
             // Date range filtering for export
             if ($request->filled('date_from') && $request->filled('date_to')) {
@@ -404,7 +417,7 @@ class ReservationController extends Controller
             // Apply filters
             if ($request->filled('vehicle_type')) {
                 $vehicleType = $request->vehicle_type;
-                $query->whereHas('packageVariant.package.vehicleTypes', function ($q) use ($vehicleType) {
+                $query->whereHas('package.vehicleTypes', function ($q) use ($vehicleType) {
                     $q->where('name', $vehicleType);
                 });
             }
@@ -427,7 +440,7 @@ class ReservationController extends Controller
                           $q->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                       })
-                      ->orWhereHas('packageVariant.package.vehicleTypes', function ($q) use ($search) {
+                      ->orWhereHas('package.vehicleTypes', function ($q) use ($search) {
                           $q->where('name', 'like', "%{$search}%");
                       });
                 });
@@ -448,7 +461,7 @@ class ReservationController extends Controller
     public function exportHistory(Request $request)
     {
         try {
-            $query = Reservation::with(['customer', 'packageVariant.package.vehicleTypes', 'scheduleSlot']);
+            $query = Reservation::with(['customer', 'package.vehicleTypes', 'scheduleSlot']);
 
             // Date range filtering for export
             if ($request->filled('date_from') && $request->filled('date_to')) {
@@ -469,7 +482,7 @@ class ReservationController extends Controller
             // Apply filters
             if ($request->filled('vehicle_type')) {
                 $vehicleType = $request->vehicle_type;
-                $query->whereHas('packageVariant.package.vehicleTypes', function ($q) use ($vehicleType) {
+                $query->whereHas('package.vehicleTypes', function ($q) use ($vehicleType) {
                     $q->where('name', $vehicleType);
                 });
             }
@@ -492,7 +505,7 @@ class ReservationController extends Controller
                           $q->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                       })
-                      ->orWhereHas('packageVariant.package.vehicleTypes', function ($q) use ($search) {
+                      ->orWhereHas('package.vehicleTypes', function ($q) use ($search) {
                           $q->where('name', 'like', "%{$search}%");
                       });
                 });
@@ -546,12 +559,12 @@ class ReservationController extends Controller
 
             // CSV Data
             foreach ($reservations as $reservation) {
-                $vehicleTypes = $reservation->packageVariant->package->vehicleTypes->pluck('name')->implode(', ');
+                $vehicleTypes = $reservation->package->vehicleTypes->pluck('name')->implode(', ');
                 
                 fputcsv($file, [
                     $reservation->booking_code,
                     $reservation->date->format('m/d/Y'),
-                    $reservation->packageVariant->package->name ?? 'N/A',
+                    $reservation->package->name ?? 'N/A',
                     $vehicleTypes,
                     $reservation->report_time ? $reservation->report_time->format('g:i A') : 'N/A',
                     $reservation->scheduleSlot ? $reservation->scheduleSlot->name : 'N/A',

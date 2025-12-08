@@ -299,7 +299,7 @@
                                 </td>
                                 <td data-label="Guest Name">{{ $primaryReservation->customer->name ?? 'N/A' }}</td>
                                 <td data-label="Guest Phone">
-                                    {{ $primaryReservation->customer->phone ? new \App\Services\PhoneNumberService()->formatForDisplayWithoutPrefix($primaryReservation->customer->phone) : 'N/A' }}
+                                    {{ isset($primaryReservation->customer->phone) ? new \App\Services\PhoneNumberService()->formatForDisplayWithoutPrefix($primaryReservation->customer->phone) : 'N/A' }}
                                 </td>
                                 <td data-label="Party Size">{{ $reservations->sum('party_size') }}</td>
                                 <td data-label="Total">৳{{ number_format($group['total_amount'], 2) }}</td>
@@ -905,7 +905,7 @@
                                                         <tr>
                                                             <td class="fw-semibold text-muted">Phone:</td>
                                                             <td class="text-break">
-                                                                {{ $reservation->customer->phone ? new \App\Services\PhoneNumberService()->formatForDisplayWithoutPrefix($reservation->customer->phone) : 'N/A' }}
+                                                                {{ @$reservation->customer->phone ? new \App\Services\PhoneNumberService()->formatForDisplayWithoutPrefix($reservation->customer->phone) : 'N/A' }}
                                                             </td>
                                                         </tr>
                                                         <tr>

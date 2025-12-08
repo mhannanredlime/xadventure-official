@@ -44,14 +44,11 @@ use App\Http\Controllers\Admin\VehicleAvailabilityController;
 use App\Http\Controllers\Frontend\RegularPackageBookingController;
 use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
 
-Route::get('/atv-booking-html-sample', function () {
-    return view('atv-booking-html-sample');
-})->name('atv-booking-html-sample');
 
 
 
 // Frontend Routes (Public)
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'home'])->name('home');
 
 Route::get('/about', function () {
     return view('frontend.about');

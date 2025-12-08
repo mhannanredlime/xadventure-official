@@ -88,20 +88,43 @@ if (! function_exists('get_package_price')) {
             return $package->display_starting_price;
         }
 
-        // Step 2: Get active prices for the given day
-        $query = $package->packagePrices()->active()->where('day', $day);
-
-        // Step 3: Filter by rider type if provided
+        // Step 2: Prepare base query for Active Prices
+        $baseQuery = $package->packagePrices()->active();
+        
         if ($riderTypeId) {
-            $query->where('rider_type_id', $riderTypeId);
+            $baseQuery->where('rider_type_id', $riderTypeId);
         }
 
-        // Step 4: Return first matching price or minimum if no riderTypeId
-        if ($riderTypeId) {
-            return $query->value('price'); // exact rider type
-        } else {
-            return $query->min('price'); // minimum price for the day
-        }
+        $lowerDay = strtolower($day);
+        
+        // CASE A: Generic 'weekday' or 'weekend' requested
+        if (in_array($lowerDay, ['weekday', 'weekend'])) {
+             $price = (clone $baseQuery)->whereHas('priceType', function($q) use ($lowerDay) {
+                  $q->where('slug', $lowerDay);
+             })->value('price');
+             
+             if ($price !== null) return (float) $price;
+        } 
+        
+        // CASE B: Specific Day requested (e.g., 'mon', 'tue')
+        // 1. Try finding a specific Day Override price
+        $specificPrice = (clone $baseQuery)->where('day', $lowerDay)->value('price');
+        if ($specificPrice !== null) return (float) $specificPrice;
+
+        // 2. Fallback: Map specific day to PriceType (Weekday/Weekend)
+        // Default Assumption: Fri/Sat is Weekend (BD Context), Sun-Thu is Weekday.
+        // Adjust this logic if project settings define weekend differently.
+        $isWeekend = in_array($lowerDay, ['fri', 'sat']); 
+        $typeSlug = $isWeekend ? 'weekend' : 'weekday';
+
+        $fallbackPrice = (clone $baseQuery)->whereHas('priceType', function($q) use ($typeSlug) {
+             $q->where('slug', $typeSlug);
+        })->value('price');
+        
+        if ($fallbackPrice !== null) return (float) $fallbackPrice;
+
+        // Step 3: Default Fail-safe (e.g. min price)
+        return (float) $baseQuery->min('price');
     }
 }
 
