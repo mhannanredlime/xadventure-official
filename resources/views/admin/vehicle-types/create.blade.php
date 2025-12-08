@@ -60,7 +60,8 @@
                     <div class="form-group">
                         <label for="multiple-image-upload">Upload Image</label>
                         <div class="d-flex gap-2 mb-2">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="openGalleryModal({multiple: true, onSelect: handleGallerySelection})">
+                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                onclick="openGalleryModal({multiple: true, onSelect: handleGallerySelection})">
                                 <i class="bi bi-images"></i> Browse Gallery
                             </button>
                         </div>
@@ -88,7 +89,7 @@
 
                     <div class="form-group ">
                         <button type="submit" class="btn btn-primary mt-2">Save Vehicle Type</button>
-                        <a href="{{ route('admin.vehical-setup') }}" class="btn btn-secondary mt-2">Cancel</a>
+                        <a href="{{ route('admin.vehicle-types.index') }}" class="btn btn-secondary mt-2">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -206,7 +207,7 @@
                         galleryId: image.id,
                         url: image.url
                     };
-                    
+
                     // Add to the upload component
                     window.multipleImageUploadInstance.addGalleryImage(mockFile);
                 });

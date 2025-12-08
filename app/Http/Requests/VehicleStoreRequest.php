@@ -3,16 +3,15 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class VehicleUpdateRequest extends FormRequest
+class VehicleStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return true; // Admin middleware handles auth
     }
 
     /**
@@ -24,15 +23,10 @@ class VehicleUpdateRequest extends FormRequest
     {
         return [
             'vehicle_type_id' => 'required|exists:vehicle_types,id',
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('vehicles')->ignore($this->vehicle->id),
-            ],
+            'name' => 'required|string|max:255|unique:vehicles,name',
             'details' => 'nullable|string',
             'op_start_date' => 'nullable|date_format:Y-m-d',
-            'is_active' => 'boolean',
+            'is_active' => 'boolean', // Checkbox handling often needs prepareForValidation if not simple boolean
             'images' => 'nullable|array',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,bmp,svg|max:5120',
         ];

@@ -2,7 +2,6 @@
 @section('title', isset($package) ? 'Edit Regular Package' : 'Add Regular Package')
 
 @push('styles')
-    
 @endpush
 
 @section('content')
@@ -41,7 +40,7 @@
         @endif
 
         <form id="packageForm" method="POST"
-            action="{{ isset($package) ? route('admin.regular-packege-management.update', $package) : route('admin.regular-packege-management.store') }}"
+            action="{{ isset($package) ? route('admin.packages.regular.update', $package) : route('admin.packages.regular.store') }}"
             enctype="multipart/form-data">
             @include('admin.package.regular.regular_form')
         </form>
@@ -49,8 +48,6 @@
 @endsection
 
 @push('scripts')
-    
-
     <script>
         $(document).ready(function() {
             $('#priceContainer').on('click', '.remove-day-row', function() {

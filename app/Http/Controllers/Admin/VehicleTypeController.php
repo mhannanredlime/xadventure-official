@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\VehicleTypeStoreRequest;
+use App\Http\Requests\VehicleTypeUpdateRequest;
 
 class VehicleTypeController extends Controller
 {
@@ -30,7 +32,7 @@ class VehicleTypeController extends Controller
             ]);
         }
         
-        return view('admin.vehical-setup', compact('vehicleTypes', 'sort'));
+        return view('admin.vehicles.vehicle-setup', compact('vehicleTypes', 'sort'));
     }
 
     public function create()
@@ -38,17 +40,13 @@ class VehicleTypeController extends Controller
         return view('admin.vehicle-types.create');
     }
 
-    public function store(Request $request)
+    public function store(VehicleTypeStoreRequest $request)
     {
-        $validated = $request->validate(
-            VehicleType::getValidationRules(),
-            VehicleType::getValidationMessages()
-        );
-
-                    // Add image validation - support all common image formats including WebP
-            $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
-            ]);
+        $validated = $request->validated();
+        
+        // Add image validation - support all common image formats including WebP
+        // This is now redundant if handled in Request but keeping for double safety or remove? Request already handles it.
+        // Removing manual validation block.
 
         $vehicleType = VehicleType::create($validated);
 
@@ -86,7 +84,7 @@ class VehicleTypeController extends Controller
             }
         }
 
-        return redirect()->route('admin.vehical-setup')
+        return redirect()->route('admin.vehicle-types.index')
             ->with('success', 'Vehicle type created successfully.');
     }
 
@@ -98,22 +96,14 @@ class VehicleTypeController extends Controller
         return view('admin.vehicle-types.edit', compact('vehicleType'));
     }
 
-    public function update(Request $request, VehicleType $vehicleType)
+    public function update(VehicleTypeUpdateRequest $request, VehicleType $vehicleType)
     {
         // Debug: Log the incoming request data
         Log::info('Update Request Data:', $request->all());
         Log::info('Files:', $request->allFiles());
         
         try {
-            $validated = $request->validate(
-                VehicleType::getValidationRules($vehicleType->id),
-                VehicleType::getValidationMessages()
-            );
-
-            // Add image validation - support all common image formats including WebP
-            $request->validate([
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg ,webp,bmp,svg|max:5120', // 5MB max, support WebP and more formats
-            ]);
+            $validated = $request->validated();
 
             Log::info('Validation passed, updating vehicle type');
             $vehicleType->update($validated);
@@ -160,7 +150,7 @@ class VehicleTypeController extends Controller
             }
 
             Log::info('Vehicle type updated successfully');
-            return redirect()->route('admin.vehical-setup')
+            return redirect()->route('admin.vehicle-types.index')
                 ->with('success', 'Vehicle type updated successfully.');
                 
         } catch (\Illuminate\Validation\ValidationException $e) {

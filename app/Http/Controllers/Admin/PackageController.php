@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\AtvUtvPackageRequest;
-use App\Http\Requests\PackageStoreRequest;
-use App\Http\Requests\PackageUpdateRequest;
-use App\Http\Requests\RegularPackageStoreUpdateRequest;
+use Throwable;
 use App\Models\Package;
-use App\Models\PackagePrice;
-use App\Models\PackageType;
 use App\Models\PriceType;
 use App\Models\RiderType;
+use App\Models\PackageType;
 use App\Models\VehicleType;
-use App\Services\AtvUtvPackageService;
+use App\Models\PackagePrice;
+use Illuminate\Http\Request;
 use App\Services\ImageService;
 use App\Services\XPackageService;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
+use App\Services\AtvUtvPackageService;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
+use App\Http\Requests\PackageStoreRequest;
+use App\Http\Requests\AtvUtvPackageRequest;
+use App\Http\Requests\PackageUpdateRequest;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+use App\Http\Requests\RegularPackageStoreUpdateRequest;
 
 class PackageController extends Controller
 {
@@ -52,7 +53,10 @@ class PackageController extends Controller
             ->paginate(10);
         $data['page_title'] = 'Packages';
         $data['page_desc'] = null;
-        $data['packageTypes'] = PackageType::whereNull('parent_id')->active()->get();
+        
+        $data['packageTypes'] = Cache::remember('parent_package_types', 120, function () {
+            return PackageType::whereNull('parent_id')->active()->get();
+        });
 
         return view('admin.add-packege-management', $data);
     }
@@ -60,7 +64,10 @@ class PackageController extends Controller
     public function create()
     {
         $packages = Package::with(['variants.prices', 'vehicleTypes.images', 'images'])->orderBy('name')->get();
-        $vehicleTypes = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+        
+        $vehicleTypes = Cache::remember('active_vehicle_types', 120, function () {
+            return VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+        });
 
         return view('admin.add-packege-management', compact('packages', 'vehicleTypes'));
     }
@@ -95,7 +102,11 @@ class PackageController extends Controller
     {
         $data['package'] = null;
         $data['page_title'] = 'Add Regular Package';
-        $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
+        
+        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types', 3600, function () {
+            return PackageType::whereNotNull('parent_id')->active()->get();
+        });
+        
         $data['days'] = weekDays();
 
         return view('admin.package.regular.regular-create', $data);
@@ -107,7 +118,10 @@ class PackageController extends Controller
         $data['page_title'] = 'Edit Regular Package';
         $data['page_desc'] = 'Update Package Details';
 
-        $data['packageTypes'] = PackageType::whereNotNull('parent_id')->active()->get();
+        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types', 3600, function () {
+            return PackageType::whereNotNull('parent_id')->active()->get();
+        });
+        
         $data['days'] = weekDays();
 
         // Build array of existing prices
@@ -135,7 +149,7 @@ class PackageController extends Controller
             $this->packageService->saveRegularPackage($request->validated());
             ToastMagic::success('Package created successfully!');
 
-            return redirect()->route('admin.packege.list');
+            return redirect()->route('admin.packages.index');
         } catch (\Throwable $e) {
             dd($e->getMessage());
             \Log::error($e->getMessage());
@@ -191,7 +205,7 @@ class PackageController extends Controller
             $this->packageService->saveRegularPackage($request->validated(), $package);
             ToastMagic::success('Regular package updated successfully!');
 
-            return redirect()->route('admin.packege.list');
+            return redirect()->route('admin.packages.index');
         } catch (Throwable $e) {
             \Log::error($e->getMessage());
             ToastMagic::error('Something went wrong while updating the package.');
@@ -215,15 +229,14 @@ class PackageController extends Controller
         $data['page_title'] = 'Create ATV/UTV Package';
         $data['page_desc'] = 'Create ATV/UTV Package';
 
-        $data['vehicleTypes'] = VehicleType::with('images')
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        $data['vehicleTypes'] = \Illuminate\Support\Facades\Cache::remember('active_vehicle_types', 3600, function () {
+            return VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+        });
 
         $data['package'] = null;
-        $data['packageTypes'] = PackageType::whereNotNull('parent_id')
-            ->active()
-            ->get();
+        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types_atv', 3600, function () {
+            return PackageType::whereNotNull('parent_id')->active()->get();
+        });
         $data['days'] = weekDays();
         $data['riderTypes'] = RiderType::get();
 
@@ -239,7 +252,9 @@ class PackageController extends Controller
         $data['page_title'] = 'Edit ATV/UTV Package';
         $data['page_desc'] = 'Edit ATV/UTV Package';
 
-        $data['vehicleTypes'] = VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+        $data['vehicleTypes'] = \Illuminate\Support\Facades\Cache::remember('active_vehicle_types', 3600, function () {
+            return VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
+        });
 
         // ✅ Correct relationship name (based on your model)
         $package->load(['packagePrices', 'images']);
@@ -284,7 +299,7 @@ class PackageController extends Controller
             DB::commit();
             ToastMagic::success('ATV/UTV package created successfully!');
 
-            return redirect()->route('admin.packege.list');
+            return redirect()->route('admin.packages.index');
 
         } catch (Throwable $e) {
             DB::rollBack();
@@ -314,7 +329,7 @@ class PackageController extends Controller
             DB::commit();
             ToastMagic::success('ATV/UTV package updated successfully!');
 
-            return redirect()->route('admin.packege.list');
+            return redirect()->route('admin.packages.index');
 
         } catch (Throwable $e) {
 

@@ -139,7 +139,7 @@
                     Package Management > Edit Package
                 </p>
             </div>
-            <a href="{{ url('admin/packege/list') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.packages.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-2"></i>Back to Packages
             </a>
         </header>
@@ -178,7 +178,7 @@
             </div>
         @endif
 
-        <form id="packageForm" method="POST" action="{{ route('admin.regular-packege-management.update', $package) }}"
+        <form id="packageForm" method="POST" action="{{ route('admin.packages.regular.update', $package) }}"
             enctype="multipart/form-data">
             @include('admin.package.regular.regular_form')
         </form>

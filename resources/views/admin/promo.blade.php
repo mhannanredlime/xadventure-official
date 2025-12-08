@@ -30,14 +30,7 @@
       <div class="card-header bg-white p-3">
         <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-start align-items-md-center gap-2">
           <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-            <div class="input-group">
-              <select class="form-select" id="packageFilter">
-                <option value="">All Packages</option>
-                @foreach($packages ?? [] as $package)
-                  <option value="{{ $package->id }}">{{ $package->name }}</option>
-                @endforeach
-              </select>
-            </div>
+            
             <div class="input-group">
               <select class="form-select" id="vehicleFilter">
                 <option value="">All Vehicles</option>
@@ -69,7 +62,6 @@
           <table class="table table-hover mb-0 responsive-stacked" id="promoCodesTable">
             <thead>
               <tr>
-                <th>Package Name</th>
                 <th>Promo Code</th>
                 <th>Calculation (% or Flat)</th>
                 <th>Discount Amount</th>
@@ -83,15 +75,7 @@
             <tbody>
               @forelse($promoCodes as $promoCode)
                 <tr data-package="{{ $promoCode->package_id }}" data-vehicle="{{ $promoCode->vehicle_type_id }}" data-status="{{ $promoCode->status }}">
-                  <td data-label="Package Name">
-                    @if($promoCode->applies_to === 'package' && $promoCode->package)
-                      {{ $promoCode->package->name }}
-                    @elseif($promoCode->applies_to === 'vehicle_type' && $promoCode->vehicleType)
-                      {{ $promoCode->vehicleType->name }}
-                    @else
-                      All Packages
-                    @endif
-                  </td>
+                  
                   <td data-label="Promo Code"><strong>{{ $promoCode->code }}</strong></td>
                   <td data-label="Type/Value">{{ $promoCode->discount_type === 'percentage' ? $promoCode->discount_value . '%' : '৳ ' . number_format($promoCode->discount_value) }}</td>
                   <td data-label="Max Discount">

@@ -105,7 +105,7 @@
                         dates only)</p>
                 </div>
             </div>
-            <form method="GET" action="{{ route('admin.view-reservation-dashboard') }}" class="filter-controls">
+            <form method="GET" action="{{ route('admin.reservations.history') }}" class="filter-controls">
                 <div style="display: flex; gap: 10px;" class="filter-controls-container">
                     <div class="">
                         <label for="date_from" class="form-label small text-muted">From Date</label>
@@ -166,8 +166,7 @@
                 <div class="row g-3 mt-2">
                     <div class="col-md-12 d-flex gap-2">
                         <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-                        <a href="{{ route('admin.view-reservation-dashboard') }}"
-                            class="btn btn-secondary btn-sm">Clear</a>
+                        <a href="{{ route('admin.reservations.history') }}" class="btn btn-secondary btn-sm">Clear</a>
                     </div>
                 </div>
             </form>

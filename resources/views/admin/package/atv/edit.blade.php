@@ -15,7 +15,7 @@
                 <p class="breadcrumb-custom"><i class="bi bi-home me-1"></i> Package Management &gt;
                     {{ isset($package) ? 'Edit' : 'Add' }} Package</p>
             </div>
-            <a href="{{ url('admin/add-packege-management') }}" class="btn btn-outline-secondary"><i
+            <a href="{{ route('admin.packages.index') }}" class="btn btn-outline-secondary"><i
                     class="bi bi-arrow-left me-2"></i>Back to Packages</a>
         </header>
 
@@ -46,7 +46,7 @@
         @endif
 
         <form id="packageForm" method="POST"
-            action="{{ isset($package) ? route('admin.atvutv-packege-management.update', $package->id) : route('admin.atvutv-packege-management.store') }}"
+            action="{{ isset($package) ? route('admin.packages.atv-utv.update', $package->id) : route('admin.packages.atv-utv.store') }}"
             enctype="multipart/form-data">
             @method('PUT')
             @include('admin.package.atv.atv_form')

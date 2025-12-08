@@ -328,25 +328,25 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Admin pages (existing) - Protected with permissions
     Route::middleware(['permission:vehicles.manage'])->group(function () {
-        Route::get('/vehical-management', [VehicleController::class, 'index'])->name('vehical-management');
+        Route::get('/vehicles-management', [VehicleController::class, 'index'])->name('vehicles.management');
     });
 
     Route::middleware(['permission:vehicle-types.manage'])->group(function () {
-        Route::get('/vehical-setup', [VehicleTypeController::class, 'index'])->name('vehical-setup');
+        Route::get('/vehicle-types-management', [VehicleTypeController::class, 'index'])->name('vehicle.types.management');
     });
 
     Route::middleware(['permission:packages.manage'])->group(function () {
-        Route::get('/atvutv-packege-management', [PackageController::class, 'createAtvUtv'])->name('atvutv-packege-management');
-        Route::post('/atvutv-packege-management', [PackageController::class, 'storeAtvUtv'])->name('atvutv-packege-management.store');
-        Route::get('/atvutv-packege-management/{package}/edit', [PackageController::class, 'editAtvUtv'])->name('atvutv-packege-management.edit');
-        Route::put('/atvutv-packege-management/{package}', [PackageController::class, 'updateAtvUtv'])->name('atvutv-packege-management.update');
+        Route::get('/packages-management', [PackageController::class, 'createAtvUtv'])->name('packages.management');
+        Route::post('/packages-management', [PackageController::class, 'storeAtvUtv'])->name('packages.management.store');
+        Route::get('/packages-management/{package}/edit', [PackageController::class, 'editAtvUtv'])->name('packages.management.edit');
+        Route::put('/packages-management/{package}', [PackageController::class, 'updateAtvUtv'])->name('packages.management.update');
 
-        Route::get('/regular-packege-management', [PackageController::class, 'createRegular'])->name('regular-packege-management');
-        Route::post('/regular-packege-management', [PackageController::class, 'storeRegular'])->name('regular-packege-management.store');
-        Route::get('/regular-packege-management/{package}/edit', [PackageController::class, 'editRegular'])->name('regular-packege-management.edit');
-        Route::put('/regular-packege-management/{package}', [PackageController::class, 'updateRegular'])->name('regular-packege-management.update');
+        Route::get('/regular-packages-management', [PackageController::class, 'createRegular'])->name('regular-packages.management');
+        Route::post('/regular-packages-management', [PackageController::class, 'storeRegular'])->name('regular-packages.management.store');
+        Route::get('/regular-packages-management/{package}/edit', [PackageController::class, 'editRegular'])->name('regular-packages.management.edit');
+        Route::put('/regular-packages-management/{package}', [PackageController::class, 'updateRegular'])->name('regular-packages.management.update');
 
-        Route::get('/packege/list', [PackageController::class, 'index'])->name('packege.list');
+        Route::get('/packages/list', [PackageController::class, 'index'])->name('packages.list');
     });
 
     Route::middleware(['permission:reservations.view'])->group(function () {

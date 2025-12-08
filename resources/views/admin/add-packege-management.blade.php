@@ -18,7 +18,7 @@
         </div>
 
         <!-- Search & Filter Section -->
-        <x-admin.search action="{{ url('admin/packege/list') }}">
+        <x-admin.search action="{{ route('admin.packages.index') }}">
             <!-- Search -->
             <div class="col-md-4">
                 <div class="input-group">
@@ -87,8 +87,7 @@
                             @if ($package->type == 'regular')
                                 <x-admin.actions.edit route="{{ route('admin.packages.edit', $package->id) }}" />
                             @elseif ($package->type == 'atv')
-                                <x-admin.actions.edit
-                                    route="{{ route('admin.atvutv-packege-management.edit', $package->id) }}" />
+                                <x-admin.actions.edit route="{{ route('admin.packages.atv-utv.edit', $package->id) }}" />
                             @endif
 
                             <x-admin.actions.view route="{{ route('admin.packages.show', $package->id) }}" />
