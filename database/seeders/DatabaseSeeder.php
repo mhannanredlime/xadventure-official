@@ -21,7 +21,11 @@ class DatabaseSeeder extends Seeder
                 VehicleTypeSeeder::class,
                 VehicleTypeImageSeeder::class,
                 VehicleSeeder::class,
+                VehicleSeeder::class,
                 CreateSampleVehiclesSeeder::class,
+                // Core ACL Seeders (Must run before Users/Customers to ensure roles/permissions exist)
+                PermissionSeeder::class,
+                RoleSeeder::class,
             ]);
 
             // Step 3: Seed packages and related data

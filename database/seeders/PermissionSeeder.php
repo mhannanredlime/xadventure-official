@@ -44,24 +44,28 @@ class PermissionSeeder extends Seeder
                 'slug' => 'roles.view',
                 'description' => 'View role list and details',
                 'module' => 'User Management',
+                'guard_name' => 'web',
             ],
             [
                 'name' => 'Create Roles',
                 'slug' => 'roles.create',
                 'description' => 'Create new roles',
                 'module' => 'User Management',
+                'guard_name' => 'web',
             ],
             [
                 'name' => 'Edit Roles',
                 'slug' => 'roles.edit',
                 'description' => 'Edit existing roles',
                 'module' => 'User Management',
+                'guard_name' => 'web',
             ],
             [
                 'name' => 'Delete Roles',
                 'slug' => 'roles.delete',
                 'description' => 'Delete roles',
                 'module' => 'User Management',
+                'guard_name' => 'web',
             ],
 
             // Package Management Module
@@ -220,9 +224,22 @@ class PermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
+            // Spatie uses 'name' for permission checks (e.g. @can('users.view')).
+            // We must ensure the 'name' column holds the slug value.
+            // We'll prepend the human-readable 'name' to the description or just swap them.
+            // Here we use the slug as the 'name'.
+            
+            $formattedPermission = [
+                'name' => $permission['slug'], // critical for Spatie
+                'slug' => $permission['slug'],
+                'module' => $permission['module'],
+                'description' => $permission['name'] . ': ' . $permission['description'],
+                'guard_name' => 'web'
+            ];
+
             Permission::updateOrCreate(
-                ['slug' => $permission['slug']],
-                $permission
+                ['slug' => $permission['slug']], // match by unique slug
+                $formattedPermission
             );
         }
     }

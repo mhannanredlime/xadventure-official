@@ -3,7 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Traits\HasPermissions;
+// use App\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasPermissions;
+    use HasFactory, Notifiable, \Spatie\Permission\Traits\HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -59,13 +59,11 @@ class User extends Authenticatable
         return $this->hasMany(Customer::class);
     }
 
-    /**
-     * Get the roles that belong to the user.
-     */
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'role_user')->with('permissions');
-    }
+    // Roles relationship is provided by HasRoles trait
+    // public function roles(): BelongsToMany
+    // {
+    //    return $this->belongsToMany(Role::class, 'role_user')->with('permissions');
+    // }
 
     /**
      * Check if the user is an admin.

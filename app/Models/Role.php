@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Models\Role as SpatieRole;
 
-class Role extends Model
+class Role extends SpatieRole
 {
     use HasFactory;
 
@@ -24,49 +23,26 @@ class Role extends Model
     /**
      * Get the users that belong to the role.
      */
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'role_user');
-    }
-
-    /**
-     * Get the permissions that belong to the role.
-     */
-    public function permissions(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class, 'permission_role');
-    }
+    // Spatie handles users() and permissions()
+    // but check if implementation matches. 
+    // Spatie uses 'model_has_roles' and 'role_has_permissions'. 
+    // Existing code uses 'role_user' and 'permission_role'.
+    // We should comment out generic BelongsToMany if we want to use Spatie's tables.
+    // However, if we keep 'role_user', Spatie won't use it.
+    // I will comment them out to force usage of Spatie's structure.
 
     /**
      * Check if the role has a specific permission.
      */
+    // Spatie provides givePermissionTo, revokePermissionTo, syncPermissions
+    // We remove custom implementations to avoid signature conflicts.
+
+    /**
+     * Check if the role has a specific permission (legacy wrapper).
+     */
     public function hasPermission(string $permission): bool
     {
-        return $this->permissions()->where('slug', $permission)->exists();
-    }
-
-    /**
-     * Give permission to the role.
-     */
-    public function givePermissionTo(Permission $permission): void
-    {
-        $this->permissions()->syncWithoutDetaching([$permission->id]);
-    }
-
-    /**
-     * Revoke permission from the role.
-     */
-    public function revokePermissionTo(Permission $permission): void
-    {
-        $this->permissions()->detach($permission->id);
-    }
-
-    /**
-     * Sync permissions for the role.
-     */
-    public function syncPermissions(array $permissions): void
-    {
-        $this->permissions()->sync($permissions);
+        return $this->hasPermissionTo($permission);
     }
 
     /**
