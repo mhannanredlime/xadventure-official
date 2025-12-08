@@ -63,46 +63,30 @@ class PackageController extends Controller
     public function atvUtvPackBookings()
     {
         // Get all active ATV/UTV packages
-        $data['packages'] = Package::with(['packagePrices', 'vehicleTypes', 'images'])
+        $packages = Package::with(['vehicleTypes', 'images', 'packagePrices'])
             ->where('is_active', true)
             ->where(function ($query) {
                 $query->where('name', 'like', '%ATV%')
-                    ->orWhere('name', 'like', '%UTV%');
+                      ->orWhere('name', 'like', '%UTV%');
             })
             ->orderByRaw("CASE WHEN name LIKE '%ATV%' THEN 1 WHEN name LIKE '%UTV%' THEN 2 ELSE 3 END")
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($package) {
-                // Calculate total available vehicles for each package
-                $totalAvailableVehicles = 0;
-                foreach ($package->vehicleTypes as $vehicleType) {
-                    $today = \Carbon\Carbon::today()->format('Y-m-d');
-                    $vehicleCount = \App\Models\Vehicle::where('vehicle_type_id', $vehicleType->id)
-                        ->where('is_active', true)
-                        ->where(function ($query) use ($today) {
-                            $query->whereNull('op_start_date')
-                                ->orWhere('op_start_date', '<=', $today);
-                        })
-                        ->count();
-                    $totalAvailableVehicles += $vehicleCount;
-                }
-
                 // Check if this is ATV/UTV package
                 $isATVUTV = str_contains($package->name, 'ATV') || str_contains($package->name, 'UTV');
 
-                // Get current day type
-                $today = \Carbon\Carbon::today();
-                $dayName = $today->isWeekend() ? 'weekend' : 'weekday';
+                // Current day type
+                $dayName = now()->isWeekend() ? 'weekend' : 'weekday';
 
-                // Get prices using get_package_price() helper
+                // Get prices using your helper
                 $singlePrice = get_package_price($package, $dayName, 1);
                 $doublePrice = $isATVUTV ? get_package_price($package, $dayName, 2) : 0;
 
-                // Get display starting price if available
+                // Display starting price
                 $displayPrice = $package->display_starting_price ?? 0;
 
-                // Add computed fields to package object
-                $package->total_available_vehicles = $totalAvailableVehicles;
+                // Add computed fields
                 $package->is_atv_utv = $isATVUTV;
                 $package->single_price = $singlePrice;
                 $package->double_price = $doublePrice;
@@ -113,24 +97,18 @@ class PackageController extends Controller
                 return $package;
             });
 
-            
-
-        // Get active schedule slots
-        $data['scheduleSlots'] = ScheduleSlot::where('is_active', true)
+        // Active schedule slots
+        $scheduleSlots = ScheduleSlot::where('is_active', true)
             ->orderBy('start_time')
             ->get();
 
-        // Prepare package data for JSON
-        $data['package_data_json'] = $data['packages']->map(function ($package) {
+        // Prepare JSON for JS
+        $packageDataJson = $packages->map(function ($package) {
             return [
                 'id' => $package->id,
                 'name' => $package->name,
-                'description' => $package->description,
-                'requirements' => $package->requirements,
-                'display_image_url' => $package->display_image_url,
                 'is_atv_utv' => $package->is_atv_utv,
                 'display_starting_price' => $package->display_price,
-                'vehicle_count' => $package->total_available_vehicles,
                 'price_data' => [
                     'single' => $package->single_price,
                     'double' => $package->double_price,
@@ -139,8 +117,71 @@ class PackageController extends Controller
                 ],
             ];
         });
-        // dd($data['scheduleSlots']);
-        return view('frontend.packages.atv-utv-packages', $data);
+
+        return view('frontend.packages.atv-utv-packages', [
+            'packages' => $packages,
+            'scheduleSlots' => $scheduleSlots,
+            'package_data_json' => $packageDataJson,
+        ]);
+    }
+
+    /**
+     * Calculate available vehicles for a package
+     */
+    private function calculateAvailableVehicles($package): int
+    {
+        $totalAvailableVehicles = 0;
+        $today = \Carbon\Carbon::today()->format('Y-m-d');
+
+        foreach ($package->vehicleTypes as $vehicleType) {
+            $totalAvailableVehicles += \App\Models\Vehicle::where('vehicle_type_id', $vehicleType->id)
+                ->where('is_active', true)
+                ->where(fn ($q) => $q->whereNull('op_start_date')->orWhere('op_start_date', '<=', $today))
+                ->count();
+        }
+
+        return $totalAvailableVehicles;
+    }
+
+    /**
+     * Calculate effective price for display
+     */
+    private function calculateEffectivePrice($displayPrice, $singlePrice, $doublePrice, $isATVUTV): float
+    {
+        if ($displayPrice > 0) {
+            return $displayPrice;
+        }
+
+        if ($isATVUTV) {
+            return min($singlePrice, $doublePrice);
+        }
+
+        return $singlePrice;
+    }
+
+    /**
+     * Prepare package data JSON for frontend
+     */
+    private function preparePackageDataJson($packages)
+    {
+        return $packages->map(function ($package) {
+            return [
+                'id' => $package->id,
+                'name' => $package->name,
+                'description' => $package->description,
+                'requirements' => $package->requirements,
+                'display_image_url' => $package->display_image_url,
+                'is_atv_utv' => $package->computed['is_atv_utv'],
+                'display_starting_price' => $package->computed['display_price'],
+                'vehicle_count' => $package->computed['total_available_vehicles'],
+                'price_data' => [
+                    'single' => $package->computed['single_price'],
+                    'double' => $package->computed['double_price'],
+                    'display' => $package->computed['display_price'],
+                    'day' => $package->computed['day_name'],
+                ],
+            ];
+        });
     }
 
     public function show(Package $package)
