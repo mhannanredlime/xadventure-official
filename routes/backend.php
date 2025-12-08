@@ -63,18 +63,13 @@ Route::middleware(['permission:packages.manage'])->group(function () {
     Route::put('/packages/regular/{package}', [PackageController::class, 'updateRegular'])->name('packages.regular.update');
 });
 
-// Promo Codes
-Route::middleware(['permission:promo-codes.manage'])->group(function () {
-    Route::resource('promo-codes', PromoCodeController::class);
-    Route::patch('promo-codes/{promoCode}/toggle', [PromoCodeController::class, 'toggleStatus'])->name('promo-codes.toggle');
-    Route::get('promo-codes/filter', [PromoCodeController::class, 'getPromoCodes'])->name('promo-codes.filter');
-    Route::post('promo-codes/validate', [PromoCodeController::class, 'validateCode'])->name('promo-codes.validate');
-    
-    // Popup View
-    Route::get('/promo-popup', function () {
-        return view('admin.promo-popup');
-    })->name('promo-popup');
-});
+    // Promo Codes
+    Route::middleware(['permission:promo-codes.manage'])->group(function () {
+        Route::resource('promo-codes', PromoCodeController::class);
+        Route::patch('promo-codes/{promoCode}/toggle', [PromoCodeController::class, 'toggleStatus'])->name('promo.codes.toggle');
+        Route::get('promo-codes/filter', [PromoCodeController::class, 'getPromoCodes'])->name('promo.codes.filter');
+        Route::post('promo-codes/validate', [PromoCodeController::class, 'validateCode'])->name('promo.codes.validate');
+    });
 
 // Reservations
 Route::middleware(['permission:reservations.view'])->group(function () {

@@ -9,6 +9,7 @@ use App\Models\VehicleType;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePromoCodeStoreUpdateRequest;
 
 class PromoCodeController extends Controller
 {
@@ -28,34 +29,12 @@ class PromoCodeController extends Controller
         return view('admin.promo-code.create', compact('packages', 'vehicleTypes'));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StorePromoCodeStoreUpdateRequest $request)
     {
         try {
-            // Debug: Log all incoming data
-            \Log::info('Promo code store request data:', $request->all());
-            
-            // Validate the request
-            $validated = $request->validate([
-                'code' => 'required|string|max:50|unique:promo_codes',
-                'applies_to' => 'required|in:all,package,vehicle_type',
-                'package_id' => 'nullable|required_if:applies_to,package|exists:packages,id',
-                'vehicle_type_id' => 'nullable|required_if:applies_to,vehicle_type|exists:vehicle_types,id',
-                'discount_type' => 'required|in:percentage,fixed',
-                'discount_value' => 'required|numeric|min:0',
-                'max_discount' => 'nullable|numeric|min:0',
-                'min_spend' => 'nullable|numeric|min:0',
-                'usage_limit_total' => 'nullable|integer|min:1',
-                'usage_limit_per_user' => 'required|integer|min:1',
-                'starts_at' => 'nullable|date',
-                'ends_at' => 'nullable|date|after:starts_at',
-                'status' => 'required|in:active,inactive,expired',
-                'remarks' => 'nullable|string',
-            ]);
+            $validated = $request->validated();
 
-            // Debug: Log validated data
-            \Log::info('Promo code validated data:', $validated);
-
-            // Clear package_id and vehicle_type_id if applies_to is 'all'
+            // Clear package_id and vehicle_type_id based on applies_to
             if ($validated['applies_to'] === 'all') {
                 $validated['package_id'] = null;
                 $validated['vehicle_type_id'] = null;
@@ -65,77 +44,31 @@ class PromoCodeController extends Controller
                 $validated['package_id'] = null;
             }
 
-            // Create the promo code
-            $promoCode = PromoCode::create($validated);
+            PromoCode::create($validated);
             
-            \Log::info('Promo code created successfully:', ['id' => $promoCode->id]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Promo code created successfully.',
-                'promo_code' => $promoCode
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Promo code validation failed:', $e->errors());
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
+            return redirect()->route('admin.promo-codes.index')
+                ->with('success', 'Promo code created successfully.');
         } catch (\Exception $e) {
             \Log::error('Promo code creation error:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Error creating promo code: ' . $e->getMessage()
-            ], 500);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating promo code: ' . $e->getMessage());
         }
     }
 
-    public function edit(PromoCode $promoCode): JsonResponse
+    public function edit(PromoCode $promoCode)
     {
-        try {
-            $promoCode->load(['package', 'vehicleType']);
-            
-            return response()->json([
-                'success' => true,
-                'promo' => $promoCode
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error loading promo code: ' . $e->getMessage()
-            ], 500);
-        }
+        $packages = Package::where('is_active', true)->orderBy('name')->get();
+        $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
+        return view('admin.promo-code.edit', compact('promoCode', 'packages', 'vehicleTypes'));
     }
 
-    public function update(Request $request, PromoCode $promoCode): JsonResponse
+    public function update(StorePromoCodeStoreUpdateRequest $request, PromoCode $promoCode)
     {
         try {
-            // Debug: Log all incoming data
-            \Log::info('Promo code update request data:', $request->all());
-            
-            // Validate the request
-            $validated = $request->validate([
-                'code' => 'required|string|max:50|unique:promo_codes,code,' . $promoCode->id,
-                'applies_to' => 'required|in:all,package,vehicle_type',
-                'package_id' => 'nullable|required_if:applies_to,package|exists:packages,id',
-                'vehicle_type_id' => 'nullable|required_if:applies_to,vehicle_type|exists:vehicle_types,id',
-                'discount_type' => 'required|in:percentage,fixed',
-                'discount_value' => 'required|numeric|min:0',
-                'max_discount' => 'nullable|numeric|min:0',
-                'min_spend' => 'nullable|numeric|min:0',
-                'usage_limit_total' => 'nullable|integer|min:1',
-                'usage_limit_per_user' => 'required|integer|min:1',
-                'starts_at' => 'nullable|date',
-                'ends_at' => 'nullable|date|after:starts_at',
-                'status' => 'required|in:active,inactive,expired',
-                'remarks' => 'nullable|string',
-            ]);
+            $validated = $request->validated();
 
-            // Debug: Log validated data
-            \Log::info('Promo code update validated data:', $validated);
-
-            // Clear package_id and vehicle_type_id if applies_to is 'all'
+            // Clear package_id and vehicle_type_id based on applies_to
             if ($validated['applies_to'] === 'all') {
                 $validated['package_id'] = null;
                 $validated['vehicle_type_id'] = null;
@@ -145,46 +78,28 @@ class PromoCodeController extends Controller
                 $validated['package_id'] = null;
             }
 
-            // Update the promo code
             $promoCode->update($validated);
             
-            \Log::info('Promo code updated successfully:', ['id' => $promoCode->id]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Promo code updated successfully.',
-                'promo_code' => $promoCode
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Promo code update validation failed:', $e->errors());
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
+            return redirect()->route('admin.promo-codes.index')
+                ->with('success', 'Promo code updated successfully.');
         } catch (\Exception $e) {
             \Log::error('Promo code update error:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Error updating promo code: ' . $e->getMessage()
-            ], 500);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating promo code: ' . $e->getMessage());
         }
     }
 
-    public function destroy(PromoCode $promoCode): JsonResponse
+    public function destroy(PromoCode $promoCode)
     {
         try {
             $promoCode->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Promo code deleted successfully.'
-            ]);
+            return redirect()->route('admin.promo-codes.index')
+                ->with('success', 'Promo code deleted successfully.');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error deleting promo code: ' . $e->getMessage()
-            ], 500);
+            return redirect()->back()
+                ->with('error', 'Error deleting promo code: ' . $e->getMessage());
         }
     }
 
