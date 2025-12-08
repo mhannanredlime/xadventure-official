@@ -14,7 +14,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     
     // Dashboard (Placeholder)
     Route::get('/dashboard', function () {
-        return view('admin.dashboard');
+        return view('admin.dashboard.index');
     })->name('dashboard');
 
     // Packages

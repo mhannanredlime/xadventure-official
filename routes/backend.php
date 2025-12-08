@@ -32,7 +32,7 @@ use App\Http\Controllers\Admin\RoleController;
 
 // Dashboard
 Route::get('/', function () {
-    return view('admin.dashboard');
+    return view('admin.dashboard.index');
 })->name('dashboard');
 
 // Vehicle Types

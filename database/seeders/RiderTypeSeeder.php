@@ -13,16 +13,28 @@ class RiderTypeSeeder extends Seeder
             [
                 'name' => 'Single Rider', 
                 'slug' => 'single-rider',
-                'description' => 'One person operating the vehicle',
-                'max_passengers' => 0,
-                'is_active' => true
+                // 'description' => 'One person operating the vehicle',
+                // 'max_passengers' => 0,
+                // 'is_active' => true
             ],
             [
                 'name' => 'Double Rider', 
                 'slug' => 'double-rider',
-                'description' => 'Two passengers with one operator',
-                'max_passengers' => 1,
-                'is_active' => true
+                // 'description' => 'Two passengers with one operator',     
+                // 'max_passengers' => 1,
+                // 'is_active' => true
+            ],
+            [
+                'name' => 'Adventure Tour', 
+                'slug' => 'adventure-tour',
+            ],
+            [
+                'name' => 'Premium Single', 
+                'slug' => 'premium-single',
+            ],
+            [
+                'name' => 'Premium Double', 
+                'slug' => 'premium-double',
             ]
         ];
 

@@ -2,26 +2,22 @@
 
 @section('title', 'Promo Codes')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('admin/css/promo-popup.css') }}">
-@endpush
-
 @section('content')
-    <main class="container-main" x-data="promoManager">
+    <main class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4 page-title-row">
             <h1 class="h3 page-title">Promo Codes</h1>
         </div>
 
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi  bi-check-circle"></i> {{ session('success') }}
+                <i class="bi bi-check-circle"></i> {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi  bi-exclamation-triangle"></i> {{ session('error') }}
+                <i class="bi bi-exclamation-triangle"></i> {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -31,7 +27,14 @@
                 <div
                     class="d-flex flex-column flex-md-row justify-content-md-between align-items-start align-items-md-center gap-2">
                     <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-
+                        <div class="input-group">
+                            <select class="form-select" id="packageFilter">
+                                <option value="">All Packages</option>
+                                @foreach ($packages ?? [] as $package)
+                                    <option value="{{ $package->id }}">{{ $package->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="input-group">
                             <select class="form-select" id="vehicleFilter">
                                 <option value="">All Vehicles</option>
@@ -41,15 +44,7 @@
                             </select>
                         </div>
                         <div class="input-group">
-                            <select class="form-select" id="vehicleFilter" x-model="filters.vehicle">
-                                <option value="">All Vehicles</option>
-                                @foreach ($vehicleTypes ?? [] as $vehicleType)
-                                    <option value="{{ $vehicleType->id }}">{{ $vehicleType->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <select class="form-select" id="statusFilter" x-model="filters.status">
+                            <select class="form-select" id="statusFilter">
                                 <option value="">All Status</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
@@ -59,9 +54,9 @@
                     </div>
                     <div>
                         @can('promo-codes.manage')
-                            <button class="btn btn-add-new jatio-bg-color" @click="openModal()">
+                            <a href="{{ route('admin.promo-codes.create') }}" class="btn btn-add-new jatio-bg-color">
                                 <i class="bi bi-plus-lg"></i> Add New Promo Code
-                            </button>
+                            </a>
                         @endcan
                     </div>
                 </div>
@@ -72,6 +67,7 @@
                         <thead>
                             <tr>
                                 <th>Promo Code</th>
+                                <th>Applies To</th>
                                 <th>Calculation (% or Flat)</th>
                                 <th>Discount Amount</th>
                                 <th>Start Date</th>
@@ -87,6 +83,16 @@
                                     data-vehicle="{{ $promoCode->vehicle_type_id }}" data-status="{{ $promoCode->status }}">
 
                                     <td data-label="Promo Code"><strong>{{ $promoCode->code }}</strong></td>
+                                    <td data-label="Applies To">
+                                        @if ($promoCode->applies_to === 'all')
+                                            <span class="badge bg-primary">All Packages</span>
+                                        @elseif($promoCode->applies_to === 'package')
+                                            <span class="badge bg-info">{{ $promoCode->package?->name ?? 'N/A' }}</span>
+                                        @else
+                                            <span
+                                                class="badge bg-warning text-dark">{{ $promoCode->vehicleType?->name ?? 'N/A' }}</span>
+                                        @endif
+                                    </td>
                                     <td data-label="Type/Value">
                                         {{ $promoCode->discount_type === 'percentage' ? $promoCode->discount_value . '%' : '৳ ' . number_format($promoCode->discount_value) }}
                                     </td>
@@ -105,44 +111,38 @@
                                     </td>
                                     <td data-label="Status">
                                         @php
-                                            $statusClass = '';
-                                            switch ($promoCode->status) {
-                                                case 'active':
-                                                    $statusClass = 'active';
-                                                    break;
-                                                case 'inactive':
-                                                    $statusClass = 'inactive';
-                                                    break;
-                                                case 'expired':
-                                                    $statusClass = 'expired';
-                                                    break;
-                                            }
+                                            $statusClass = match ($promoCode->status) {
+                                                'active' => 'bg-success',
+                                                'inactive' => 'bg-secondary',
+                                                'expired' => 'bg-danger',
+                                                default => 'bg-secondary',
+                                            };
                                         @endphp
-                                        <span
-                                            class="status-badge {{ $statusClass }}">{{ ucfirst($promoCode->status) }}</span>
+                                        <span class="badge {{ $statusClass }}">{{ ucfirst($promoCode->status) }}</span>
                                     </td>
                                     <td data-label="Remarks">{{ Str::limit($promoCode->remarks, 30) }}</td>
                                     <td data-label="Action" class="text-center action-icons">
                                         @can('promo-codes.manage')
-                                            <button @click="openModal({{ $promoCode->id }})" title="Edit"
+                                            <a href="{{ route('admin.promo-codes.edit', $promoCode) }}" title="Edit"
                                                 class="btn btn-link p-0">
                                                 <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button @click="deletePromo({{ $promoCode->id }})" title="Delete"
-                                                class="btn btn-link p-0">
-                                                <i class="bi bi-telephone-x text-danger"></i>
-                                            </button>
-                                            <button @click="toggleStatus({{ $promoCode->id }})" title="Toggle Status"
-                                                class="btn btn-link p-0">
-                                                <i class="bi bi-telephone-minus text-success"></i>
-                                            </button>
+                                            </a>
+                                            <form action="{{ route('admin.promo-codes.destroy', $promoCode) }}" method="POST"
+                                                class="d-inline"
+                                                onsubmit="return confirm('Are you sure you want to delete this promo code?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" title="Delete" class="btn btn-link p-0">
+                                                    <i class="bi bi-trash text-danger"></i>
+                                                </button>
+                                            </form>
                                         @endcan
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="9" class="text-center py-4">
-                                        <i class="bi  bi-tag fa-3x text-muted mb-3 d-block"></i>
+                                        <i class="bi bi-tag fa-3x text-muted mb-3 d-block"></i>
                                         <h5>No Promo Codes Found</h5>
                                         <p class="text-muted">Create your first promo code to get started.</p>
                                     </td>
@@ -160,142 +160,45 @@
             </div>
         </div>
     </main>
-
-    <!-- Promo Code Modal -->
-    <div id="promoModal" class="modal-overlay" style="display: none;" x-show="showModal" x-transition>
-        <div class="modal-backdrop-link" @click="closeModal()"></div>
-        <div class="promo-modal-content">
-            <div class="promo-modal-header">
-                <h2 x-text="formTitle">Add Promo Code</h2>
-                <button @click="closeModal()" class="btn-close-modal">&times;</button>
-            </div>
-            <div class="promo-modal-body mb-5">
-                <form id="promoForm" @submit.prevent="submitForm">
-                    <!-- Method handled by JS -->
-
-                    <div class="mb-3">
-                        <label for="appliesTo" class="form-label">Applies To</label>
-                        <select class="form-select form-control-custom" id="appliesTo" x-model="form.applies_to"
-                            required>
-                            <option value="all">All Packages</option>
-                            <option value="package">Specific Package</option>
-                            <option value="vehicle_type">Specific Vehicle Type</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3" x-show="form.applies_to === 'package'" style="display: none;">
-                        <label for="packageName" class="form-label">Package Name</label>
-                        <select class="form-select form-control-custom" id="packageName" x-model="form.package_id">
-                            <option value="">Select Package</option>
-                            @foreach ($packages ?? [] as $package)
-                                <option value="{{ $package->id }}">{{ $package->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-3" x-show="form.applies_to === 'vehicle_type'" style="display: none;">
-                        <label for="vehicleType" class="form-label">Vehicle Type</label>
-                        <select class="form-select form-control-custom" id="vehicleType" x-model="form.vehicle_type_id">
-                            <option value="">Select Vehicle Type</option>
-                            @foreach ($vehicleTypes ?? [] as $vehicleType)
-                                <option value="{{ $vehicleType->id }}">{{ $vehicleType->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="promoCode" class="form-label">Promo Code</label>
-                        <input type="text" class="form-control form-control-custom" id="promoCode"
-                            x-model="form.code" @input="debounceValidate()"
-                            :class="{ 'is-invalid': errors.code, 'is-valid': codeValid === true }" required>
-                        <div class="invalid-feedback" x-text="errors.code ? errors.code[0] : ''"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Set Discount Type</label>
-                        <div class="btn-group w-100 discount-type-group" role="group" aria-label="Discount Type">
-                            <input type="radio" class="btn-check" id="percentage" value="percentage"
-                                x-model="form.discount_type" autocomplete="off">
-                            <label class="btn btn-outline-primary" for="percentage">Percentage</label>
-
-                            <input type="radio" class="btn-check" id="fixed" value="fixed"
-                                x-model="form.discount_type" autocomplete="off">
-                            <label class="btn btn-outline-primary" for="fixed">Flat (৳)</label>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="discountValue" class="form-label">Discount Value</label>
-                        <input type="number" class="form-control form-control-custom" id="discountValue"
-                            x-model="form.discount_value" step="0.01" min="0" required
-                            :placeholder="form.discount_type === 'percentage' ? 'Enter percentage (0-100)' : 'Enter amount in ৳'"
-                            :max="form.discount_type === 'percentage' ? 100 : null">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="maxDiscount" class="form-label">Maximum Discount (Optional)</label>
-                        <input type="number" class="form-control form-control-custom" id="maxDiscount"
-                            x-model="form.max_discount" step="0.01" min="0">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="minSpend" class="form-label">Minimum Spend (Optional)</label>
-                        <input type="number" class="form-control form-control-custom" id="minSpend"
-                            x-model="form.min_spend" step="0.01" min="0">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="usageLimitTotal" class="form-label">Total Usage Limit (Optional)</label>
-                        <input type="number" class="form-control form-control-custom" id="usageLimitTotal"
-                            x-model="form.usage_limit_total" min="1">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="usageLimitPerUser" class="form-label">Usage Limit Per User</label>
-                        <input type="number" class="form-control form-control-custom" id="usageLimitPerUser"
-                            x-model="form.usage_limit_per_user" min="1" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="startDate" class="form-label">Start Date</label>
-                        <input type="date" class="form-control form-control-custom" id="startDate"
-                            x-model="form.starts_at">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="expireDate" class="form-label">Expire Date</label>
-                        <input type="date" class="form-control form-control-custom" id="expireDate"
-                            x-model="form.ends_at">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="remarks" class="form-label">Remarks</label>
-                        <textarea class="form-control form-control-custom" id="remarks" x-model="form.remarks" rows="3"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Set Discount Status</label>
-                        <div class="btn-group w-100 discount-status-group" role="group" aria-label="Discount Status">
-                            <input type="radio" class="btn-check" id="active" value="active" x-model="form.status"
-                                autocomplete="off">
-                            <label class="btn btn-outline-primary" for="active">Active</label>
-
-                            <input type="radio" class="btn-check" id="inactive" value="inactive"
-                                x-model="form.status" autocomplete="off">
-                            <label class="btn btn-outline-primary" for="inactive">Inactive</label>
-                        </div>
-                    </div>
-
-                    <div class="promo-modal-footer">
-                        <button type="submit" class="btn btn-add-new text-white jatio-bg-color">Save</button>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-    </div>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('admin/js/alpine-promo.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const packageFilter = document.getElementById('packageFilter');
+            const vehicleFilter = document.getElementById('vehicleFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            const tableRows = document.querySelectorAll('#promoCodesTable tbody tr[data-status]');
+
+            function filterTable() {
+                const packageValue = packageFilter.value;
+                const vehicleValue = vehicleFilter.value;
+                const statusValue = statusFilter.value;
+                let visibleCount = 0;
+
+                tableRows.forEach(function(row) {
+                    const rowPackage = row.dataset.package;
+                    const rowVehicle = row.dataset.vehicle;
+                    const rowStatus = row.dataset.status;
+
+                    const packageMatch = !packageValue || rowPackage === packageValue;
+                    const vehicleMatch = !vehicleValue || rowVehicle === vehicleValue;
+                    const statusMatch = !statusValue || rowStatus === statusValue;
+
+                    if (packageMatch && vehicleMatch && statusMatch) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                document.getElementById('showingCount').textContent = visibleCount;
+            }
+
+            packageFilter.addEventListener('change', filterTable);
+            vehicleFilter.addEventListener('change', filterTable);
+            statusFilter.addEventListener('change', filterTable);
+        });
+    </script>
 @endpush

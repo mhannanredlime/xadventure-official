@@ -95,7 +95,7 @@ class ReservationController extends Controller
         $scheduleSlots = ScheduleSlot::orderBy('sort_order')->get();
         $vehicleTypes = VehicleType::where('is_active', true)->orderBy('name')->get();
         
-        return view('admin.reservation-dashboard', compact('reservations', 'groupedReservations', 'customers', 'packages', 'riderTypes', 'scheduleSlots', 'vehicleTypes'));
+        return view('admin.reservations.index', compact('reservations', 'groupedReservations', 'customers', 'packages', 'riderTypes', 'scheduleSlots', 'vehicleTypes'));
     }
 
     public function create()
@@ -108,7 +108,7 @@ class ReservationController extends Controller
         $reservations = collect(); // Empty collection for create view
         $groupedReservations = collect(); // Empty collection for create view
         
-        return view('admin.reservation-dashboard', compact('customers', 'packages', 'riderTypes', 'scheduleSlots', 'reservations', 'groupedReservations'));
+        return view('admin.reservations.index', compact('customers', 'packages', 'riderTypes', 'scheduleSlots', 'reservations', 'groupedReservations'));
     }
 
     public function store(Request $request)
@@ -148,7 +148,7 @@ class ReservationController extends Controller
         $reservations = collect([$reservation]); // Single reservation for show view
         $groupedReservations = $this->groupReservationsByTransaction($reservations);
         
-        return view('admin.reservation-dashboard', compact('reservation', 'reservations', 'groupedReservations'));
+        return view('admin.reservations.index', compact('reservation', 'reservations', 'groupedReservations'));
     }
 
     public function edit(Reservation $reservation)
@@ -161,7 +161,7 @@ class ReservationController extends Controller
         $reservations = collect([$reservation]); // Single reservation for edit view
         $groupedReservations = $this->groupReservationsByTransaction($reservations);
         
-        return view('admin.reservation-dashboard', compact('reservation', 'customers', 'packages', 'riderTypes', 'scheduleSlots', 'reservations', 'groupedReservations'));
+        return view('admin.reservations.index', compact('reservation', 'customers', 'packages', 'riderTypes', 'scheduleSlots', 'reservations', 'groupedReservations'));
     }
 
     public function update(Request $request, Reservation $reservation)
@@ -317,7 +317,7 @@ class ReservationController extends Controller
             ]);
         }
 
-        return view('admin.view-reservation-dashboard', compact('groupedReservations', 'vehicleTypes'));
+        return view('admin.reservations.index', compact('groupedReservations', 'vehicleTypes'));
     }
 
     /**

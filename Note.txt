@@ -14,11 +14,15 @@ php artisan db:seed --class=RiderTypeSeeder
 php artisan db:seed --class=PackagePriceSeeder
 
 
-Dec 5, 2025 Tas summary:
+Dec 8, 2025 Tas summary:
 
-1. Fix AmarPay `cus_email` error by passing correct customer email.
-2. Update `processBooking()` to handle guest checkout and account creation safely.
-3. Refactor Reservation creation to skip missing packages and calculate totals correctly.
-4. Create `cleanOldCarts()` observer to auto-delete old carts after reservation.
-5. Fix `showConfirmation()` route to accept 2 arguments fix the booking code issue.
-6. Create helper for generating lowercase, unique transaction IDs from booking code.
+1. Refactor VehicleController and VehicleTypeController for cleaner structure.
+2. Implement VehicleStoreRequest and VehicleUpdateRequest for validation.
+3. Rename all vehicle-* views to vehicle-* and update references and update references Refactor code and testing 
+4. Add caching for active_vehicle_types and other repeated queries.
+5. Create Promo Code Form Requests for create/update validation.
+6. Convert Promo Code CRUD from Alpine.js modals to Blade forms.
+7. Integrate ToastMagic notifications into PromoCodeController.
+8. Build PromoCodeService to handle business logic.
+9. Enhance PromoCode model with scopes and dynamic status logic.
+10. Restructure admin views into meaningful folders and update paths and fix acl/rbac issues.

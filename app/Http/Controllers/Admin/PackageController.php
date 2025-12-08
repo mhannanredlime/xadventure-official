@@ -58,7 +58,7 @@ class PackageController extends Controller
             return PackageType::whereNull('parent_id')->active()->get();
         });
 
-        return view('admin.add-packege-management', $data);
+        return view('admin.package.index', $data);
     }
 
     public function create()
@@ -69,7 +69,7 @@ class PackageController extends Controller
             return VehicleType::with('images')->where('is_active', true)->orderBy('name')->get();
         });
 
-        return view('admin.add-packege-management', compact('packages', 'vehicleTypes'));
+        return view('admin.package.index', compact('packages', 'vehicleTypes'));
     }
 
     public function store(PackageStoreRequest $request)
@@ -354,7 +354,7 @@ class PackageController extends Controller
             'packagePrices.priceType',
         ]);
 
-        return view('admin.package-show', compact('package'));
+        return view('admin.package.show', compact('package'));
     }
 
     public function editRegular(Package $package)

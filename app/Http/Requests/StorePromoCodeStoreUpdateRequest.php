@@ -13,7 +13,8 @@ class StorePromoCodeStoreUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-        $promoCodeId = $this->route('promo_code')?->id ?? null;
+        $promoCode = $this->route('promo_code');
+        $promoCodeId = $promoCode?->id ?? null;
 
         return [
             'code' => 'required|string|max:50|unique:promo_codes,code,' . $promoCodeId,

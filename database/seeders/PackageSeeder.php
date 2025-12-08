@@ -2,12 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Package;
-use App\Models\PackagePrice;
-use App\Models\RiderType;
-use App\Models\PriceType;
-use App\Models\VehicleType;
+use Exception;
 use App\Models\Image;
+use App\Models\Package;
+use App\Models\PriceType;
+use App\Models\RiderType;
+use App\Models\VehicleType;
+use App\Models\PackagePrice;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 
@@ -24,7 +25,7 @@ class PackageSeeder extends Seeder
             $regularType = VehicleType::where('name', 'Regular')->first();
 
             if (!$atvType || !$utvType || !$regularType) {
-                throw new \Exception('Vehicle types not found. Please run VehicleTypeSeeder first.');
+                throw new Exception('Vehicle types not found. Please run VehicleTypeSeeder first.');
             }
 
             // Get rider types (assuming they're pre-seeded)
@@ -39,7 +40,7 @@ class PackageSeeder extends Seeder
             $weekendPriceType = PriceType::where('slug', 'weekend')->first();
 
             if (!$weekdayPriceType || !$weekendPriceType) {
-                throw new \Exception('Price types not found. Please run PriceTypeSeeder first.');
+                throw new Exception('Price types not found. Please run PriceTypeSeeder first.');
             }
 
             $packages = [
@@ -49,7 +50,6 @@ class PackageSeeder extends Seeder
                     'type' => 'atv',
                     'min_participants' => 1,
                     'max_participants' => 10,
-                    'duration_minutes' => 120,
                     'display_starting_price' => 1200.00,
                     'is_active' => true,
                     'notes' => 'Perfect for adventure seekers looking for an exciting off-road experience.',
@@ -78,7 +78,6 @@ class PackageSeeder extends Seeder
                     'type' => 'regular',
                     'min_participants' => 1,
                     'max_participants' => 10,
-                    'duration_minutes' => 90,
                     'display_starting_price' => 800.00,
                     'is_active' => true,
                     'notes' => 'Our standard package for regular adventure tours.',
@@ -111,7 +110,6 @@ class PackageSeeder extends Seeder
                     'type' => 'atv',
                     'min_participants' => 1,
                     'max_participants' => 6,
-                    'duration_minutes' => 180,
                     'display_starting_price' => 2000.00,
                     'is_active' => true,
                     'selected_weekday' => true,
@@ -197,7 +195,7 @@ class PackageSeeder extends Seeder
 
             $this->command->info("Package seeding completed: {$createdPackages} created, {$updatedPackages} updated.");
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->command->error('Error seeding packages: ' . $e->getMessage());
             Log::error('Package seeding failed: ' . $e->getMessage(), [
                 'file' => $e->getFile(),

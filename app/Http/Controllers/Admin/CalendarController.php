@@ -42,7 +42,7 @@ class CalendarController extends Controller
         $defaultPackage = $packages->first();
         $currentMonth = now()->format('Y-m');
 
-        return view('admin.calendar', compact('packages', 'defaultPackage', 'currentMonth'));
+        return view('admin.calendar.index', compact('packages', 'defaultPackage', 'currentMonth'));
     }
 
     public function testApi()

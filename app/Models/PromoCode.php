@@ -36,6 +36,33 @@ class PromoCode extends Model
         'ends_at' => 'datetime',
     ];
 
+    public function getStatusAttribute($value)
+    {
+        if ($this->ends_at && $this->ends_at->isPast()) {
+            return 'expired';
+        }
+
+        return $value;
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('ends_at')
+                  ->orWhere('ends_at', '>', now());
+            });
+    }
+    
+    public function scopeValid($query)
+    {
+         return $query->active()
+            ->where(function ($q) {
+                $q->whereNull('starts_at')
+                  ->orWhere('starts_at', '<=', now());
+            });
+    }
+
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);

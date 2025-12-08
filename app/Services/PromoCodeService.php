@@ -3,140 +3,131 @@
 namespace App\Services;
 
 use App\Models\PromoCode;
-use App\Models\PromoRedemption;
-use App\Models\Customer;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class PromoCodeService
 {
-    public function validatePromoCode(string $code, float $subtotal, ?int $customerId = null): array
+    /**
+     * Create a new promo code.
+     *
+     * @param array $data
+     * @return PromoCode
+     * @throws Exception
+     */
+    public function createPromoCode(array $data): PromoCode
     {
-        $promoCode = PromoCode::where('code', strtoupper($code))
-            ->where('status', 'active')
-            ->first();
+        return DB::transaction(function () use ($data) {
+            // Logic for 'applies_to' cleanup
+            $data = $this->prepareData($data);
+            return PromoCode::create($data);
+        });
+    }
 
-        if (!$promoCode) {
-            return [
-                'valid' => false,
-                'message' => 'Invalid promo code.'
-            ];
+    /**
+     * Update an existing promo code.
+     *
+     * @param PromoCode $promoCode
+     * @param array $data
+     * @return PromoCode
+     * @throws Exception
+     */
+    public function updatePromoCode(PromoCode $promoCode, array $data): PromoCode
+    {
+        return DB::transaction(function () use ($promoCode, $data) {
+             $data = $this->prepareData($data);
+             $promoCode->update($data);
+             return $promoCode;
+        });
+    }
+
+    /**
+     * Delete a promo code.
+     *
+     * @param PromoCode $promoCode
+     * @return bool
+     * @throws Exception
+     */
+    public function deletePromoCode(PromoCode $promoCode): bool
+    {
+        return $promoCode->delete();
+    }
+
+    /**
+     * Toggle status or perform specific status updates.
+     * 
+     * @param PromoCode $promoCode
+     * @return string New Status
+     */
+    public function toggleStatus(PromoCode $promoCode): string
+    {
+         $newStatus = $promoCode->status === 'active' ? 'inactive' : 'active';
+         $promoCode->update(['status' => $newStatus]);
+         return $newStatus;
+    }
+    
+    /**
+     * Get filtered promo codes.
+     *
+     * @param array $filters
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getFilteredPromoCodes(array $filters = [])
+    {
+        $query = PromoCode::with(['package', 'vehicleType']);
+
+        if (!empty($filters['package_id'])) {
+            $query->where('package_id', $filters['package_id']);
+        }
+        if (!empty($filters['vehicle_type_id'])) {
+            $query->where('vehicle_type_id', $filters['vehicle_type_id']);
+        }
+        if (!empty($filters['status'])) {
+             // If filter is 'expired', we might use scope or raw query, 
+             // but since status attribute is accessor, direct query on DB column 'status' might not catch date-based expiry.
+             // However, for admin panel filtering usually relies on DB columns. 
+             // If we want to strictly filter by calculated status, it's heavier. 
+             // For now, let's assume 'status' column filter, or if 'expired' is passed, check dates.
+             if ($filters['status'] === 'expired') {
+                 $query->where(function($q) {
+                     $q->where('status', 'expired') // if explicitly set in DB
+                       ->orWhere('ends_at', '<', now());
+                 });
+             } else {
+                 $query->where('status', $filters['status']);
+             }
         }
 
-        // Check if promo code is within valid date range
-        $now = Carbon::now();
-        if ($promoCode->starts_at && $now->lt($promoCode->starts_at)) {
-            return [
-                'valid' => false,
-                'message' => 'This promo code is not yet active.'
-            ];
+        return $query->orderBy('created_at', 'desc')->get();
+    }
+    
+    /**
+     * Check if code exists.
+     */
+    public function checkCodeAvailability(string $code, ?int $excludeId = null): bool
+    {
+        $query = PromoCode::where('code', $code);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
         }
+        return !$query->exists();
+    }
 
-        if ($promoCode->ends_at && $now->gt($promoCode->ends_at)) {
-            return [
-                'valid' => false,
-                'message' => 'This promo code has expired.'
-            ];
-        }
-
-        // Check minimum spend requirement
-        if ($promoCode->min_spend && $subtotal < $promoCode->min_spend) {
-            return [
-                'valid' => false,
-                'message' => 'Minimum spend of TK ' . number_format($promoCode->min_spend) . ' required.'
-            ];
-        }
-
-        // Check total usage limit
-        if ($promoCode->usage_limit_total) {
-            $totalUsage = PromoRedemption::where('promo_code_id', $promoCode->id)->count();
-            if ($totalUsage >= $promoCode->usage_limit_total) {
-                return [
-                    'valid' => false,
-                    'message' => 'This promo code has reached its usage limit.'
-                ];
+    /**
+     * Prepare data for save/update (handle applies_to nulling).
+     */
+    private function prepareData(array $data): array
+    {
+        if (isset($data['applies_to'])) {
+            if ($data['applies_to'] === 'all') {
+                $data['package_id'] = null;
+                $data['vehicle_type_id'] = null;
+            } elseif ($data['applies_to'] === 'package') {
+                $data['vehicle_type_id'] = null;
+            } elseif ($data['applies_to'] === 'vehicle_type') {
+                $data['package_id'] = null;
             }
         }
-
-        // Check per-user usage limit
-        if ($promoCode->usage_limit_per_user && $customerId) {
-            $userUsage = PromoRedemption::where('promo_code_id', $promoCode->id)
-                ->where('customer_id', $customerId)
-                ->count();
-            if ($userUsage >= $promoCode->usage_limit_per_user) {
-                return [
-                    'valid' => false,
-                    'message' => 'You have already used this promo code the maximum number of times.'
-                ];
-            }
-        }
-
-        // Calculate discount
-        $discount = $this->calculateDiscount($promoCode, $subtotal);
-
-        return [
-            'valid' => true,
-            'message' => 'Promo code applied successfully!',
-            'promo_code' => $promoCode,
-            'discount' => $discount,
-            'discount_type' => $promoCode->discount_type,
-            'discount_value' => $promoCode->discount_value,
-            'max_discount' => $promoCode->max_discount
-        ];
-    }
-
-    public function calculateDiscount(PromoCode $promoCode, float $subtotal): float
-    {
-        $discount = 0;
-
-        if ($promoCode->discount_type === 'percentage') {
-            $discount = ($subtotal * $promoCode->discount_value) / 100;
-        } elseif ($promoCode->discount_type === 'fixed') {
-            $discount = $promoCode->discount_value;
-        }
-
-        // Apply maximum discount limit
-        if ($promoCode->max_discount && $discount > $promoCode->max_discount) {
-            $discount = $promoCode->max_discount;
-        }
-
-        // Ensure discount doesn't exceed subtotal
-        if ($discount > $subtotal) {
-            $discount = $subtotal;
-        }
-
-        return round($discount, 2);
-    }
-
-    public function applyPromoCode(string $code, float $subtotal, ?int $customerId = null): array
-    {
-        $validation = $this->validatePromoCode($code, $subtotal, $customerId);
-
-        if (!$validation['valid']) {
-            return $validation;
-        }
-
-        $discount = $validation['discount'];
-        $total = $subtotal - $discount;
-
-        return [
-            'valid' => true,
-            'message' => 'Promo code applied successfully!',
-            'discount' => $discount,
-            'subtotal' => $subtotal,
-            'total' => $total,
-            'promo_code' => $validation['promo_code']
-        ];
-    }
-
-    public function recordRedemption(int $promoCodeId, int $reservationId, int $customerId, float $amountDiscounted): PromoRedemption
-    {
-        return PromoRedemption::create([
-            'promo_code_id' => $promoCodeId,
-            'reservation_id' => $reservationId,
-            'customer_id' => $customerId,
-            'amount_discounted' => $amountDiscounted,
-            'redeemed_at' => Carbon::now(),
-        ]);
+        return $data;
     }
 }
