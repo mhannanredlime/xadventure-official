@@ -15,21 +15,42 @@ class PriceCalculationService
         $this->vehicleAvailabilityService = $vehicleAvailabilityService;
     }
 
-    public function getPriceForDate(\App\Models\Package $package, $date, $riderTypeId = null): float
+    private function findPackagePrice(\App\Models\Package $package, $date, $riderTypeId = null)
     {
-        // Resolve PackagePrice for ID if possible, for overrides
-        // We need package_price_id for PriceOverride.
-        // So we must find the PackagePrice record first.
-        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
         $dayName = strtolower(Carbon::parse($date)->format('D')); // 'sun', 'mon' etc.
+        $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+        $isWeekend = ($dayOfWeek == 0 || $dayOfWeek == 5 || $dayOfWeek == 6); // Assuming Fri/Sat/Sun as weekend, or standard. 
+        // Note: Project seems to treat Fri/Sat as weekend? Or custom?
+        // In Package migration: selected_weekend default 'friday'.
+        // Let's rely on standard logic or generic "Weekend" slug.
+        // Usually Fri+Sat in BD/MiddleEast, Sat+Sun in West.
+        // Let's assume standard Laravel/Carbon isWeekend()? (Sat/Sun). 
+        // But application might have custom logic. 
+        // Step 933 PackageController: $isWeekend = ($dayOfWeek == 0 || $dayOfWeek == 6); // Sun, Sat.
+        // Let's match that.
         
-        // Find PackagePrice
-        $packagePrice = $package->packagePrices()
-            ->where('day', $dayName)
+        $priceTypeSlug = ($dayOfWeek == 0 || $dayOfWeek == 6) ? 'weekend' : 'weekday';
+
+        $query = $package->packagePrices()
             ->when($riderTypeId, function($q) use ($riderTypeId) {
                 return $q->where('rider_type_id', $riderTypeId);
-            })
-            ->first();
+            });
+
+        // Try exact day match first
+        $priceByDay = (clone $query)->where('day', $dayName)->first();
+        if ($priceByDay) return $priceByDay;
+
+        // Try Price Type match (fallback)
+        $priceByType = (clone $query)->whereHas('priceType', function($q) use ($priceTypeSlug) {
+            $q->where('slug', $priceTypeSlug);
+        })->first();
+
+        return $priceByType;
+    }
+
+    public function getPriceForDate(\App\Models\Package $package, $date, $riderTypeId = null): float
+    {
+        $packagePrice = $this->findPackagePrice($package, $date, $riderTypeId);
             
         if (!$packagePrice) return 0;
 
@@ -48,13 +69,7 @@ class PriceCalculationService
 
     public function getPriceTagForDate(\App\Models\Package $package, $date, $riderTypeId = null): ?string
     {
-        $dayName = strtolower(Carbon::parse($date)->format('D'));
-        $packagePrice = $package->packagePrices()
-            ->where('day', $dayName)
-            ->when($riderTypeId, function($q) use ($riderTypeId) {
-                return $q->where('rider_type_id', $riderTypeId);
-            })
-            ->first();
+        $packagePrice = $this->findPackagePrice($package, $date, $riderTypeId);
             
         if (!$packagePrice) return null;
 
@@ -68,14 +83,7 @@ class PriceCalculationService
 
     public function getDefaultPriceForDate(\App\Models\Package $package, $date, $riderTypeId = null): float
     {
-       // Default is the base price from PackagePrice table
-       $dayName = strtolower(Carbon::parse($date)->format('D'));
-       $packagePrice = $package->packagePrices()
-            ->where('day', $dayName)
-            ->when($riderTypeId, function($q) use ($riderTypeId) {
-                return $q->where('rider_type_id', $riderTypeId);
-            })
-            ->first();
+       $packagePrice = $this->findPackagePrice($package, $date, $riderTypeId);
        
        return $packagePrice ? $packagePrice->price : 0;
     }
