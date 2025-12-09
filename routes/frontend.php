@@ -13,8 +13,7 @@ use App\Http\Controllers\Customer\DashboardController;
 use App\Http\Controllers\Frontend\CustomPackageController;
 use App\Http\Controllers\Frontend\BookingReceiptController;
 use App\Http\Controllers\Frontend\CheckoutReceiptController;
-use App\Http\Controllers\Frontend\AutvPackageNewController; // Consider renaming class to AtvUtvPackageNewController
-use App\Http\Controllers\Frontend\RegularPackageBookingController;
+use App\Http\Controllers\Frontend\AutvPackageNewController; // Consider renaming class to AtvUtvPackageNewController;
 use App\Http\Controllers\Frontend\PackageController as FrontendPackageController;
 
 /*
@@ -45,10 +44,10 @@ Route::view('/payment-failed', 'frontend.payment-failed')->name('payment.failed'
 // --- Package Routes ---
 
 // Custom Packages
-Route::get('/custom-packages', [CustomPackageController::class, 'index'])->name('packages.custom.index'); // Renamed: custom-packages -> packages.custom.index
+Route::get('/packages/custom', [CustomPackageController::class, 'index'])->name('packages.custom.index'); // Renamed: custom-packages -> packages.custom.index
 
 // Regular Packages
-Route::get('/regular-packages-booking', [RegularPackageBookingController::class, 'index'])->name('packages.regular.index'); // Renamed: regular-packages-booking -> packages.regular.index
+Route::get('/packages/regular/booking', [CustomPackageController::class, 'booking'])->name('packages.regular.index'); // Renamed: regular-packages-booking -> packages.regular.index
 
 // ATV/UTV Packages
 Route::controller(FrontendPackageController::class)->prefix('atv-utv-bookings')->name('packages.atv-utv.')->group(function () {
@@ -81,7 +80,7 @@ Route::controller(AutvPackageNewController::class)->group(function () {
 
 Route::controller(BookingController::class)->group(function () {
     // Booking Flow
-    Route::match(['post'], '/process-to-checkout', 'processToCheckout')->name('booking.process-checkout');
+    Route::match(['post'], '/checkout/initiate', 'processToCheckout')->name('booking.process-checkout');
     Route::get('/checkout', 'checkout')->name('checkout.index');
     Route::post('/checkout/process', 'processBooking')->name('checkout.process');
     Route::get('/booking-confirmation', 'showConfirmation')->name('booking.confirmation');
@@ -96,6 +95,7 @@ Route::controller(BookingController::class)->group(function () {
         Route::post('update-datetime', 'updateCartDateTime')->name('update-datetime');
         Route::post('validate-promo', 'validatePromoCode')->name('validate-promo');
         Route::post('remove-promo', 'removePromoCode')->name('remove-promo');
+        Route::post('remove-package', 'removePackageFromCart')->name('remove-package');
     });
 });
 

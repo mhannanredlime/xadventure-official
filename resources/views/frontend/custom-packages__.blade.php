@@ -234,7 +234,7 @@
     </div>
 
     <!-- Floating Cart Icon -->
-    <a href="{{ route('regular-packages-booking') }}" class="floating-cart-icon" id="floatingCartIcon">
+    <a href="{{ route('packages.regular.index') }}" class="floating-cart-icon" id="floatingCartIcon">
         <i class="fa-solid fa-cart-shopping"></i>
         <span class="cart-count" id="cartCount">{{ $cartCount ?? 0 }}</span>
         <span class="cart-text">Items</span>
@@ -251,7 +251,6 @@
 
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
                 @foreach ($bundlePackages as $package)
-               
                     @php
                         $variants = $bundleVariantsByPackage[$package->id] ?? collect();
                         $firstVariant = $variants->first();
@@ -496,7 +495,7 @@
                                 const open = Array.isArray(slots) ? slots.find(s => s.is_open && s
                                     .available_total > 0) : null;
                                 if (open) {
-                                    return fetch(`{{ route('frontend.cart.add') }}`, {
+                                    return fetch(`{{ route('cart.add') }}`, {
                                             method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json',

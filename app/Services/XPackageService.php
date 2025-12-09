@@ -32,6 +32,7 @@ class XPackageService
                 'display_starting_price' => $data['displayStartingPrice'] ?? null,
                 'min_participants' => $data['minParticipant'],
                 'max_participants' => $data['maxParticipant'],
+                'type' => 'regular',
                 'is_active' => $data['is_active'] ?? true,
             ];
 

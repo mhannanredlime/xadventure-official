@@ -168,16 +168,16 @@
         }
 
         .acknowledgment-item:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
 
-        .acknowledgment-checkbox:checked + .form-label {
+        .acknowledgment-checkbox:checked+.form-label {
             color: #28a745;
             font-weight: 600;
         }
 
-        .acknowledgment-checkbox:checked ~ .badge {
+        .acknowledgment-checkbox:checked~.badge {
             background-color: #28a745 !important;
         }
 
@@ -330,6 +330,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -356,7 +357,8 @@
 
                         <div class="mb-5">
                             <h3 class="section-heading">Choose Date</h3>
-                            <button type="button" id="datePickerToggle" class="btn btn-outline-primary date-picker-toggle-btn w-100 mb-3">
+                            <button type="button" id="datePickerToggle"
+                                class="btn btn-outline-primary date-picker-toggle-btn w-100 mb-3">
                                 <i class="bi bi-calendar3 me-2"></i>
                                 <span id="datePickerText">Choose Date</span>
                                 <i class="bi bi-chevron-down ms-auto toggle-icon"></i>
@@ -592,7 +594,8 @@
     </div>
 
     <!-- ATV/UTV Acknowledgment Modal -->
-    <div class="modal fade" id="acknowledgmentModal" tabindex="-1" aria-labelledby="acknowledgmentModalLabel" aria-hidden="true">
+    <div class="modal fade" id="acknowledgmentModal" tabindex="-1" aria-labelledby="acknowledgmentModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 90%; width: 1200px;">
             <div class="modal-content" style="background-color: #ffffff;">
                 <div class="modal-header" style="background-color: #2c5aa0; color: white;">
@@ -600,11 +603,13 @@
                         <i class="bi  bi-exclamation-triangle me-2"></i>
                         Booking Acknowledgment - ATV/UTV Trail Rides
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="alert alert-info">
-                        <strong>By booking this reservation I acknowledge below and all rules and regulations of the <span style="color: #dc3545; text-decoration: underline;">xadventure</span></strong>
+                        <strong>By booking this reservation I acknowledge below and all rules and regulations of the <span
+                                style="color: #dc3545; text-decoration: underline;">xadventure</span></strong>
                     </div>
 
                     <!-- Acknowledgment Checkboxes -->
@@ -613,11 +618,15 @@
                             <div class="acknowledgment-item p-3 border rounded" style="background-color: #f8f9fa;">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3">
-                                        <input type="checkbox" class="form-check-input acknowledgment-checkbox" id="acknowledgment1" style="transform: scale(1.2);">
+                                        <input type="checkbox" class="form-check-input acknowledgment-checkbox"
+                                            id="acknowledgment1" style="transform: scale(1.2);">
                                     </div>
                                     <div class="flex-grow-1">
                                         <label for="acknowledgment1" class="form-label mb-0" style="cursor: pointer;">
-                                            I understand that for Each vehicle reservation, we will have at least one person have <span style="color: #007bff; text-decoration: underline;">Motorcycle</span> or Car Driver's licenses
+                                            I understand that for Each vehicle reservation, we will have at least one person
+                                            have <span
+                                                style="color: #007bff; text-decoration: underline;">Motorcycle</span> or
+                                            Car Driver's licenses
                                         </label>
                                     </div>
                                 </div>
@@ -630,11 +639,16 @@
                             <div class="acknowledgment-item p-3 border rounded" style="background-color: #f8f9fa;">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3">
-                                        <input type="checkbox" class="form-check-input acknowledgment-checkbox" id="acknowledgment2" style="transform: scale(1.2);">
+                                        <input type="checkbox" class="form-check-input acknowledgment-checkbox"
+                                            id="acknowledgment2" style="transform: scale(1.2);">
                                     </div>
                                     <div class="flex-grow-1">
                                         <label for="acknowledgment2" class="form-label mb-0" style="cursor: pointer;">
-                                            I understand I have to <span style="color: #dc3545; text-decoration: underline;">carry</span> show my driver's license before the ride start. Failure the show my physical license, <span style="color: #dc3545; text-decoration: underline;">Xadventure</span> will Deny the Ride, and I will not get my money back.
+                                            I understand I have to <span
+                                                style="color: #dc3545; text-decoration: underline;">carry</span> show my
+                                            driver's license before the ride start. Failure the show my physical license,
+                                            <span style="color: #dc3545; text-decoration: underline;">Xadventure</span>
+                                            will Deny the Ride, and I will not get my money back.
                                         </label>
                                     </div>
                                 </div>
@@ -652,12 +666,14 @@
                         <!-- Signature Tabs -->
                         <ul class="nav nav-tabs mb-3" id="signatureTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="draw-tab" data-bs-toggle="tab" data-bs-target="#draw-pane" type="button" role="tab">
+                                <button class="nav-link active" id="draw-tab" data-bs-toggle="tab"
+                                    data-bs-target="#draw-pane" type="button" role="tab">
                                     <i class="bi  bi-pen me-1"></i> Draw Signature
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-pane" type="button" role="tab">
+                                <button class="nav-link" id="upload-tab" data-bs-toggle="tab"
+                                    data-bs-target="#upload-pane" type="button" role="tab">
                                     <i class="bi  bi-upload me-1"></i> Upload Signature
                                 </button>
                             </li>
@@ -667,7 +683,8 @@
                             <!-- Draw Signature Tab -->
                             <div class="tab-pane fade show active" id="draw-pane" role="tabpanel">
                                 <div class="signature-canvas-container text-center">
-                                    <canvas id="signatureCanvas" width="500" height="200" style="border: 2px dashed #dee2e6; border-radius: 8px; cursor: crosshair;"></canvas>
+                                    <canvas id="signatureCanvas" width="500" height="200"
+                                        style="border: 2px dashed #dee2e6; border-radius: 8px; cursor: crosshair;"></canvas>
                                     <div class="mt-2">
                                         <small class="text-muted">Draw your signature above</small>
                                     </div>
@@ -677,9 +694,11 @@
                             <!-- Upload Signature Tab -->
                             <div class="tab-pane fade" id="upload-pane" role="tabpanel">
                                 <div class="signature-upload-container text-center">
-                                    <input type="file" id="signatureUpload" accept="image/png,image/jpeg,image/jpg" class="form-control mb-3" style="max-width: 400px; margin: 0 auto;">
+                                    <input type="file" id="signatureUpload" accept="image/png,image/jpeg,image/jpg"
+                                        class="form-control mb-3" style="max-width: 400px; margin: 0 auto;">
                                     <div id="signaturePreview" class="mt-3" style="display: none;">
-                                        <img id="signaturePreviewImg" style="max-width: 400px; max-height: 200px; border: 2px solid #dee2e6; border-radius: 8px;">
+                                        <img id="signaturePreviewImg"
+                                            style="max-width: 400px; max-height: 200px; border: 2px solid #dee2e6; border-radius: 8px;">
                                     </div>
                                 </div>
                             </div>
@@ -705,7 +724,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-success" id="submitAcknowledgmentBtn" onclick="submitAcknowledgment()" disabled>
+                    <button type="button" class="btn btn-success" id="submitAcknowledgmentBtn"
+                        onclick="submitAcknowledgment()" disabled>
                         <i class="bi  bi-check me-1"></i> Confirm & Add to Cart
                     </button>
                 </div>
@@ -718,14 +738,15 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content" style="background-color: #ffffff;">
                 <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeSuccessModal()"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        onclick="closeSuccessModal()"></button>
                 </div>
                 <div class="modal-body text-center pt-0">
                     <div class="row g-4">
                         <div class="col-md-6">
                             <div class="card bg-dark text-white border-0"
                                 style="border-radius: 1rem; overflow: hidden; cursor: pointer; transition: transform 0.3s ease;"
-                                data-href="{{ route('frontend.packages.index') }}">
+                                data-href="{{ route('packages.atv-utv.list') }}">
                                 <img src="{{ asset('frontEnd/images/atv-trial.svg') }}" class="card-img"
                                     alt="ATV Session Image" style="filter: brightness(60%);">
                                 <div class="card-img-overlay d-flex align-items-end p-4">
@@ -736,7 +757,7 @@
                         <div class="col-md-6">
                             <div class="card bg-dark text-white border-0"
                                 style="border-radius: 1rem; overflow: hidden; cursor: pointer; transition: transform 0.3s ease;"
-                                data-href="{{ route('custom-packages') }}">
+                                data-href="{{ route('packages.custom.index') }}">
                                 <img src="{{ asset('frontEnd/images/archery.svg') }}" class="card-img"
                                     alt="Other Adventures Image" style="filter: brightness(60%);">
                                 <div class="card-img-overlay d-flex align-items-end p-4">
@@ -745,7 +766,7 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('frontend.process-to-checkout') }}">
+                    <a href="{{ route('checkout.index') }}">
                         <button class="btn btn-orange btn-lg my-4" style="background-color: #ff6f00; color: #fff;">
                             View Cart
                         </button>
@@ -798,7 +819,8 @@
         // Date Picker Toggle Functions
         function formatDateForDisplay(date) {
             const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December'];
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const day = days[date.getDay()];
             const month = months[date.getMonth()];
@@ -2271,10 +2293,10 @@
             e.preventDefault();
             const touch = e.touches[0];
             const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' :
-                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
+                e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
             signatureCanvas.dispatchEvent(mouseEvent);
         }
 
@@ -2345,7 +2367,8 @@
         function updateSignatureStatus(hasSignature) {
             const statusElement = document.getElementById('signatureStatus');
             if (hasSignature) {
-                statusElement.innerHTML = '<small class="text-success"><i class="bi  bi-check me-1"></i>Signature provided</small>';
+                statusElement.innerHTML =
+                    '<small class="text-success"><i class="bi  bi-check me-1"></i>Signature provided</small>';
             } else {
                 statusElement.innerHTML = '<small class="text-muted">No signature provided</small>';
             }
@@ -2382,37 +2405,38 @@
 
             // Add to cart via AJAX
             fetch('{{ route('frontend.cart.add') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(cartDataWithAcknowledgment)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update cart count
-                    if (typeof updateCartCount === 'function') {
-                        updateCartCount();
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(cartDataWithAcknowledgment)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update cart count
+                        if (typeof updateCartCount === 'function') {
+                            updateCartCount();
+                        }
+
+                        // Close acknowledgment modal
+                        const acknowledgmentModal = bootstrap.Modal.getInstance(document.getElementById(
+                            'acknowledgmentModal'));
+                        acknowledgmentModal.hide();
+
+                        // Show success modal
+                        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                        successModal.show();
+                    } else {
+                        toastNotifications.error('Error adding packages to cart: ' + (data.message || 'Unknown error'));
                     }
-
-                    // Close acknowledgment modal
-                    const acknowledgmentModal = bootstrap.Modal.getInstance(document.getElementById('acknowledgmentModal'));
-                    acknowledgmentModal.hide();
-
-                    // Show success modal
-                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-                    successModal.show();
-                } else {
-                    toastNotifications.error('Error adding packages to cart: ' + (data.message || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                toastNotifications.error('Error adding packages to cart. Please try again.');
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastNotifications.error('Error adding packages to cart. Please try again.');
+                });
         }
 
         // Close success modal

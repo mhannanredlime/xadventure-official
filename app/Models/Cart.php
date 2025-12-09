@@ -16,9 +16,12 @@ class Cart extends Model
         'user_id',
         'session_id',
         'package_id',
+        'rider_type_id',
         'quantity',
         'selected_date',
+        'date',
         'time_slot_id',
+        'schedule_slot_id',
         'amount',
         'metadata',
         'expires_at',
@@ -33,6 +36,18 @@ class Cart extends Model
     public function package()
     {
         return $this->belongsTo(Package::class);
+    }
+
+    // Accessor for cart_amount (alias for amount)
+    public function getCartAmountAttribute()
+    {
+        return $this->amount;
+    }
+
+    // Accessor for cart_uuid (alias for uuid)
+    public function getCartUuidAttribute()
+    {
+        return $this->uuid;
     }
 
     protected static function booted()

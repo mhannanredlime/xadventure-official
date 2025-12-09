@@ -38,6 +38,6 @@ class Payment extends Model
 
     public function reservation(): BelongsTo
     {
-        return $this->belongsTo(Reservation::class)->with('packageVariant.package');
+        return $this->belongsTo(Reservation::class);
     }
 }

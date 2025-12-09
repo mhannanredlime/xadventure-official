@@ -61,7 +61,7 @@
                     <div class="success-icon">
                         <i class="bi bi-check-circle"></i>
                     </div>
-                    <p class="confirmation-title">Booking Confirmed!</p>
+                    <p class="confirmation-title">🎉 Booking Confirmed!</p>
                     <h1 class="customer-name">Hello {{ $reservation->customer->name ?? 'Guest' }}!</h1>
                     <p class="sub-text">Booking #{{ $reservation->booking_code ?? 'N/A' }} |
                         {{ isset($reservation->created_at) ? $reservation->created_at->format('M d, Y') : '' }}</p>

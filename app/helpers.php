@@ -93,7 +93,7 @@ if (! function_exists('get_package_price')) {
 
         // Step 3: Filter by rider type if provided
         if ($riderTypeId) {
-            $baseQuery->where('rider_type_id', $riderTypeId);
+            $query->where('rider_type_id', $riderTypeId);
         }
 
         // Step 4: Return first matching price or minimum if no riderTypeId

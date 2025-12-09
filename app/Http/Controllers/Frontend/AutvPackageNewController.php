@@ -215,7 +215,7 @@ public function addPackagesToCart(Request $request)
         'message' => 'Packages added to cart successfully',
         'cart_count' => count($cartItems),
         'total_amount' => $totalAmount,
-        'redirect_url' => route('frontend.process-to-checkout')
+        'redirect_url' => route('booking.process-checkout')
     ]);
 }
 }

@@ -102,7 +102,6 @@ class User extends Authenticatable
      */
     public function hasPermission($permission): bool
     {
-        return $this->can($permission); // using Gate capability or direct Spatie method
         // Try/Catch because Spatie might throw PermissionDoesNotExist
         try {
             return $this->hasPermissionTo($permission);

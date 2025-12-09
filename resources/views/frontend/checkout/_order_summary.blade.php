@@ -1,5 +1,13 @@
 <div class="card shadow-sm sticky-top">
     <div class="card-body">
+        <!-- Order Summary Header -->
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-shopping-cart text-orange me-2"></i>Order Summary
+            </h5>
+            
+        </div>
+
         @php
             $total = $subtotal;
             $vatData = calculateVAT($total);
@@ -60,7 +68,7 @@
             <input type="hidden" name="total" value="{{ $vatData['total'] }}">
 
             <div class="d-flex justify-content-center mt-4 gap-3">
-                <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
+                <a href="{{ route('packages.custom.index') }}" class="btn continue-shopping-btn equal-btn">
                     <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                 </a>
                 <button type="submit" class="checkout-btn equal-btn">

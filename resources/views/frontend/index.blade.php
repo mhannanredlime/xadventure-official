@@ -131,7 +131,7 @@
                                         <li><i class="bi  bi-check"></i> {{ $feature }}</li>
                                     @endforeach
                                 </ul>
-                                <a href="{{ route('custom-packages') }}"
+                                <a href="{{ route('packages.custom.index') }}"
                                     class="btn btn-pricing primary-btn-border-radius">Learn More</a>
                             </div>
                         </div>

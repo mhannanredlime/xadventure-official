@@ -131,7 +131,7 @@
                 <i class="bi  bi-shopping-cart"></i>
                 <h3>Your cart is empty</h3>
                 <p class="text-muted">Add some adventure packages to get started!</p>
-                <a href="{{ route('frontend.packages.index') }}" class="btn btn-orange jatio-bg-color">
+                <a href="{{ route('packages.atv-utv.list') }}" class="btn btn-orange jatio-bg-color">
                     Browse Packages
                 </a>
             </div>
@@ -267,11 +267,11 @@
                             <span id="total-amount">TK {{ number_format($total) }}</span>
                         </div>
 
-                        <a href="{{ route('frontend.checkout.index') }}" class="btn btn-orange jatio-bg-color w-100 mt-3">
+                        <a href="{{ route('checkout.index') }}" class="btn btn-orange jatio-bg-color w-100 mt-3">
                             Proceed to Checkout
                         </a>
 
-                        <a href="{{ route('frontend.packages.index') }}" class="btn btn-outline-secondary w-100 mt-2">
+                        <a href="{{ route('packages.atv-utv.list') }}" class="btn btn-outline-secondary w-100 mt-2">
                             Continue Shopping
                         </a>
                     </div>

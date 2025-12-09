@@ -33,11 +33,6 @@ class Package extends Model
         'display_starting_price' => 'decimal:2',
     ];
 
-    // public function variants(): HasMany
-    // {
-    //     return $this->hasMany(PackageVariant::class);
-    // }
-
     public function vehicleTypes(): BelongsToMany
     {
         return $this->belongsToMany(VehicleType::class, 'package_vehicle_types');

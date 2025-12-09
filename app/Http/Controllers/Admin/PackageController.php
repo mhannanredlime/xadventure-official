@@ -103,7 +103,7 @@ class PackageController extends Controller
         $data['package'] = null;
         $data['page_title'] = 'Add Regular Package';
         
-        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types', 3600, function () {
+        $data['packageTypes'] = Cache::remember('parent_package_types', 3600, function () {
             return PackageType::whereNotNull('parent_id')->active()->get();
         });
         
@@ -118,7 +118,7 @@ class PackageController extends Controller
         $data['page_title'] = 'Edit Regular Package';
         $data['page_desc'] = 'Update Package Details';
 
-        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types', 3600, function () {
+        $data['packageTypes'] = Cache::remember('parent_package_types', 3600, function () {
             return PackageType::whereNotNull('parent_id')->active()->get();
         });
         
@@ -144,7 +144,6 @@ class PackageController extends Controller
 
     public function storeRegular(RegularPackageStoreUpdateRequest $request)
     {
-        // dd($request->all());
         try {
             $this->packageService->saveRegularPackage($request->validated());
             ToastMagic::success('Package created successfully!');
@@ -162,43 +161,6 @@ class PackageController extends Controller
     /**
      * Create package prices with default null rider_type_id
      */
-    private function regularPackagePriceCreate(Package $package, array $dayPrices): void
-    {
-        // Get price types
-        $weekdayPriceType = PriceType::where('slug', 'weekday')->first();
-        $weekendPriceType = PriceType::where('slug', 'weekend')->first();
-
-        $pricesToCreate = [];
-        $now = now();
-
-        foreach ($dayPrices as $priceData) {
-            // Skip invalid data
-            if (empty($priceData['day']) || ! isset($priceData['price'])) {
-                continue;
-            }
-
-            $day = $priceData['day'];
-            $price = $priceData['price'];
-            // Determine price type (weekday/weekend)
-            $isWeekend = in_array($day, ['fri', 'sat']);
-            $priceTypeId = $isWeekend ? $weekendPriceType->id : $weekdayPriceType->id;
-
-            $pricesToCreate[] = [
-                'package_id' => $package->id,
-                'package_type_id' => $package->package_type_id,
-                'day' => $day,
-                'price' => $price,
-                'is_active' => true,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
-
-        if (! empty($pricesToCreate)) {
-            PackagePrice::insert($pricesToCreate);
-        }
-    }
-
     public function updateRegular(RegularPackageStoreUpdateRequest $request, Package $package)
     {
         try {
@@ -212,16 +174,6 @@ class PackageController extends Controller
 
             return back()->withInput();
         }
-    }
-
-    /**
-     * Determine day type (weekend/weekday)
-     */
-    private function getDayType(string $day): string
-    {
-        $weekendDays = ['fri', 'sat', 'sun'];
-
-        return in_array($day, $weekendDays) ? 'weekend' : 'weekday';
     }
 
     public function createAtvUtv()
@@ -359,32 +311,7 @@ class PackageController extends Controller
 
     public function editRegular(Package $package)
     {
-        $data['package'] = $package;
-        $data['page_title'] = 'Edit Regular Package';
-        $data['page_desc'] = 'Update Package Details';
-
-        $data['packageTypes'] = \Illuminate\Support\Facades\Cache::remember('parent_package_types', 3600, function () {
-            return PackageType::whereNotNull('parent_id')->active()->get();
-        });
-        
-        $data['days'] = weekDays();
-
-        // Build array of existing prices
-        $existingPrices = [];
-        foreach ($package->packagePrices as $price) {
-            $existingPrices[$price->day] = $price->price;
-        }
-
-        // Ensure all days have at least null values
-        foreach ($data['days'] as $day) {
-            if (! isset($existingPrices[$day])) {
-                $existingPrices[$day] = null;
-            }
-        }
-
-        $data['dayPrices'] = $existingPrices; // Pass as array
-
-        return view('admin.package.regular.regular-edit', $data);
+        return $this->edit($package);
     }
 
     public function update(PackageUpdateRequest $request, Package $package)
@@ -422,32 +349,5 @@ class PackageController extends Controller
         ToastMagic::success('Package deleted successfully!');
 
         return redirect()->route('admin.packages.index');
-    }
-
-    /**
-     * Get MIME type with fallback for missing fileinfo extension
-     */
-    private function getMimeTypeWithFallback(UploadedFile $file): string
-    {
-        try {
-            // Try to get MIME type using Laravel's method (requires fileinfo extension)
-            return $file->getMimeType();
-        } catch (\Exception $e) {
-            // Fallback: determine MIME type from file extension
-            $extension = strtolower($file->getClientOriginalExtension());
-
-            $mimeTypes = [
-                'jpg' => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'png' => 'image/png',
-                'gif' => 'image/gif',
-                'webp' => 'image/webp',
-                'bmp' => 'image/bmp',
-                'svg' => 'image/svg+xml',
-                'ico' => 'image/x-icon',
-            ];
-
-            return $mimeTypes[$extension] ?? 'application/octet-stream';
-        }
     }
 }

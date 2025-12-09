@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Log;
 
 class CheckPermission
 {
@@ -19,11 +20,15 @@ class CheckPermission
             abort(401, 'Unauthenticated');
         }
 
-        if (!$request->user()->hasPermission($permission)) {
+        $user = $request->user();
+        
+        if (!$user->hasPermission($permission)) {
+            Log::warning('CheckPermission: Denied', ['user_id' => $user->id, 'permission' => $permission]);
             // dd($permission);
             abort(403, 'Insufficient permissions');
         }
 
+        Log::info('CheckPermission: Granted', ['user_id' => $user->id, 'permission' => $permission]);
         return $next($request);
     }
 }

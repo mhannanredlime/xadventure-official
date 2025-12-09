@@ -36,30 +36,9 @@ class CartService
     /**
      * Get cart items with details
      */
-    public function getCartItems(): array
+    public function getCartItems()
     {
-        $carts = $this->getQuery()->with(['package.images', 'package.vehicleTypes'])->get();
-        
-        $items = [];
-        foreach ($carts as $cart) {
-            // Load rider type label if needed, or frontend handles it via ID
-            $package = $cart->package;
-            
-            $items[] = [
-                'key' => $cart->uuid,
-                'id' => $cart->id,
-                'uuid' => $cart->uuid,
-                'package_id' => $cart->package_id,
-                'rider_type_id' => $cart->rider_type_id,
-                'quantity' => $cart->quantity,
-                'date' => $cart->date ?? $cart->selected_date, // Handle legacy/migration naming
-                'slot_id' => $cart->schedule_slot_id ?? $cart->time_slot_id,
-                'amount' => $cart->amount,
-                'package' => $package,
-                'rider_type_label' => $this->getRiderTypeLabel($cart->rider_type_id),
-            ];
-        }
-        return $items;
+        return $this->getQuery()->with(['package.images', 'package.vehicleTypes'])->get();
     }
 
     /**
@@ -116,11 +95,15 @@ class CartService
     }
 
     /**
-     * Clear cart
+     * Clear cart and promo session data
      */
     public function clearCart(): void
     {
         $this->getQuery()->delete();
+        
+        // Also clear promo code session data
+        Session::forget('applied_promo_code');
+        Session::forget('promo_discount');
     }
     
     /**
@@ -160,5 +143,36 @@ class CartService
         if ($riderTypeId == 2) return 'Double Rider';
         // Needs generic lookup if RiderType model exists and is robust
         return 'Variant #' . $riderTypeId;
+    }
+    /**
+     * Get cart item by UUID
+     */
+    public function getCartItem(string $uuid)
+    {
+        return $this->getQuery()->where('uuid', $uuid)->first();
+    }
+
+    /**
+     * Update cart item quantity
+     */
+    public function updateCartItem(string $uuid, string $action): bool
+    {
+        $cartItem = $this->getCartItem($uuid);
+
+        if (!$cartItem) {
+            return false;
+        }
+
+        if ($action === 'addition') {
+            $cartItem->quantity += 1;
+        } elseif ($action === 'minus') {
+            if ($cartItem->quantity > 1) {
+                $cartItem->quantity -= 1;
+            } else {
+                return false; // Cannot decrease below 1
+            }
+        }
+
+        return $cartItem->save();
     }
 }

@@ -63,11 +63,24 @@ class AmarPayService
             ]);
             
             if (isset($data['result']) && $data['result'] === 'true' && isset($data['payment_url'])) {
+                // Fix deprecated URL if AmarPay returns old domain
+                $paymentUrl = $data['payment_url'];
+                
+                // Replace deprecated ebl.aamarpay.com with correct sandbox.aamarpay.com
+                if (strpos($paymentUrl, 'ebl.aamarpay.com') !== false) {
+                    $paymentUrl = str_replace('ebl.aamarpay.com', 'sandbox.aamarpay.com', $paymentUrl);
+                    
+                    Log::info('Fixed deprecated AmarPay URL', [
+                        'original' => $data['payment_url'],
+                        'fixed' => $paymentUrl,
+                    ]);
+                }
+                
                 // Payment record is already created in BookingController
                 // Just return the redirect URL
                 return [
                     'success' => true,
-                    'redirect_url' => $data['payment_url'],
+                    'redirect_url' => $paymentUrl,
                     'transaction_id' => $tranId,
                 ];
             }
@@ -148,7 +161,7 @@ class AmarPayService
             // Find all reservations that were created in the same checkout session
             // Since we don't have payment_id in reservations, we'll find by customer and recent creation time
             $primaryReservation = $payment->reservation;
-            $allReservations = Reservation::where('customer_id', $primaryReservation->customer_id)
+            $allReservations = Reservation::where('user_id', $primaryReservation->user_id)
                 ->where('created_at', '>=', $payment->created_at->subMinutes(5)) // Within 5 minutes of payment creation
                 ->where('payment_status', 'pending')
                 ->get();
@@ -171,7 +184,7 @@ class AmarPayService
             }
 
             // Fire payment confirmation event for SMS notification
-            $paymentWithRelations = Payment::with(['reservation.customer', 'reservation.packageVariant.package'])->find($payment->id);
+            $paymentWithRelations = Payment::with(['reservation.customer', 'reservation.package'])->find($payment->id);
             
             Log::info('Firing PaymentConfirmed event', [
                 'payment_id' => $payment->id,
@@ -185,6 +198,10 @@ class AmarPayService
                 'payment_method' => 'amarpay',
                 'amount' => $amount,
             ]));
+
+            // Clear the cart after successful payment
+            $cartService = app(\App\Services\CartService::class);
+            $cartService->clearCart();
 
             Log::info('AmarPay payment completed', [
                 'payment_id' => $payment->id,
@@ -203,7 +220,7 @@ class AmarPayService
 
             // Find all reservations that were created in the same checkout session
             $primaryReservation = $payment->reservation;
-            $allReservations = Reservation::where('customer_id', $primaryReservation->customer_id)
+            $allReservations = Reservation::where('user_id', $primaryReservation->user_id)
                 ->where('created_at', '>=', $payment->created_at->subMinutes(5)) // Within 5 minutes of payment creation
                 ->where('payment_status', 'pending')
                 ->get();

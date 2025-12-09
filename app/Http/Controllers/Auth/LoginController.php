@@ -72,7 +72,10 @@ class LoginController extends Controller
                     'email' => $user->email,
                 ]);
 
-                return redirect()->intended(route('admin.reservations.index'))->with('success', 'Welcome back, ' . $user->name . '!');
+                $redirectUrl = route('admin.reservations.index');
+                Log::info('Redirecting admin to: ' . $redirectUrl);
+
+                return redirect()->intended($redirectUrl)->with('success', 'Welcome back, ' . $user->name . '!');
             }
 
             // Failed authentication

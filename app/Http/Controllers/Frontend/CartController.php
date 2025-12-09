@@ -45,10 +45,21 @@ class CartController extends Controller
      */
     public function getCartStatus(Request $request)
     {
+        $cartItems = $this->cartService->getCartItems();
+        
+        // Format items for frontend JS sync
+        $items = $cartItems->map(function($item) {
+            return [
+                'packageId' => $item->package_id,
+                'quantity' => $item->quantity,
+            ];
+        })->values()->toArray();
+        
         return response()->json([
             'has_items' => !$this->cartService->isCartEmpty(),
-            'cart_count' => $this->cartService->getCartCount(),
-            'cart_total_items' => $this->cartService->getCartTotalItems()
+            'count' => $this->cartService->getCartCount(),
+            'cart_total_items' => $this->cartService->getCartTotalItems(),
+            'items' => $items,
         ]);
     }
 }

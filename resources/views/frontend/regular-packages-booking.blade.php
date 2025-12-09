@@ -48,41 +48,22 @@
                                             <td>
                                                 <span class="fw-medium">TK {{ number_format($item->cart_amount, 2) }}</span>
                                             </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <form action="{{ route('frontend.cart.update') }}" method="POST"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        <input type="hidden" name="cart_uuid"
-                                                            value="{{ $item->cart_uuid }}">
-                                                        <input type="hidden" name="change" value="minus">
-                                                        <button type="submit"
-                                                            class="btn btn-outline-secondary btn-sm px-3 py-1 @if ($item->quantity <= 1) disabled @endif">
-                                                            <i class="fas fa-minus"></i>
-                                                        </button>
-                                                    </form>
-                                                    <span class="mx-3 fw-bold">{{ $item->quantity }}</span>
-                                                    <form action="{{ route('frontend.cart.update') }}" method="POST"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        <input type="hidden" name="cart_uuid"
-                                                            value="{{ $item->cart_uuid }}">
-                                                        <input type="hidden" name="change" value="addition">
-                                                        <button type="submit"
-                                                            class="btn btn-outline-secondary btn-sm px-3 py-1">
-                                                            <i class="fas fa-plus"></i>
-                                                        </button>
-                                                    </form>
+                                            <td x-data="cartItem({{ $item->package->id }}, {{ $item->quantity }})">
+                                                <div class="btn-qty-selector">
+                                                    <button class="qty-btn" @click="decrement"
+                                                        :disabled="loading">−</button>
+                                                    <span x-text="qty"></span>
+                                                    <button class="qty-btn" @click="increment"
+                                                        :disabled="loading">+</button>
                                                 </div>
                                             </td>
                                             <td>
                                                 <span class="fw-bold">TK {{ number_format($itemTotal, 2) }}</span>
                                             </td>
                                             <td>
-                                                <form action="{{ route('frontend.cart.remove', $item->cart_uuid) }}"
-                                                    method="POST" class="d-inline">
+                                                <form action="{{ route('cart.remove', $item->cart_uuid) }}" method="POST"
+                                                    class="d-inline">
                                                     @csrf
-                                                    {{-- @method('DELETE') --}}
                                                     <button type="submit" class="btn btn-outline-danger btn-sm"
                                                         onclick="return confirm('Remove this item from cart?')">
                                                         <i class="fas fa-trash-alt"></i>
@@ -132,7 +113,7 @@
                                     </div>
 
                                     <!-- Next Month -->
-                                    <div class="calendar flex-grow-1">
+                                    <div class="calendar grow">
                                         <div class="calendar-header d-flex justify-content-between align-items-center mb-2">
                                             <span class="calendar-title fw-bold" id="nextMonth"></span>
                                         </div>
@@ -188,7 +169,7 @@
                                 </div>
                             </div>
 
-                            <form action="{{ route('frontend.process-to-checkout') }}" method="POST" id="checkoutForm">
+                            <form action="{{ route('booking.process-checkout') }}" method="POST" id="checkoutForm">
                                 @csrf
                                 <input type="hidden" name="selected_date" id="checkout_selected_date">
                                 <input type="hidden" name="time_slot_id" id="checkout_time_slot_id">
@@ -197,7 +178,7 @@
 
 
                                 <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
-                                    <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn">
+                                    <a href="{{ route('packages.custom.index') }}" class="btn continue-shopping-btn">
                                         <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                                     </a>
 
@@ -218,7 +199,7 @@
                 <div class="mb-4"><i class="fas fa-shopping-cart fa-4x text-muted"></i></div>
                 <h3 class="mb-3">Your cart is empty</h3>
                 <p class="text-muted mb-4">Looks like you haven't added any packages to your cart yet.</p>
-                <a href="{{ url('custom-packages') }}"
+                <a href="{{ route('packages.custom.index') }}"
                     class="btn-orange jatio-bg-color primary-btn-border-radius btn-lg text-decoration-none">
                     <i class="fas fa-store me-2"></i>Browse Packages
                 </a>
@@ -228,6 +209,86 @@
 @endsection
 @push('scripts')
     <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('cartItem', (packageId, initialQty, minQty = 1, maxQty = 999) => ({
+                id: packageId,
+                qty: initialQty,
+                min: minQty,
+                max: maxQty,
+                loading: false,
+
+                async increment() {
+                    if (this.qty >= this.max) return;
+                    this.loading = true;
+                    // Send +1 delta
+                    await this.syncCart(1);
+                },
+
+                async decrement() {
+                    this.loading = true;
+                    if (this.qty <= this.min) {
+                        if (confirm('Remove this item from cart?')) {
+                            await this.removeFromCart();
+                        } else {
+                            this.loading = false;
+                        }
+                    } else {
+                        // Send -1 delta
+                        await this.syncCart(-1);
+                    }
+                },
+
+                async syncCart(changeAmount) {
+                    try {
+                        const response = await fetch("{{ route('cart.add') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                package_id: this.id,
+                                quantity: changeAmount
+                            })
+                        });
+
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            this.loading = false;
+                            alert('Failed to update cart.');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        this.loading = false;
+                    }
+                },
+
+                async removeFromCart() {
+                    try {
+                        const response = await fetch("{{ route('cart.remove-package') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                package_id: this.id
+                            })
+                        });
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            this.loading = false;
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        this.loading = false;
+                    }
+                }
+            }));
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const backendTimeSlots = @json($time_slots ?? []);
             const timeSlots = backendTimeSlots.map(slot => ({
@@ -609,6 +670,43 @@
                 width: 100%;
                 height: 50px;
             }
+        }
+
+        .btn-qty-selector {
+            background-color: #FC692A;
+            color: white;
+            border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            width: 120px;
+            transition: all 0.3s;
+        }
+
+        .btn-qty-selector:hover {
+            background-color: #e65a1e;
+            color: white;
+        }
+
+        .qty-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .qty-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
         }
     </style>
 @endpush

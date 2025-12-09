@@ -114,6 +114,115 @@ class PromoCodeService
     }
 
     /**
+     * Validate a promo code for frontend checkout.
+     *
+     * @param string $code
+     * @param float $subtotal
+     * @param int|null $userId
+     * @return array ['valid' => bool, 'message' => string, 'discount' => float, 'promo_code' => PromoCode|null]
+     */
+    public function validatePromoCode(string $code, float $subtotal, ?int $userId = null): array
+    {
+        $promoCode = PromoCode::where('code', strtoupper(trim($code)))->first();
+
+        // Check if promo code exists
+        if (!$promoCode) {
+            return [
+                'valid' => false,
+                'message' => 'Invalid promo code.',
+                'discount' => 0,
+                'promo_code' => null,
+            ];
+        }
+
+        // Check if active
+        if ($promoCode->status !== 'active') {
+            return [
+                'valid' => false,
+                'message' => 'This promo code is no longer active.',
+                'discount' => 0,
+                'promo_code' => null,
+            ];
+        }
+
+        // Check date validity
+        $now = now();
+        if ($promoCode->starts_at && $promoCode->starts_at->isAfter($now)) {
+            return [
+                'valid' => false,
+                'message' => 'This promo code is not yet valid.',
+                'discount' => 0,
+                'promo_code' => null,
+            ];
+        }
+
+        if ($promoCode->ends_at && $promoCode->ends_at->isBefore($now)) {
+            return [
+                'valid' => false,
+                'message' => 'This promo code has expired.',
+                'discount' => 0,
+                'promo_code' => null,
+            ];
+        }
+
+        // Check minimum spend
+        if ($promoCode->min_spend && $subtotal < $promoCode->min_spend) {
+            return [
+                'valid' => false,
+                'message' => 'Minimum spend of TK ' . number_format($promoCode->min_spend, 2) . ' required.',
+                'discount' => 0,
+                'promo_code' => null,
+            ];
+        }
+
+        // Check total usage limit
+        if ($promoCode->usage_limit_total) {
+            $totalUsed = $promoCode->redemptions()->count();
+            if ($totalUsed >= $promoCode->usage_limit_total) {
+                return [
+                    'valid' => false,
+                    'message' => 'This promo code has reached its usage limit.',
+                    'discount' => 0,
+                    'promo_code' => null,
+                ];
+            }
+        }
+
+        // Check per-user usage limit (uses customer_id in promo_redemptions table)
+        if ($userId && $promoCode->usage_limit_per_user) {
+            $userUsed = $promoCode->redemptions()->where('customer_id', $userId)->count();
+            if ($userUsed >= $promoCode->usage_limit_per_user) {
+                return [
+                    'valid' => false,
+                    'message' => 'You have already used this promo code the maximum number of times.',
+                    'discount' => 0,
+                    'promo_code' => null,
+                ];
+            }
+        }
+
+        // Calculate discount
+        $discount = 0;
+        if ($promoCode->discount_type === 'percentage') {
+            $discount = ($subtotal * $promoCode->discount_value) / 100;
+            // Apply max discount cap if set
+            if ($promoCode->max_discount && $discount > $promoCode->max_discount) {
+                $discount = $promoCode->max_discount;
+            }
+        } else {
+            // Fixed discount
+            $discount = min($promoCode->discount_value, $subtotal);
+        }
+
+        return [
+            'valid' => true,
+            'message' => 'Promo code applied successfully!',
+            'discount' => round($discount, 2),
+            'promo_code' => $promoCode,
+        ];
+    }
+
+    /**
      * Prepare data for save/update (handle applies_to nulling).
      */
     private function prepareData(array $data): array

@@ -25,6 +25,9 @@ class MultipleImageUpload {
         this.files = [];
         this.deletingImages = new Set();
 
+        // Attach instance to container for external access
+        this.container._instance = this;
+
         this.init();
     }
 
@@ -58,13 +61,13 @@ class MultipleImageUpload {
                 },
                 credentials: 'same-origin'
             })
-            .then(res => res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`))
-            .then(data => {
-                if (data.success && data.images) {
-                    data.images.forEach(img => this.addExistingImage(img));
-                }
-            })
-            .catch(err => console.error('Error loading existing images:', err));
+                .then(res => res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`))
+                .then(data => {
+                    if (data.success && data.images) {
+                        data.images.forEach(img => this.addExistingImage(img));
+                    }
+                })
+                .catch(err => console.error('Error loading existing images:', err));
         }
     }
 
@@ -203,16 +206,16 @@ class MultipleImageUpload {
                 'Content-Type': 'application/json'
             }
         })
-        .then(res => res.ok ? res.json() : Promise.reject(res.status))
-        .then(data => {
-            if (data.success) {
-                const el = document.getElementById(`existing-${imageId}`);
-                if (el) el.remove();
-                this.updateAllBadges();
-            } else this.showError(data.message || 'Failed to delete image');
-        })
-        .catch(err => this.showError('Error deleting image: ' + err))
-        .finally(() => this.deletingImages.delete(imageId));
+            .then(res => res.ok ? res.json() : Promise.reject(res.status))
+            .then(data => {
+                if (data.success) {
+                    const el = document.getElementById(`existing-${imageId}`);
+                    if (el) el.remove();
+                    this.updateAllBadges();
+                } else this.showError(data.message || 'Failed to delete image');
+            })
+            .catch(err => this.showError('Error deleting image: ' + err))
+            .finally(() => this.deletingImages.delete(imageId));
     }
 
     createElementFromHTML(html) {

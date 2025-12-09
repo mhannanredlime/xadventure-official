@@ -100,7 +100,7 @@ class PaymentController extends Controller
             }
         }
         
-        return redirect()->route('frontend.checkout.index')
+        return redirect()->route('checkout.index')
             ->with('error', 'Payment verification failed. Please contact support.');
     }
 
@@ -200,7 +200,7 @@ class PaymentController extends Controller
                 ->with('success', 'Payment successful! Your booking has been confirmed.');
         }
         
-        return redirect()->route('frontend.packages.index')->with('error', 'Payment not found.');
+        return redirect()->route('packages.custom.index')->with('error', 'Payment not found.');
     }
 
     public function fail(Request $request)
@@ -213,7 +213,7 @@ class PaymentController extends Controller
             return view('frontend.payment.fail', compact('reservation', 'payment'));
         }
         
-        return redirect()->route('frontend.packages.index')->with('error', 'Payment not found.');
+        return redirect()->route('packages.custom.index')->with('error', 'Payment not found.');
     }
 
     public function cancel(Request $request)
@@ -226,7 +226,7 @@ class PaymentController extends Controller
             return view('frontend.payment.cancel', compact('reservation', 'payment'));
         }
         
-        return redirect()->route('frontend.packages.index')->with('error', 'Payment not found.');
+        return redirect()->route('packages.custom.index')->with('error', 'Payment not found.');
     }
 
     public function ipn(Request $request)

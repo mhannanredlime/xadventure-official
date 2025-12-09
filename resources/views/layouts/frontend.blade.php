@@ -219,17 +219,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('contact.index') }}">Contact</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-1 gap-md-3">
-                    {{-- <a href="{{ url('/shopping-cart') }}"
-                        style="color: white; text-decoration: none; position: relative;">
-                        <i class="fa-solid fa-cart-arrow-down"></i>
-                        @if ($cartCount > 0)
-                            <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style="font-size: 0.6rem; transform: translate(-50%, -50%);">
-                                {{ $cartCount }}
-                            </span>
-                        @endif
-                    </a> --}}
+                    
                     <a href="{{ route('packages.regular.index') }}"
                         style="color: white; text-decoration: none; position: relative;">
                         <i class="fa-solid fa-cart-arrow-down"></i>

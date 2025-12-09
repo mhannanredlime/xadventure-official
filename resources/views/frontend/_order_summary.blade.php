@@ -1,26 +1,42 @@
 <div class="card shadow-sm sticky-top">
     <div class="card-body">
+        <!-- Order Summary Header -->
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-shopping-cart text-orange me-2"></i>Order Summary
+            </h5>
+
+        </div>
+
         @php
-            $total = $subtotal;
-            $vatData = calculateVAT($total);
+            // Read promo discount from session
+            $promoDiscount = session('promo_discount', 0);
+            $amountAfterDiscount = max(0, $subtotal - $promoDiscount);
+            $vatData = calculateVAT($amountAfterDiscount);
         @endphp
 
         <form action="{{ url('checkout') }}" method="GET">
             <div class="pt-3">
                 <div class="d-flex justify-content-between mb-2">
-                    <span>Promo Discount</span>
-                    <span class="fw-medium">TK
-                        {{ number_format(isset($promo_discount) ? $promo_discount : 0, 2) }}</span>
+                    <span>Subtotal</span>
+                    <span class="fw-medium">TK {{ number_format($subtotal, 2) }}</span>
                 </div>
 
+                @if ($promoDiscount > 0)
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                        <span><i class="bi bi-tag-fill me-1"></i>Promo Discount</span>
+                        <span class="fw-medium">- TK {{ number_format($promoDiscount, 2) }}</span>
+                    </div>
+                @endif
+
                 <div class="d-flex justify-content-between mt-3 pt-3">
-                    <strong>VAT (15%)</strong>
+                    <strong>VAT ({{ env('VAT_RATE', 15) }}%)</strong>
                     <strong class="fs-5">TK {{ number_format($vatData['vat'], 2) }}</strong>
                 </div>
 
                 <div class="d-flex justify-content-between mt-3 pt-3 border-top">
                     <strong>Total Amount</strong>
-                    <strong class="fs-5">TK {{ number_format($vatData['total'], 2) }}</strong>
+                    <strong class="fs-5 text-orange">TK {{ number_format($vatData['total'], 2) }}</strong>
                 </div>
             </div>
 
@@ -42,14 +58,14 @@
             @endforeach
 
             <!-- Hidden inputs for subtotal, VAT, and total -->
-            <input type="hidden" name="promo_discount" value="{{ isset($promo_discount) ? $promo_discount : 0 }}">
-            <input type="hidden" name="subtotal" value="{{ $total }}">
+            <input type="hidden" name="promo_discount" value="{{ $promoDiscount }}">
+            <input type="hidden" name="subtotal" value="{{ $subtotal }}">
             <input type="hidden" name="vat" value="{{ $vatData['vat'] }}">
             <input type="hidden" name="total" value="{{ $vatData['total'] }}">
 
             @if (!isset($showPlaceOrder) || $showPlaceOrder)
                 <div class="d-flex justify-content-center mt-4 gap-3">
-                    <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
+                    <a href="{{ route('packages.custom.index') }}" class="btn continue-shopping-btn equal-btn">
                         <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                     </a>
                     <button type="submit" class="checkout-btn equal-btn">
@@ -58,7 +74,7 @@
                 </div>
             @else
                 <div class="d-flex justify-content-center mt-4 gap-3">
-                    <a href="{{ url('custom-packages') }}" class="btn continue-shopping-btn equal-btn">
+                    <a href="{{ route('packages.custom.index') }}" class="btn continue-shopping-btn equal-btn">
                         <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                     </a>
                 </div>

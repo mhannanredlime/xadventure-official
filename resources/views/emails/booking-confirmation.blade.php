@@ -75,7 +75,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>🎉 Booking Confirmed!</h1>
+        <h1>🎉 Booking Confirmed!</h1> 
         <p>Your adventure awaits</p>
     </div>
 

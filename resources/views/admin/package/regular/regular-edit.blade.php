@@ -178,250 +178,77 @@
             </div>
         @endif
 
-        <form id="packageForm" method="POST" action="{{ route('admin.packages.regular.update', $package) }}"
-            enctype="multipart/form-data">
-            @include('admin.package.regular.regular_form')
-        </form>
+        <div x-data="packageFormHandler()">
+            <form x-ref="packageForm" @submit.prevent="handleSubmit" method="POST"
+                action="{{ route('admin.packages.regular.update', $package) }}" enctype="multipart/form-data">
+                @include('admin.package.regular.regular_form')
+            </form>
+        </div>
     </main>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('admin/js/multiple-image-upload.js') }}"></script>
-    <script src="{{ asset('admin/js/gallery-manager.js') }}"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // -------------------------------------------------
-            // Base Variables
-            // -------------------------------------------------
-            const form = document.getElementById('packageForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const dayPricesInput = document.getElementById('dayPricesInput');
-            const applyAllInput = document.getElementById('applyAllPrice');
-            const imageFilesInput = document.getElementById('package_images_input');
-
-            // All days array
-            const allDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-
-            // Initialize prices from existing data
-            let prices = @json($dayPrices ?? []);
-
-            console.log('Initial prices from database:', prices);
-
-            // -------------------------------------------------
-            // Initialize Custom Image Uploader
-            // -------------------------------------------------
-            const container = document.getElementById('multiple-image-upload');
-            let uploaderInstance = null;
-
-            if (container) {
-                try {
-                    // Parse existing images from data attribute
-                    const existingImages = JSON.parse(container.dataset.existingImages || '[]');
-                    console.log('Existing images for uploader:', existingImages);
-
-                    // Initialize uploader
-                    if (typeof MultipleImageUpload !== 'undefined') {
-                        uploaderInstance = new MultipleImageUpload(container.id, {
-                            maxFiles: parseInt(container.dataset.maxFiles) || 4,
-                            maxFileSize: parseInt(container.dataset.maxFileSize) || 5 * 1024 * 1024,
-                            modelType: container.dataset.modelType || 'Package',
-                            modelId: container.dataset.modelId || '',
-                            uploadUrl: container.dataset.uploadUrl || '',
-                            updateUrl: container.dataset.updateUrl || '',
-                            imagesUrl: container.dataset.imagesUrl || '',
-                            primaryUrl: container.dataset.primaryUrl || '',
-                            reorderUrl: container.dataset.reorderUrl || '',
-                            altTextUrl: container.dataset.altTextUrl || '',
-                            deleteUrl: container.dataset.deleteUrl || '',
-                            existingImages: existingImages
-                        });
-
-                        window.multipleImageUploadInstance = uploaderInstance;
-                        console.log('Image uploader initialized');
-                    }
-                } catch (error) {
-                    console.error('Error initializing image uploader:', error);
-                }
-            }
-
-            // -------------------------------------------------
-            // Price Input Handling
-            // -------------------------------------------------
-            // Individual price input changes
-            document.addEventListener('input', function(e) {
-                if (e.target.classList.contains('day-price-input')) {
-                    const day = e.target.dataset.day;
-                    const val = e.target.value;
-
-                    if (val && val > 0) {
-                        prices[day] = parseFloat(val);
-                    } else {
-                        // Keep the existing price if user clears the field
-                        // Or set to null if you want to clear it
-                        prices[day] = null;
-                    }
-
-                    updateDayPricesInput();
-                }
-            });
-
-            // Apply All functionality
-            applyAllInput.addEventListener('input', function() {
-                const val = this.value;
-                if (val && val > 0) {
-                    document.querySelectorAll('.day-price-input').forEach(input => {
-                        input.value = val;
-                        const day = input.dataset.day;
-                        prices[day] = parseFloat(val);
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('packageFormHandler', () => ({
+                init() {
+                    // Component self-initializes
+                },
+                validateForm() {
+                    const form = this.$refs.packageForm;
+                    const requiredFields = ['packageName', 'packageType', 'displayStartingPrice',
+                        'minParticipant', 'maxParticipant'
+                    ];
+                    let isValid = true;
+                    requiredFields.forEach(name => {
+                        const el = form.querySelector(`[name="${name}"]`);
+                        if (el) {
+                            if (!el.value.trim()) {
+                                isValid = false;
+                                el.classList.add('is-invalid');
+                            } else {
+                                el.classList.remove('is-invalid');
+                            }
+                        }
                     });
-                    updateDayPricesInput();
-                }
-            });
-
-            // Function to update hidden input
-            function updateDayPricesInput() {
-                const dayPricesArray = allDays.map(day => ({
-                    day: day,
-                    price: prices[day] !== undefined ? prices[day] : null
-                }));
-
-                dayPricesInput.value = JSON.stringify(dayPricesArray);
-                console.log('Updated day prices:', dayPricesArray);
-            }
-
-            // -------------------------------------------------
-            // Form Validation
-            // -------------------------------------------------
-            function validateForm() {
-                let isValid = true;
-
-                // Check required fields
-                const requiredFields = [{
-                        selector: 'input[name="packageName"]',
-                        message: 'Package name is required'
-                    },
-                    {
-                        selector: 'select[name="packageType"]',
-                        message: 'Package type is required'
-                    },
-                    {
-                        selector: 'input[name="displayStartingPrice"]',
-                        message: 'Display price is required'
-                    },
-                    {
-                        selector: 'input[name="minParticipant"]',
-                        message: 'Minimum participants is required'
-                    },
-                    {
-                        selector: 'input[name="maxParticipant"]',
-                        message: 'Maximum participants is required'
+                    if (!isValid) {
+                        alert('Please fill in all required fields.');
                     }
-                ];
+                    return isValid;
+                },
+                attachImages() {
+                    // Access the Alpine instance attached to the DOM
+                    const container = document.getElementById('package-image-uploader');
+                    const uploader = container ? container._x_uploader : null;
 
-                requiredFields.forEach(field => {
-                    const element = document.querySelector(field.selector);
-                    if (!element || !element.value.trim()) {
-                        alert(field.message);
-                        if (element) element.focus();
-                        isValid = false;
-                        return false;
-                    }
+                    if (uploader) {
+                        try {
+                            // Native Alpine access - getSelectedFiles() defined in component
+                            const files = uploader.getSelectedFiles();
 
-                    // Additional validation for numbers
-                    if (field.selector.includes('Participant') || field.selector.includes(
-                            'StartingPrice')) {
-                        const value = parseFloat(element.value);
-                        if (isNaN(value) || value <= 0) {
-                            alert(`${field.message} (must be a positive number)`);
-                            element.focus();
-                            isValid = false;
-                            return false;
+                            if (files && files.length > 0) {
+                                const dataTransfer = new DataTransfer();
+                                files.forEach(file => {
+                                    if (file instanceof File) dataTransfer.items.add(file);
+                                });
+                                this.$refs.packageImagesInput.files = dataTransfer.files;
+                                console.log('Attached ' + files.length + ' files to form input.');
+                            }
+                        } catch (error) {
+                            console.error('Error attaching images:', error);
+                            alert('Error preparing images for upload.');
                         }
+                    } else {
+                        console.warn('Image Uploader component not found.');
                     }
-                });
-
-                if (!isValid) return false;
-
-                // Check min <= max participants
-                const minParticipant = parseInt(document.querySelector('input[name="minParticipant"]').value);
-                const maxParticipant = parseInt(document.querySelector('input[name="maxParticipant"]').value);
-
-                if (minParticipant > maxParticipant) {
-                    alert('Minimum participants cannot be greater than maximum participants');
-                    return false;
-                }
-
-                return true;
-            }
-
-            // -------------------------------------------------
-            // Form Submission Handler
-            // -------------------------------------------------
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                console.log('=== EDIT FORM SUBMISSION STARTED ===');
-
-                // Validate form
-                if (!validateForm()) {
-                    return;
-                }
-
-                // Update day prices
-                updateDayPricesInput();
-
-                // Handle image files from uploader
-                if (uploaderInstance) {
-                    try {
-                        // Get new files from uploader
-                        let newFiles = [];
-                        if (typeof uploaderInstance.getFiles === 'function') {
-                            newFiles = uploaderInstance.getFiles();
-                        } else if (uploaderInstance.files) {
-                            newFiles = uploaderInstance.files;
-                        }
-
-                        newFiles = newFiles.filter(file => file instanceof File);
-                        console.log('New files to upload:', newFiles.length);
-
-                        if (newFiles.length > 0) {
-                            const dataTransfer = new DataTransfer();
-                            newFiles.forEach(file => {
-                                dataTransfer.items.add(file);
-                            });
-
-                            imageFilesInput.files = dataTransfer.files;
-                            console.log(`Attached ${imageFilesInput.files.length} new image files`);
-                        }
-                    } catch (error) {
-                        console.error('Error getting files from uploader:', error);
+                },
+                handleSubmit() {
+                    this.attachImages();
+                    if (this.validateForm()) {
+                        this.$refs.packageForm.submit();
                     }
                 }
-
-                // Debug logging
-                console.log('Final form data check:');
-                console.log('Package ID:', '{{ $package->id }}');
-                console.log('Day prices:', JSON.parse(dayPricesInput.value));
-                console.log('Image files:', imageFilesInput.files.length);
-
-                // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.classList.add('btn-loading');
-
-                // Submit form after short delay
-                setTimeout(() => {
-                    console.log('Submitting edit form...');
-                    form.submit();
-                }, 500);
-            });
-
-            // Initialize
-            updateDayPricesInput();
-
-            // Log initial state
-            console.log('Edit form initialized for package:', '{{ $package->id }}');
-            console.log('Initial prices:', prices);
+            }));
         });
     </script>
 @endpush
