@@ -2,26 +2,28 @@
 
 namespace App\Http\Controllers\Frontend;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\OrderPlacingMakePaymentRequest;
-use App\Http\Requests\XCartUpdateRequest;
+use Exception;
 use App\Models\Cart;
-use App\Models\Customer;
+use App\Models\User;
 use App\Models\Package;
-
 use App\Models\Payment;
+use App\Models\Customer;
+
 use App\Models\PromoCode;
 use App\Models\Reservation;
 use App\Models\ScheduleSlot;
-use App\Models\User;
-use App\Services\AmarPayService;
-use App\Services\PhoneNumberService;
-use Devrabiul\ToastMagic\Facades\ToastMagic;
-use Exception;
 use Illuminate\Http\Request;
+use App\Services\CartService;
 use Illuminate\Support\Carbon;
+use App\Services\AmarPayService;
+use App\Services\BookingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Services\PhoneNumberService;
+use App\Http\Requests\XCartUpdateRequest;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
+use App\Http\Requests\OrderPlacingMakePaymentRequest;
 
 class BookingController extends Controller
 {
@@ -30,8 +32,8 @@ class BookingController extends Controller
     protected $bookingService;
 
     public function __construct(
-        \App\Services\CartService $cartService,
-        \App\Services\BookingService $bookingService
+        CartService $cartService,
+        BookingService $bookingService
     ) {
         $this->cartService = $cartService;
         $this->bookingService = $bookingService;
@@ -80,7 +82,6 @@ class BookingController extends Controller
 
         // Pass data to the view
         return view('frontend.shopping-cart', [
-            // 'guestCartItems' => $guestCartItems, // View will fetch via service or we pass fresh
             'guestCartItems' => $this->cartService->getCartItems(), // Use service to get detailed array
             'time_slot' => $time_slot,
             'selected_date' => format_full_date($selectedDate),
@@ -251,15 +252,7 @@ class BookingController extends Controller
         $formattedPhone = $phoneService->validateAndFormat($request->customer_phone)['formatted'] ?? $request->customer_phone;
         $validated['customer_phone'] = $formattedPhone;
 
-        // Check for User creation/update - this might still need to be here or moved to service?
-        // Service expects data array. Let's handle User logic here or pass flags to service. 
-        // Plan said: "BookingService: Centralize booking creation and processing".
-        // Let's create user here for now to keep service focused on Booking/Payment structure, or move user logic to a UserService?
-        // To stick to the plan of "maintainable way", let's keep controller thin. 
-        // But for safe-to-auto-run refactor, let's replicate existing behavior for User but move Transaction/Reservation to Service.
         
-        // ... (User logic omitted/kept same or moved? Let's keep User logic inline for now as it interacts with Auth/Session heavily 
-        // and just pass the user object to service).
         
         try {
             DB::beginTransaction();

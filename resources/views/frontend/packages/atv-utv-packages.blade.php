@@ -1,4 +1,3 @@
-{{-- resources/views/frontend/packages/atv-utv-packages.blade.php --}}
 @extends('layouts.frontend')
 
 @section('title', 'ATV/UTV Package Booking')
@@ -112,7 +111,7 @@
                 const slot = $(`.schedule-slot`).val();
 
                 $.ajax({
-                    url: "{{ route('frontend.cart.add') }}",
+                    url: "{{ route('cart.add') }}",
                     method: 'POST',
                     data: {
                         _token: "{{ csrf_token() }}",
